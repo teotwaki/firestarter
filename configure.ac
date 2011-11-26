@@ -1,6 +1,6 @@
 AC_INIT([Firestarter], [0.1], [slauwers@gmail.com], [firestarter], [http://firestarter.example.com])
 AC_PREREQ([2.64])
-AM_INIT_AUTOMAKE([1.11 -Wall no-define])
+AM_INIT_AUTOMAKE([1.11 -Wall no-define subdir-objects])
 
 AC_CONFIG_HEADERS([config.h])
 
