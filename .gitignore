@@ -1,0 +1,6 @@
+*.log
+*.sw?
+bin/firestarter
+*.so
+*.o
+*.o.d
