@@ -33,4 +33,6 @@ src/common/.dirstamp
 src/fs/.deps
 src/fs/.dirstamp
 stamp-h1
-
+*.l[ao]
+.libs
+.dirstamp
