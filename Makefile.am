@@ -23,7 +23,7 @@ pkglib_LTLIBRARIES = dummy.la signalEmitter.la signalReceiver.la
 ## header files (.h) do not result in object files by themselves, but will be
 ## included in distribution archives of the project.
 firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
-                      src/fs/modulemanager.h \
+                      src/fs/modulemanager.h src/fs/modulemanager.cpp \
                       src/common/log.h src/common/log.cpp
 
 ## Set the library dependencies for the "firestarter" target to the value obtained
@@ -34,6 +34,9 @@ firestarter_LDADD = $(DEPS_LIBS) \
                     -dlopen signalEmitter.la \
                     -dlopen signalReceiver.la
 
+## Set the libtool flags
+firestarter_LDFLAGS = -export-dynamic
+
 ## Define the list of source files for the "libdummy" library target. The file extension
 ## .cpp is recognized by Automake, and causes it to produce rules which invoke
 ## the C++ compiler to produce an object file (.o) from each source file. THe
@@ -42,20 +45,21 @@ firestarter_LDADD = $(DEPS_LIBS) \
 dummy_la_SOURCES = src/modules/core/dummy/dummy.cpp \
                    src/modules/core/dummy/dummy.h
 
-dummy_la_LDFLAGS = -module -avoid-version
+dummy_la_LDFLAGS = -module -avoid-version -export-dynamic
 
 signalReceiver_la_SOURCES = src/modules/core/signalReceiver/signalreceiver.cpp \
                             src/modules/core/signalReceiver/signalreceiver.h
 
-signalReceiver_la_LDFLAGS = -module -avoid-version
+signalReceiver_la_LDFLAGS = -module -avoid-version -export-dynamic
 signalReceiver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 
 signalEmitter_la_SOURCES = src/modules/core/signalEmitter/signalemitter.cpp \
                            src/modules/core/signalEmitter/signalemitter.h
 
-signalEmitter_la_LDFLAGS = -module -avoid-version
+signalEmitter_la_LDFLAGS = -module -avoid-version -export-dynamic
 signalEmitter_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 
 ## Define an independent executable script for inclusion in the distribution
 ## archive. It will not be installed on an end user's system, however.
 dist_noinst_SCRIPTS = autogen.sh
+

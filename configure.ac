@@ -15,7 +15,7 @@ AC_PROG_LIBTOOL
 AC_CHECK_HEADERS([stdlib.h ltdl.h])
 
 # Checks for library functions.
-AC_SEARCH_LIBS([lt_dlopen], [ltdl])
+AC_SEARCH_LIBS([lt_dlinit], [ltdl])
 
 # Check if the boost libraries are available
 BOOST_REQUIRE([1.42])

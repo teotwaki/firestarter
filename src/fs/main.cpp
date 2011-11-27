@@ -3,6 +3,40 @@
 void loadModules(ModuleMap & modules, list<string> & invalidModules) {
 	DECLARE_LOG(loadModLog, "main.loadModules");
 
+#if HAVE_LTDL_H
+	LOG_DEBUG(loadModLog, "ltdl is available");
+	int ltdl;
+	lt_dlhandle module;
+
+	LTDL_SET_PRELOADED_SYMBOLS();
+	
+	ltdl = lt_dlinit();
+	if (ltdl == 0) {
+		module = lt_dlopenext("/usr/local/lib/firestarter/dummy");
+		if (module != 0) {
+			LOG_DEBUG(loadModLog, "Correctly loaded dummy.la!");
+		}
+
+		else
+			LOG_ERROR(loadModLog, "lt_dlopen() failed: " << lt_dlerror());
+	}
+
+	else
+		LOG_ERROR(loadModLog, "lt_dlinit() failed: " << lt_dlerror());
+#else
+	LOG_WARN(loadModLog, "No access to ltdl!");
+#endif
+
+#if HAVE_LTDL_H
+	if (ltdl == 0) {
+		if (module != 0)
+			lt_dlclose(module);
+		lt_dlexit();
+	}
+#endif
+
+#if 0
+
 	LOG_DEBUG(loadModLog, "Loading mods/signalemitter.so");
 	void * foo = dlopen("mods/signalemitter.so", RTLD_LAZY | RTLD_GLOBAL);
 	if (!foo) {
@@ -17,6 +51,9 @@ void loadModules(ModuleMap & modules, list<string> & invalidModules) {
 		LOG_ERROR(loadModLog, "Cannot load library: " << dlerror());
 		return;
 	}
+//#else
+	LOG_WARN(loadModLog, "No lt_dlopen features available!");
+//#endif
 
 	return;
 
@@ -89,7 +126,7 @@ void loadModules(ModuleMap & modules, list<string> & invalidModules) {
 			invalidModules.push_back(name);
 		}
 	}
-
+#endif
 }
 
 ModuleDependencyMap * run_beforeFilter(ModuleMap & modules, list<string> & invalidModules) {
@@ -124,7 +161,7 @@ ModuleDependencyMap * run_beforeFilter(ModuleMap & modules, list<string> & inval
 			foreach(ComponentMap::value_type i, components) {
 				string name = i.first;
 				int version = i.second.first;
-				string path = "mods/" + name + ".so";
+				string path = "mods/" + name + ".la";
 				boost::to_lower(path);
 
 				modmap[name] = ModuleTuple(path, version, NULL, static_cast<create_module *>(NULL), static_cast<destroy_module *>(NULL));
@@ -172,7 +209,7 @@ int main(void) {
 					LOG_DEBUG(mainLog, "Retrieving conf_modules[" << i << "]");
 					string module_name = conf_modules[i++];
 
-					string path = "mods/" + module_name + ".so";
+					string path = "firestarter/" + module_name + ".so";
 					boost::to_lower(path);
 
 					LOG_DEBUG(mainLog, "Storing modulePaths[" << module_name << "] = " << path);

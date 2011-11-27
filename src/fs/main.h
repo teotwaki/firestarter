@@ -2,6 +2,10 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#if HAVE_CONFIG_H
+	#include <config.h>
+#endif
+
 #include <libconfig.h++>
 #include <iostream>
 #include <vector>
@@ -10,7 +14,10 @@
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <dlfcn.h>
+
+#if HAVE_LTDL_H
+	#include <ltdl.h>
+#endif
 
 #include "log.h"
 #include "helper.h"
