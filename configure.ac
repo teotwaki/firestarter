@@ -1,12 +1,21 @@
-AC_INIT([Firestarter], [0.1], [slauwers@gmail.com], [firestarter], [http://firestarter.example.com])
+
 AC_PREREQ([2.64])
+AC_INIT([Firestarter], [0.1], [slauwers@gmail.com], [firestarter], [http://firestarter.example.com])
 AM_INIT_AUTOMAKE([1.11 no-define subdir-objects])
+
+LT_PREREQ([2.2])
+LT_INIT([dlopen])
 
 AC_CONFIG_HEADERS([config.h])
 
+AC_PROG_CXX
 AC_PROG_LIBTOOL
 
-AC_PROG_CXX
+# Checks for header files
+AC_CHECK_HEADERS([stdlib.h ltdl.h])
+
+# Checks for library functions.
+AC_SEARCH_LIBS([lt_dlopen], [ltdl])
 
 # Check if the boost libraries are available
 BOOST_REQUIRE([1.42])
