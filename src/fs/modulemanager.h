@@ -7,9 +7,9 @@
 #endif
 
 #include <libconfig.h++>
-#include <string>
 #include <list>
 #include <exception>
+#include <boost/foreach.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -17,8 +17,33 @@
 	#include <ltdl.h>
 #endif
 
-#include "log.h"
-#include "module.h"
+#include "helper.h"
+
+namespace firestarter {
+	namespace exception {
+
+class ModuleNotFoundException : public std::exception {
+	virtual const char * what() const throw() {
+		return "Requested module could not be found";
+	}
+};
+
+class ModuleNotLoadableException : public ModuleNotFoundException {
+	virtual const char * what() const throw() {
+		return "Requested module could not be loaded";
+	}
+};
+
+class MissingDependencyException : public ModuleNotLoadableException {
+	virtual const char * what() const throw() {
+		return "Module dependency could not be found";
+	}
+};
+
+/* Closing the namespace */
+	}
+}
+
 
 namespace firestarter {
 	namespace ModuleManager {
@@ -60,7 +85,9 @@ class ModuleManager {
 	ModuleManager(const libconfig::Config & config);
 	~ModuleManager();
 	void loadModule(const std::string & name);
-	ModuleInfo & getModule(const std::string & name);
+	void loadModules();
+	ModuleInfo & getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
+	inline ModuleMap & getModuleList() { return modules; }
 
 };
 
@@ -68,28 +95,4 @@ class ModuleManager {
 	}
 }
 
-namespace firestarter {
-	namespace exception {
-
-class ModuleNotFoundException : public std::exception {
-	virtual const char * what() const throw() {
-		return "Requested module could not be found";
-	}
-};
-
-class ModuleNotLoadableException : public ModuleNotFoundException {
-	virtual const char * what() const throw() {
-		return "Requested module could not be loaded";
-	}
-};
-
-class MissingDependencyException : public ModuleNotLoadableException {
-	virtual const char * what() const throw() {
-		return "Module dependency could not be found";
-	}
-};
-
-/* Closing the namespace */
-	}
-}
 #endif
