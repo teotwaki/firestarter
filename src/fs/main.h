@@ -9,7 +9,6 @@
 #include <libconfig.h++>
 #include <iostream>
 #include <vector>
-#include <string>
 #include <boost/foreach.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/algorithm/string.hpp>
@@ -19,13 +18,7 @@
 	#include <ltdl.h>
 #endif
 
-#include "log.h"
 #include "helper.h"
-#include "module.h"
-
-// Prettify BOOST's foreach.
-#define foreach BOOST_FOREACH
-#define reverse_foreach BOOST_FOREACH_REVERSE
 
 using namespace std;
 

@@ -4,7 +4,7 @@ void loadModules(ModuleMap & modules, list<string> & invalidModules) {
 	DECLARE_LOG(loadModLog, "main.loadModules");
 
 #if HAVE_LTDL_H
-	LOG_DEBUG(loadModLog, "ltdl is available");
+	LOG_DEBUG(loadModLog, "Compiled with libltdl (required for modules)");
 	int ltdl;
 	lt_dlhandle module;
 
@@ -12,6 +12,7 @@ void loadModules(ModuleMap & modules, list<string> & invalidModules) {
 	
 	ltdl = lt_dlinit();
 	if (ltdl == 0) {
+		LOG_DEBUG(loadModLog, "lt_dlinit() success");
 		module = lt_dlopenext("/usr/local/lib/firestarter/dummy");
 		if (module != 0) {
 			LOG_DEBUG(loadModLog, "Correctly loaded dummy.la!");
@@ -24,7 +25,7 @@ void loadModules(ModuleMap & modules, list<string> & invalidModules) {
 	else
 		LOG_ERROR(loadModLog, "lt_dlinit() failed: " << lt_dlerror());
 #else
-	LOG_WARN(loadModLog, "No access to ltdl!");
+	LOG_WARN(loadModLog, "Compiled without libltdl (required for modules)");
 #endif
 
 #if HAVE_LTDL_H
