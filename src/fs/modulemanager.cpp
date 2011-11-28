@@ -26,8 +26,13 @@ ModuleManager::ModuleManager(const libconfig::Config & config) :
 
 	catch (libconfig::SettingNotFoundException e) {
 		LOG_WARN(modManLog, "Couldn't find module_path configuration key.");
-		LOG_DEBUG(modManLog, "Selecting default `/usr/lib/firestarter'.");
+#if HAVE_LTDL_H
+		LOG_DEBUG(modManLog, "Default search path: `" << lt_dlgetsearchpath() <<"'.");
+		module_path = lt_dlgetsearchpath();
+#else
+		LOG_DEBUG(modManLog, "Setting default search path to: `/usr/lib/firestarter'.");
 		module_path = "/usr/lib/firestarter";
+#endif
 	}
 
 #if HAVE_LTDL_H
@@ -38,7 +43,13 @@ ModuleManager::ModuleManager(const libconfig::Config & config) :
 }
 
 ModuleManager::~ModuleManager() {
-	// TODO: Close handles to opened modules
+	foreach(ModuleMap::value_type module, modules) {
+#if HAVE_LTDL_H
+		lt_dlhandle moduleHandle = module.second.get<3>();	
+		if (lt_dlclose(moduleHandle) != 0)
+			LOG_ERROR(modManLog, "An error occured while closing module `" << module.first << "': " << lt_dlerror());
+#endif
+	}
 
 #if HAVE_LTDL_H
 	if (ltdl == 0) {
@@ -58,6 +69,17 @@ void ModuleManager::loadModule(const std::string & name) {
 
 }
 
-ModuleInfo & ModuleManager::getModule(const std::string & name) {
+void ModuleManager::loadModules() {
 
+}
+
+ModuleInfo & ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
+	try {
+		return modules.at(name);
+	}
+
+	catch (...) {
+		LOG_ERROR(modManLog, "Exception occured in ModuleManager::getModule() when trying to access modules[" << name <<"].");
+		throw firestarter::exception::ModuleNotFoundException();
+	}
 }
