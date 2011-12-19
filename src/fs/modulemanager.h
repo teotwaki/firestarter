@@ -60,7 +60,7 @@ typedef boost::tuple<std::string, libconfig::Config &, int, lt_dlhandle, create_
 */
 #endif
 
-typedef boost::unordered_map<std::string, ModuleInfo &> ModuleMap;
+typedef boost::unordered_map<std::string, ModuleInfo> ModuleMap;
 /*             ^- hash map   |            |             ^- Type name
                              |            ^- module info
                              ^- key (module name)
