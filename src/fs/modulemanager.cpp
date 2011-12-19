@@ -79,7 +79,7 @@ ModuleInfo & ModuleManager::getModule(const std::string & name) throw(firestarte
 	}
 
 	catch (...) {
-		LOG_ERROR(modManLog, "Exception occured in ModuleManager::getModule() when trying to access modules[" << name <<"].");
+		LOG_ERROR(modManLog, "Exception occured in ModuleManager::getModule() when trying to access modules[" << name << "].");
 		throw firestarter::exception::ModuleNotFoundException();
 	}
 }
