@@ -87,7 +87,7 @@ class ModuleManager {
 	void loadModule(const std::string & name);
 	void loadModules();
 	ModuleInfo & getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
-	inline ModuleMap & getModuleList() { return modules; }
+	inline ModuleMap & getModuleList() { return this->modules; }
 
 };
 

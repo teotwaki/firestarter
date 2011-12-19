@@ -9,29 +9,29 @@ ModuleManager::ModuleManager(const libconfig::Config & config) :
 	LOG_DEBUG(modManLog, "Setting preloaded symbols.");
 	LTDL_SET_PRELOADED_SYMBOLS();
 	LOG_DEBUG(modManLog, "Initialising ltdl library.");
-	ltdl = lt_dlinit();
+	this->ltdl = lt_dlinit();
 
 	if (ltdl != 0) {
 		LOG_ERROR(modManLog, "Unable to initialise ltdl library:");
-		while (ltdl-- > 0)
+		while (this->ltdl-- > 0)
 			LOG_ERROR(modManLog, "lt_dlerror(): " << lt_dlerror());
 		return;
 	}
 #endif
 
 	try {
-		module_path = (const char *) config.lookup("application.module_path");
-		LOG_DEBUG(modManLog, "Setting module search path to `" << module_path << "'.");
+		this->module_path = (const char *) config.lookup("application.module_path");
+		LOG_DEBUG(modManLog, "Setting module search path to `" << this->module_path << "'.");
 	}
 
 	catch (libconfig::SettingNotFoundException e) {
 		LOG_WARN(modManLog, "Couldn't find module_path configuration key.");
 #if HAVE_LTDL_H
 		LOG_DEBUG(modManLog, "Default search path: `" << lt_dlgetsearchpath() <<"'.");
-		module_path = lt_dlgetsearchpath();
+		this->module_path = lt_dlgetsearchpath();
 #else
 		LOG_DEBUG(modManLog, "Setting default search path to: `/usr/lib/firestarter'.");
-		module_path = "/usr/lib/firestarter";
+		this->module_path = "/usr/lib/firestarter";
 #endif
 	}
 
@@ -54,10 +54,10 @@ ModuleManager::~ModuleManager() {
 #if HAVE_LTDL_H
 	if (ltdl == 0) {
 		LOG_DEBUG(modManLog, "Shutting down ltdl library.");
-		ltdl = lt_dlexit();
+		this->ltdl = lt_dlexit();
 		if (ltdl != 0) {
 			LOG_ERROR(modManLog, "Unable to shut down ltdl library:");
-			while (ltdl-- > 0)
+			while (this->ltdl-- > 0)
 				LOG_ERROR(modManLog, "lt_dlerror(): " << lt_dlerror());
 		}
 	}
@@ -75,7 +75,7 @@ void ModuleManager::loadModules() {
 
 ModuleInfo & ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
 	try {
-		return modules.at(name);
+		return this->modules.at(name);
 	}
 
 	catch (...) {
