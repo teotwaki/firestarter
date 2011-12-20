@@ -1,5 +1,7 @@
 #include "main.h"
 
+DECLARE_LOG(logger, "firestarter.main");
+
 void loadModules(ModuleMap & modules, list<string> & invalidModules) {
 	DECLARE_LOG(loadModLog, "main.loadModules");
 
@@ -195,11 +197,11 @@ int main(void) {
 	ModuleMap			modules;
 
 	try {
-		LOG_INFO(mainLog, "Loading the configuration...");
+		LOG_INFO(logger, "Loading the configuration...");
 		config.readFile("/etc/firestarter/fs.cfg");
-		LOG_INFO(mainLog, "done");
+		LOG_INFO(logger, "done");
 
-		LOG_INFO(mainLog, "Modules that will be loaded:");
+		LOG_INFO(logger, "Modules that will be loaded:");
 		{
 			bool end = false;
 			int i = 0;
@@ -207,55 +209,55 @@ int main(void) {
 
 			while (!end) {
 				try {
-					LOG_DEBUG(mainLog, "Retrieving conf_modules[" << i << "]");
+					LOG_DEBUG(logger, "Retrieving conf_modules[" << i << "]");
 					string module_name = conf_modules[i++];
 
 					string path = "firestarter/" + module_name + ".so";
 					boost::to_lower(path);
 
-					LOG_DEBUG(mainLog, "Storing modulePaths[" << module_name << "] = " << path);
+					LOG_DEBUG(logger, "Storing modulePaths[" << module_name << "] = " << path);
 					modules[module_name] = ModuleTuple(path, 0, NULL, static_cast<create_module *>(NULL), static_cast<destroy_module *>(NULL));
 //					modules[module_name] = boost::make_tuple(path, 0, NULL, static_cast<create_module *>(NULL), static_cast<destroy_module *>(NULL));
 /*					modulePaths[module_name] = path;*/
-					LOG_INFO(mainLog, "\t- " << module_name);
+					LOG_INFO(logger, "\t- " << module_name);
 				}
 				catch (libconfig::SettingNotFoundException e) {
 					end = true;
-					LOG_DEBUG(mainLog, "Reached end of application.modules list (Caught libconfig::SettingNotFoundException)");
+					LOG_DEBUG(logger, "Reached end of application.modules list (Caught libconfig::SettingNotFoundException)");
 				}
 			}
 		}
 	}
 	catch (libconfig::SettingTypeException e) {
-		LOG_ERROR(mainLog, "Caught SettingTypeException");
+		LOG_ERROR(logger, "Caught SettingTypeException");
 	}
 
 	catch (libconfig::SettingNameException e) {
-		LOG_ERROR(mainLog, "Caught SettingNameException");
+		LOG_ERROR(logger, "Caught SettingNameException");
 	}
 
 	catch (libconfig::ParseException e) {
-		LOG_ERROR(mainLog, "Caught ParseException");
+		LOG_ERROR(logger, "Caught ParseException");
 	}
 
 	catch (libconfig::FileIOException e) {
-		LOG_ERROR(mainLog, "Caught FileIOException");
+		LOG_ERROR(logger, "Caught FileIOException");
 	}
 
 	catch (...) {
-		LOG_ERROR(mainLog, "Failed.");
+		LOG_ERROR(logger, "Failed.");
 	}
 
-	LOG_DEBUG(mainLog, "Going over the modules list");
+	LOG_DEBUG(logger, "Going over the modules list");
 
 	list<string> invalidModules;
 
 	loadModules(modules, invalidModules);
 
 	if (invalidModules.size() != 0) {
-		LOG_WARN(mainLog, "Invalid modules have been detected.");
+		LOG_WARN(logger, "Invalid modules have been detected.");
 		foreach(string name, invalidModules) {
-			LOG_WARN(mainLog, "Removing " << name << " from list.");
+			LOG_WARN(logger, "Removing " << name << " from list.");
 			modules.erase(name);
 		}
 		invalidModules.clear();
@@ -281,5 +283,5 @@ int main(void) {
 			break;
 	} while (dependencies.size() < d->size());*/
 
-	LOG_INFO(mainLog, "Firestarter exit.");
+	LOG_INFO(logger, "Firestarter exit.");
 }

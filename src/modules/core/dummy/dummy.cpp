@@ -1,23 +1,25 @@
 #include "dummy.h"
 
+DECLARE_LOG(firestarter::module::core::Dummy::logger, "module.core.Dummy");
+
 using namespace firestarter::module::core::Dummy;
 
 Dummy::Dummy() {
 	set_logfile_name("Dummy");
-	LOG_DEBUG(dummyLog, "Dummy being created.");
+	LOG_DEBUG(logger, "Dummy being created.");
 }
 
 void Dummy::beforeFilter() {
-	LOG_DEBUG(dummyLog, "Dummy::beforeFilter() called.");
+	LOG_DEBUG(logger, "Dummy::beforeFilter() called.");
 	addComponent("Foo", 1);
 	addComponent("Bar", 1);
 	addBehaviour("Slimy", 2);
 }
 
 void Dummy::setup() {
-	LOG_INFO(dummyLog, "Dummy being set up.");
+	LOG_INFO(logger, "Dummy being set up.");
 }
 
 void Dummy::afterFilter() {
-	LOG_DEBUG(dummyLog, "Dummy::afterFilter() called.");
+	LOG_DEBUG(logger, "Dummy::afterFilter() called.");
 }

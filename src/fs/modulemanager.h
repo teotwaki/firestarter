@@ -48,8 +48,6 @@ class MissingDependencyException : public ModuleNotLoadableException {
 namespace firestarter {
 	namespace ModuleManager {
 
-DECLARE_LOG(modManLog, "ModuleManager");
-
 #if HAVE_LTDL_H
 typedef boost::tuple<std::string, libconfig::Config &, int, lt_dlhandle, create_module *, destroy_module *> ModuleInfo;
 /*             |     ^- path      ^- module config     |    |            |                |                 ^- Type name
