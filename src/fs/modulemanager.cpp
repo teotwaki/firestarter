@@ -6,8 +6,16 @@ ModuleManager::ModuleManager(const libconfig::Config & config) :
 	configuration(config) {
 
 #if HAVE_LTDL_H
+	/* The following two lines are supposed to be used should we need to support platforms 
+	   that do not use dynamic libraries, however, if we do use it, there is a conflict 
+	   with how Boost.Test is designed. 
+	   As I understand it, libltdl injects a specific symbol (lt__PROGRAM__LTX_preloaded_symbols) 
+	   into the main executable. The problematic issue is that the main executable is provided 
+	   by the Boost.Test shared library. Hence, no insertion of symbol can be done.
+	   TODO: Bugfix welcome.
 	LOG_DEBUG(modManLog, "Setting preloaded symbols.");
-	LTDL_SET_PRELOADED_SYMBOLS();
+	LTDL_SET_PRELOADED_SYMBOLS(); */
+
 	LOG_DEBUG(modManLog, "Initialising ltdl library.");
 	this->ltdl = lt_dlinit();
 
@@ -20,7 +28,7 @@ ModuleManager::ModuleManager(const libconfig::Config & config) :
 #endif
 
 	try {
-		this->module_path = (const char *) config.lookup("application.module_path");
+		this->module_path = (const char *) this->configuration.lookup("application.module_path");
 		LOG_DEBUG(modManLog, "Setting module search path to `" << this->module_path << "'.");
 	}
 
