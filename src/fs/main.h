@@ -37,6 +37,4 @@ typedef boost::unordered_map<string, ModuleMap> ModuleDependencyMap;
                                      ^- List of children modules
 */
 
-DECLARE_LOG(mainLog, "main");
-
 #endif

@@ -10,8 +10,6 @@ namespace firestarter {
 		namespace core {
 			namespace Dummy {
 
-	DECLARE_LOG(dummyLog, "module.core.Dummy");
-	
 	class Dummy : Module {
 		private:
 	

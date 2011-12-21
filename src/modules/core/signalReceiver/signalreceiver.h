@@ -14,8 +14,6 @@ namespace firestarter {
 		namespace core {
 			namespace SignalReceiver {
 
-	DECLARE_LOG(sigRLog, "module.core.SignalReceiver");
-
 	class SignalReceiver : Module {
 		private:
 

@@ -13,8 +13,6 @@ namespace firestarter {
 		namespace core {
 			namespace SignalEmitter {
 
-	DECLARE_LOG(sigELog, "module.core.SignalEmitter");
-	
 	class SignalEmitter : Module {
 	
 		public:
