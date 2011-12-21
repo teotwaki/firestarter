@@ -5,6 +5,9 @@ bin/firestarter
 *.o
 *.o.d
 
+# Ignore unit test binaries
+*_tests
+
 # Ignore automake and autoconf stuff
 .deps
 Makefile

@@ -1,7 +1,7 @@
 
 AC_PREREQ([2.64])
 AC_INIT([Firestarter], [0.1], [slauwers@gmail.com], [firestarter], [http://firestarter.example.com])
-AM_INIT_AUTOMAKE([1.11 no-define subdir-objects])
+AM_INIT_AUTOMAKE([1.11 no-define subdir-objects color-tests parallel-tests])
 
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
@@ -21,6 +21,7 @@ AC_SEARCH_LIBS([lt_dlinit], [ltdl])
 BOOST_REQUIRE([1.42])
 # you can check for specific parts of the boost library with:
 # BOOST_ARRAY
+BOOST_TEST
 
 PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2])
 

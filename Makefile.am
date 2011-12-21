@@ -9,10 +9,15 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 ## language-specific options.
 AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common
 MODULES_CPPFLAGS = $(AM_CPPFLAGS) -I src/modules
+TEST_LIBS = $(DEPS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
 
 ## Define an executable target "firestarter", which will be installed into the
 ## directory named by the predefined variable $(bindir).
 bin_PROGRAMS = firestarter
+
+## Define the test executables that will provide unit testing.
+TESTS = modulemanager_tests
+check_PROGRAMS = $(TESTS)
 
 ## Define the different module libraries that will be compiled and installed
 pkglib_LTLIBRARIES = dummy.la signalEmitter.la signalReceiver.la
@@ -58,6 +63,10 @@ signalEmitter_la_SOURCES = src/modules/core/signalEmitter/signalemitter.cpp \
 
 signalEmitter_la_LDFLAGS = -module -avoid-version -export-dynamic
 signalEmitter_la_CPPFLAGS = $(MODULES_CPPFLAGS)
+
+modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
+                               src/fs/modulemanager.cpp src/fs/modulemanager.h
+modulemanager_tests_LDADD = $(TEST_LIBS)
 
 ## Define an independent executable script for inclusion in the distribution
 ## archive. It will not be installed on an end user's system, however.
