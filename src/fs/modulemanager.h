@@ -88,6 +88,8 @@ class ModuleManager {
 	void loadModules();
 	ModuleInfo & getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
 	inline ModuleMap & getModuleList() { return this->modules; }
+	inline bool is_initialised() { return this->ltdl ? true : false; }
+	inline std::string getModulePath() { return this->module_path; }
 
 };
 
