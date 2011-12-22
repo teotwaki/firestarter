@@ -82,11 +82,11 @@ class ModuleManager {
 	public:
 	ModuleManager(const libconfig::Config & config);
 	~ModuleManager();
-	void loadModule(const std::string & name);
+	void loadModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
 	void loadModules();
 	ModuleInfo & getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
 	inline ModuleMap & getModuleList() { return this->modules; }
-	inline bool is_initialised() { return this->ltdl ? true : false; }
+	inline bool is_initialised() { return not (this->ltdl != 0); }
 	inline std::string getModulePath() { return this->module_path; }
 
 };

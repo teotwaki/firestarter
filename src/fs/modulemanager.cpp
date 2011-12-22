@@ -1,6 +1,8 @@
 #include "modulemanager.h"
 
-DECLARE_LOG(firestarter::ModuleManager::logger, "firestarter.ModuleManager");
+namespace firestarter { namespace ModuleManager {
+	DECLARE_LOG(logger, "firestarter.ModuleManager");
+} }
 
 using namespace firestarter::ModuleManager;
 
@@ -31,14 +33,24 @@ ModuleManager::ModuleManager(const libconfig::Config & config) :
 
 	try {
 		this->module_path = (const char *) this->configuration.lookup("application.module_path");
-		LOG_DEBUG(logger, "Setting module search path to `" << this->module_path << "'.");
+		if (not this->module_path.empty()) {
+			LOG_DEBUG(logger, "Setting module search path to `" << this->module_path << "'.");
+		}
 	}
 
 	catch (libconfig::SettingNotFoundException e) {
 		LOG_WARN(logger, "Couldn't find module_path configuration key.");
 #if HAVE_LTDL_H
-		LOG_DEBUG(logger, "Default search path: `" << lt_dlgetsearchpath() <<"'.");
-		this->module_path = lt_dlgetsearchpath();
+		if (lt_dlgetsearchpath() == NULL) {
+			LOG_DEBUG(logger, "Default search path: `NULL'.");
+			LOG_DEBUG(logger, "Setting default search path to: `/usr/lib/firestarter'.");
+			this->module_path = "/usr/lib/firestarter";
+		}
+
+		else {
+			LOG_DEBUG(logger, "Default search path: `NULL'.");
+			this->module_path = lt_dlgetsearchpath();
+		}
 #else
 		LOG_DEBUG(logger, "Setting default search path to: `/usr/lib/firestarter'.");
 		this->module_path = "/usr/lib/firestarter";
@@ -46,8 +58,10 @@ ModuleManager::ModuleManager(const libconfig::Config & config) :
 	}
 
 #if HAVE_LTDL_H
-	LOG_DEBUG(logger, "Setting ltdl library search path.");
-	lt_dlsetsearchpath(module_path.c_str());
+	if (not module_path.empty()) {
+		LOG_INFO(logger, "Setting ltdl library search path to " << this->module_path);
+		lt_dlsetsearchpath(module_path.c_str());
+	}
 #endif
 
 }
@@ -73,17 +87,21 @@ ModuleManager::~ModuleManager() {
 	}
 #endif
 
+	// TODO: Implement reading list of modules in config file
+
 }
 
-void ModuleManager::loadModule(const std::string & name) {
-
+void ModuleManager::loadModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
+	throw firestarter::exception::ModuleNotFoundException();
+	// TODO: Implement function
 }
 
 void ModuleManager::loadModules() {
-
+	// TODO: Implement function
 }
 
 ModuleInfo & ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
+	// TODO: Implement try loading module before throwing
 	try {
 		return this->modules.at(name);
 	}
