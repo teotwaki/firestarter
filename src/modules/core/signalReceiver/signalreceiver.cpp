@@ -1,6 +1,8 @@
 #include "signalreceiver.h"
 
-DECLARE_LOG(firestarter::module::core::SignalReceiver::logger, "module.core.SignalReceiver");
+namespace firestarter { namespace module { namespace core { namespace SignalReceiver {
+	DECLARE_LOG(logger, "module.core.SignalReceiver");
+} } } }
 
 using namespace firestarter::module::core::SignalReceiver;
 

@@ -1,6 +1,8 @@
 #include "dummy.h"
 
-DECLARE_LOG(firestarter::module::core::Dummy::logger, "module.core.Dummy");
+namespace firestarter { namespace module { namespace core { namespace Dummy {
+	DECLARE_LOG(logger, "module.core.Dummy");
+} } } }
 
 using namespace firestarter::module::core::Dummy;
 
