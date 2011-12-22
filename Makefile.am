@@ -9,7 +9,8 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 ## language-specific options.
 AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common
 MODULES_CPPFLAGS = $(AM_CPPFLAGS) -I src/modules
-TEST_LIBS = $(DEPS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
+TESTS_CPPFLAGS = $(AM_CPPFLAGS) -DIN_UNIT_TESTING
+TESTS_LIBS = $(DEPS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
 
 ## Define an executable target "firestarter", which will be installed into the
 ## directory named by the predefined variable $(bindir).
@@ -66,7 +67,8 @@ signalEmitter_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                                src/fs/modulemanager.cpp src/fs/modulemanager.h
-modulemanager_tests_LDADD = $(TEST_LIBS)
+modulemanager_tests_LDADD = $(TESTS_LIBS)
+modulemanager_tests_CPPFLAGS = $(TESTS_CPPFLAGS)
 
 ## Define an independent executable script for inclusion in the distribution
 ## archive. It will not be installed on an end user's system, however.
