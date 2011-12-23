@@ -5,35 +5,46 @@
 #include <libconfig.h++>
 #include "src/fs/modulemanager.h"
 
-/* Fixtures */
+BOOST_AUTO_TEST_CASE(constructor_test) {
+	using namespace firestarter::ModuleManager;
+
+	BOOST_CHECK_THROW(ModuleManager m0 = ModuleManager(libconfig::Config()), firestarter::exception::InvalidConfiguration);
+}
+
 struct EmptyConfig {
+	EmptyConfig() {
+		using namespace libconfig;
+
+		Setting & root = config.getRoot();
+		root.add("application", Setting::TypeGroup);
+		root["application"].add("modules", Setting::TypeArray);
+	}
 	libconfig::Config config;
 };
 
-BOOST_FIXTURE_TEST_CASE(constructor_test, EmptyConfig) {
+BOOST_FIXTURE_TEST_CASE(constructor_test_emptyconfig, EmptyConfig) {
 	using namespace firestarter::ModuleManager;
-	ModuleManager m0 = ModuleManager(config);
-	
-	BOOST_CHECK(m0.is_initialised());
-	BOOST_CHECK(not m0.getModulePath().empty());
-	BOOST_CHECK(m0.getModulePath() == "/usr/lib/firestarter");
-	BOOST_CHECK(m0.getModuleList().empty());
+	ModuleManager m1 = ModuleManager(config);
 
+	BOOST_CHECK(m1.is_initialised());
+	BOOST_CHECK(not m1.getModulePath().empty());
+	BOOST_CHECK(m1.getModulePath() == "/usr/lib/firestarter");
+	BOOST_CHECK(m1.getModuleList().empty());
 }
 
 BOOST_FIXTURE_TEST_CASE(robustness_test, EmptyConfig) {
 	using namespace firestarter::ModuleManager;
 	using namespace firestarter::exception;
 
-	ModuleManager m1 = ModuleManager(config);
+	ModuleManager m2 = ModuleManager(config);
 
-	BOOST_CHECK_THROW(m1.getModule("this should throw an exception"), ModuleNotFoundException);
-	BOOST_CHECK_THROW(m1.getModule(NULL), std::logic_error);
-	BOOST_CHECK_THROW(m1.getModule(""), ModuleNotFoundException);
+	BOOST_CHECK_THROW(m2.getModule("this should throw an exception"), ModuleNotFoundException);
+	BOOST_CHECK_THROW(m2.getModule(NULL), std::logic_error);
+	BOOST_CHECK_THROW(m2.getModule(""), ModuleNotFoundException);
 
-	BOOST_CHECK_THROW(m1.loadModule("this should throw an exception"), ModuleNotFoundException);
-	BOOST_CHECK_THROW(m1.loadModule(NULL), std::logic_error);
-	BOOST_CHECK_THROW(m1.loadModule(""), ModuleNotFoundException);
+	BOOST_CHECK_THROW(m2.loadModule("this should throw an exception"), ModuleNotFoundException);
+	BOOST_CHECK_THROW(m2.loadModule(NULL), std::logic_error);
+	BOOST_CHECK_THROW(m2.loadModule(""), ModuleNotFoundException);
 }
 
 struct FakeConfig {
@@ -56,14 +67,14 @@ struct FakeConfig {
 	std::string fakepath;
 };
 
-BOOST_FIXTURE_TEST_CASE(constructor_test_2, FakeConfig) {
+BOOST_FIXTURE_TEST_CASE(constructor_test_fakeconfig, FakeConfig) {
 	using namespace firestarter::ModuleManager;
 
-	ModuleManager m2 = ModuleManager(config);
+	ModuleManager m3 = ModuleManager(config);
 
-	BOOST_CHECK(m2.is_initialised());
-	BOOST_CHECK(not m2.getModulePath().empty());
-	BOOST_CHECK(m2.getModulePath() == fakepath);
-	BOOST_CHECK(not m2.getModuleList().empty());
-	BOOST_CHECK_EQUAL(m2.getModuleList().size(), 1);
+	BOOST_CHECK(m3.is_initialised());
+	BOOST_CHECK(not m3.getModulePath().empty());
+	BOOST_CHECK(m3.getModulePath() == fakepath);
+	BOOST_CHECK(not m3.getModuleList().empty());
+	BOOST_CHECK_EQUAL(m3.getModuleList().size(), 1);
 }
