@@ -23,12 +23,12 @@ namespace firestarter {
 	namespace ModuleManager {
 
 #if HAVE_LTDL_H
-typedef boost::tuple<std::string, libconfig::Config &, int, lt_dlhandle, create_module *, destroy_module *> ModuleInfo;
-/*             |     ^- path      ^- module config     |    |            |                |                 ^- Type name
-               ^- tuple                                |    |            |                ^- delete function pointer
-                                                       |    |            ^- factory function pointer
-                                                       |    ^- shared library file handle
-                                                       ^- module version
+typedef boost::tuple<libconfig::Config &, int, lt_dlhandle, create_module *, destroy_module *> ModuleInfo;
+/*             |     ^- module config     |    |            |                |                 ^- Type name
+               ^- tuple                   |    |            |                ^- delete function pointer
+                                          |    |            ^- factory function pointer
+                                          |    ^- shared library file handle
+                                          ^- module version
 */
 #endif
 
