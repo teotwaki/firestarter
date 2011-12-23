@@ -54,7 +54,7 @@ class ModuleManager {
 	int ltdl;
 
 	public:
-	ModuleManager(const libconfig::Config & config);
+	ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfiguration);
 	~ModuleManager();
 	void loadModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
 	void loadModules();

@@ -6,8 +6,13 @@ namespace firestarter { namespace ModuleManager {
 
 using namespace firestarter::ModuleManager;
 
-ModuleManager::ModuleManager(const libconfig::Config & config) :
+ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfiguration):
 	configuration(config) {
+
+	if (not config.exists("application.modules")) {
+		this->ltdl = 1;
+		throw firestarter::exception::InvalidConfiguration();
+	}
 
 #if HAVE_LTDL_H
 	/* The following two lines are supposed to be used should we need to support platforms 
