@@ -22,6 +22,12 @@ class MissingDependencyException : public ModuleNotLoadableException {
 	}
 };
 
+class InvalidConfiguration : public std::exception {
+	virtual const char * what() const throw() {
+		return "Configuration file is not valid";
+	}
+};
+
 /* Closing the namespace */
 	}
 }
