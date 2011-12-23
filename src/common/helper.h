@@ -6,6 +6,7 @@
 
 #include "log.h"
 #include "module.h"
+#include "exceptions.h"
 
 // Prettify BOOST's foreach.
 #ifndef foreach
