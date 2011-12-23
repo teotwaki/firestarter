@@ -16,9 +16,11 @@ ModuleManager::ModuleManager(const libconfig::Config & config) :
 	   As I understand it, libltdl injects a specific symbol (lt__PROGRAM__LTX_preloaded_symbols) 
 	   into the main executable. The problematic issue is that the main executable is provided 
 	   by the Boost.Test shared library. Hence, no insertion of symbol can be done.
-	   TODO: Bugfix welcome.
+	   TODO: Bugfix welcome. */
+#ifndef IN_UNIT_TESTING
 	LOG_DEBUG(logger, "Setting preloaded symbols.");
-	LTDL_SET_PRELOADED_SYMBOLS(); */
+	LTDL_SET_PRELOADED_SYMBOLS();
+#endif
 
 	LOG_DEBUG(logger, "Initialising ltdl library.");
 	this->ltdl = lt_dlinit();
