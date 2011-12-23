@@ -12,6 +12,8 @@
 #include <boost/foreach.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/topological_sort.hpp>
 
 #if HAVE_LTDL_H
 	#include <ltdl.h>
@@ -23,7 +25,7 @@ namespace firestarter {
 	namespace ModuleManager {
 
 #if HAVE_LTDL_H
-typedef boost::tuple<libconfig::Config &, int, lt_dlhandle *, create_module *, destroy_module *> ModuleInfo;
+typedef boost::tuple<libconfig::Config *, int, lt_dlhandle *, create_module *, destroy_module *> ModuleInfo;
 /*             |     ^- module config     |    |              |                |                 ^- Type name
                ^- tuple                   |    |              |                ^- delete function pointer
                                           |    |              ^- factory function pointer
@@ -38,17 +40,22 @@ typedef boost::unordered_map<std::string, ModuleInfo> ModuleMap;
                              ^- key (module name)
 */
 
-typedef boost::unordered_map<std::string, std::list<std::string> > ModuleDependencyMap;
-/*             ^- hash map   |            |                        ^- Type name
-                             |            ^- list of dependencies' names
-                             ^- key (module name)
-*/
+/* Graph for dependency resolution */
+typedef boost::adjacency_list< boost::listS, // Store all out edges as an std::vector
+                               boost::vecS, // Store all vertices in an std::vector
+                               boost::undirectedS, // Relationships can go both ways
+                               boost::property<boost::vertex_name_t, std::string> // Vertices have a name
+                             > Graph;
+
+typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+typedef std::vector<Vertex> ModuleDependencyContainer;
+typedef boost::unordered_map<std::string, Graph::vertex_descriptor> VertexMap;
 
 class ModuleManager {
 
 	private:
 	ModuleMap modules;
-	ModuleDependencyMap dependencies;
+	ModuleDependencyContainer dependencies;
 	const libconfig::Config & configuration;
 	std::string module_path;
 	int ltdl;

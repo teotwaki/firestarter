@@ -9,8 +9,11 @@ using namespace firestarter::ModuleManager;
 ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfiguration):
 	configuration(config) {
 
+	using namespace libconfig;
+	using namespace std;
+
 	if (not config.exists("application.modules")) {
-		this->ltdl = 1;
+		LOG_ERROR(logger, "Configuration file does not contain application.modules.");
 		throw firestarter::exception::InvalidConfiguration();
 	}
 
@@ -70,13 +73,73 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 	}
 #endif
 
+	// TODO: Implement reading list of modules in config file
+	Setting & config_modules = this->configuration.lookup("application.modules");
+
+	Graph graph;
+	VertexMap vertices;
+	// We need a root vertex just so that a core module with no dependencies
+	// wouldn't end up breaking the graph.
+	const Graph::vertex_descriptor rootVertex = boost::add_vertex(string("root"), graph);
+
+	for (int i = 0; i < config_modules.getLength(); i++) {
+		string module_name = config_modules[i];
+		// Using a pointer instead of a reference because libconfig::Config does not support
+		// Copy constructor... Not really sure why, as I use it fine in this constructor...
+		// TODO: Make libconfig::Config in ModuleInfo a reference rather than a pointer.
+		Config * module_config = new Config();
+
+		try {
+			// TODO: Use Boost.Filesystem to convert the slash into platform independent path separator.
+			module_config->readFile((this->module_path + '/' + module_name).c_str());
+		}
+		catch (ParseException pex) {
+			LOG_ERROR(logger, "Invalid configuration file for module `" << module_name << "': Parse Exception.");
+			throw firestarter::exception::InvalidConfiguration();
+		}
+		catch (FileIOException fex) {
+			LOG_ERROR(logger, "Could not read configuration file for module `" << module_name << "': File IO Exception.");
+			throw firestarter::exception::InvalidConfiguration();
+		}
+
+		LOG_INFO(logger, "Inserting `" << module_name << "' into ModuleMap");
+		modules[module_name] = ModuleInfo(module_config, 1, static_cast<lt_dlhandle *>(NULL), 
+		                                                    static_cast<create_module *>(NULL), 
+		                                                    static_cast<destroy_module *>(NULL));
+		if (vertices.find(module_name) == vertices.end())
+			vertices[module_name] = boost::add_vertex(module_name, graph);
+		boost::add_edge(rootVertex, vertices.at(module_name), graph);
+
+		if (module_config->exists("module.components")) {
+			Setting & components = module_config->lookup("module.components");
+
+			for (int j = 0; j < components.getLength(); j++) {
+				string component_name = components[j];
+				if (vertices.find(component_name) == vertices.end())
+					vertices[component_name] = boost::add_vertex(component_name, graph);
+				boost::add_edge(vertices.at(module_name), vertices.at(component_name), graph);
+			}
+		}
+	}
+
+	boost::topological_sort(graph, std::back_inserter(this->dependencies));
+
+	boost::property_map<Graph, boost::vertex_name_t>::type module_name = boost::get(boost::vertex_name, graph);
+
+	for (ModuleDependencyContainer::iterator dep = this->dependencies.begin();
+	     dep != this->dependencies.end(); dep++) {
+		LOG_INFO(logger, "Topological ordering of dependencies:");
+		LOG_DEBUG(logger, "mabite" << module_name[*dep]);
+		LOG_DEBUG(logger, "moncouteau");
+	}
+
 }
 
 ModuleManager::~ModuleManager() {
-	foreach(ModuleMap::value_type module, modules) {
+	foreach(ModuleMap::value_type module, this->modules) {
 #if HAVE_LTDL_H
-		lt_dlhandle moduleHandle = module.second.get<3>();	
-		if (lt_dlclose(moduleHandle) != 0)
+		lt_dlhandle * moduleHandle = module.second.get<2>();
+		if (lt_dlclose(*moduleHandle) != 0)
 			LOG_ERROR(logger, "An error occured while closing module `" << module.first << "': " << lt_dlerror());
 #endif
 	}
@@ -92,8 +155,6 @@ ModuleManager::~ModuleManager() {
 		}
 	}
 #endif
-
-	// TODO: Implement reading list of modules in config file
 
 }
 
