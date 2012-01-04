@@ -6,7 +6,7 @@ namespace firestarter { namespace ModuleManager {
 
 using namespace firestarter::ModuleManager;
 
-ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfiguration):
+ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException):
 	configuration(config) {
 
 	using namespace libconfig;
@@ -14,7 +14,7 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 
 	if (not config.exists("application.modules")) {
 		LOG_ERROR(logger, "Configuration file does not contain application.modules.");
-		throw firestarter::exception::InvalidConfiguration();
+		throw firestarter::exception::InvalidConfigurationException("Configuration file does not contain application.modules.");
 	}
 
 #if HAVE_LTDL_H
@@ -95,11 +95,11 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 		}
 		catch (ParseException pex) {
 			LOG_ERROR(logger, "Invalid configuration file for module `" << module_name << "': Parse Exception.");
-			throw firestarter::exception::InvalidConfiguration();
+			throw firestarter::exception::InvalidConfigurationException("Invalid configuration file for module: Parse Exception.");
 		}
 		catch (FileIOException fex) {
 			LOG_ERROR(logger, "Could not read configuration file for module `" << module_name << "': File IO Exception.");
-			throw firestarter::exception::InvalidConfiguration();
+			throw firestarter::exception::InvalidConfigurationException("Could not read configuration file for module: File IO Exception.");
 		}
 
 		LOG_INFO(logger, "Inserting `" << module_name << "' into ModuleMap");

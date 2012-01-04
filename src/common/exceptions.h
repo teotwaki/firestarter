@@ -1,31 +1,39 @@
 #ifndef __EXCEPTIONS_H
 #define __EXCEPTIONS_H
 
+#include <exception>
+
 namespace firestarter {
 	namespace exception {
 
-class ModuleNotFoundException : public std::exception {
+class Exception : public std::exception {
+	public:
+	Exception(const char * message = NULL) throw() : message(message) { }
 	virtual const char * what() const throw() {
-		return "Requested module could not be found";
+		return message;
 	}
+	private:
+	const char * message;
+};
+
+class ModuleNotFoundException : public Exception {
+	public:
+	ModuleNotFoundException(const char * message = "Requested module could not be found") throw() : Exception(message) { }
 };
 
 class ModuleNotLoadableException : public ModuleNotFoundException {
-	virtual const char * what() const throw() {
-		return "Requested module could not be loaded";
-	}
+	public:
+	ModuleNotLoadableException(const char * message = "Requested module could not be loaded") throw() : ModuleNotFoundException(message) { }
 };
 
 class MissingDependencyException : public ModuleNotLoadableException {
-	virtual const char * what() const throw() {
-		return "Module dependency could not be found";
-	}
+	public:
+	MissingDependencyException(const char * message = "Module dependency could not be found") throw() : ModuleNotLoadableException(message) { }
 };
 
-class InvalidConfiguration : public std::exception {
-	virtual const char * what() const throw() {
-		return "Configuration file is not valid";
-	}
+class InvalidConfigurationException : public Exception {
+	public:
+	InvalidConfigurationException(const char * message = "Configuration file is not valid") throw() : Exception(message) { }
 };
 
 /* Closing the namespace */

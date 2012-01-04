@@ -4,11 +4,12 @@
 
 #include <libconfig.h++>
 #include "src/fs/modulemanager.h"
+#include "src/common/exceptions.h"
 
 BOOST_AUTO_TEST_CASE(constructor_test) {
 	using namespace firestarter::ModuleManager;
 
-	BOOST_CHECK_THROW(ModuleManager m0 = ModuleManager(libconfig::Config()), firestarter::exception::InvalidConfiguration);
+	BOOST_CHECK_THROW(ModuleManager m0 = ModuleManager(libconfig::Config()), firestarter::exception::InvalidConfigurationException);
 }
 
 struct EmptyConfig {
