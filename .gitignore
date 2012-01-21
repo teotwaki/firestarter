@@ -8,6 +8,9 @@ bin/firestarter
 # Ignore unit test binaries
 *_tests
 
+# Ignore Doxygen's documentation
+doc/*
+
 # Ignore automake and autoconf stuff
 .deps
 Makefile
