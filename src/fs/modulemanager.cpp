@@ -18,12 +18,12 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 	}
 
 #if HAVE_LTDL_H
-	/* The following two lines are supposed to be used should we need to support platforms 
-	   that do not use dynamic libraries, however, if we do use it, there is a conflict 
-	   with how Boost.Test is designed. 
-	   As I understand it, libltdl injects a specific symbol (lt__PROGRAM__LTX_preloaded_symbols) 
-	   into the main executable. The problematic issue is that the main executable is provided 
-	   by the Boost.Test shared library. Hence, no insertion of symbol can be done. */
+	/** The following two lines are supposed to be used should we need to support platforms 
+	  * that do not use dynamic libraries, however, if we do use it, there is a conflict 
+	  * with how Boost.Test is designed. 
+	  * As I understand it, libltdl injects a specific symbol (lt__PROGRAM__LTX_preloaded_symbols) 
+	  * into the main executable. The problematic issue is that the main executable is provided 
+	  * by the Boost.Test shared library. Hence, no insertion of symbol can be done. */
 #ifndef IN_UNIT_TESTING
 	LOG_DEBUG(logger, "Setting preloaded symbols.");
 	LTDL_SET_PRELOADED_SYMBOLS();
@@ -73,24 +73,24 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 	}
 #endif
 
-	// TODO: Implement reading list of modules in config file
+	/** \todo Implement reading list of modules in config file */
 	Setting & config_modules = this->configuration.lookup("application.modules");
 
 	Graph graph;
 	VertexMap vertices;
-	// We need a root vertex just so that a core module with no dependencies
-	// wouldn't end up breaking the graph.
+	/** We need a root vertex just so that a core module with no dependencies
+	  * wouldn't end up breaking the graph. */
 	const Graph::vertex_descriptor rootVertex = boost::add_vertex(string("root"), graph);
 
 	for (int i = 0; i < config_modules.getLength(); i++) {
 		string module_name = config_modules[i];
-		// Using a pointer instead of a reference because libconfig::Config does not support
-		// Copy constructor... Not really sure why, as I use it fine in this constructor...
-		// TODO: Make libconfig::Config in ModuleInfo a reference rather than a pointer.
+		/** Using a pointer instead of a reference because libconfig::Config does not support
+		  * Copy constructor... Not really sure why, as I use it fine in this constructor...
+		  * \todo Make libconfig::Config in ModuleInfo a reference rather than a pointer. */
 		Config * module_config = new Config();
 
 		try {
-			// TODO: Use Boost.Filesystem to convert the slash into platform independent path separator.
+			/** \todo Use Boost.Filesystem to convert the slash into platform independent path separator. */
 			module_config->readFile((this->module_path + '/' + module_name).c_str());
 		}
 		catch (ParseException pex) {
@@ -160,15 +160,15 @@ ModuleManager::~ModuleManager() {
 
 void ModuleManager::loadModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
 	throw firestarter::exception::ModuleNotFoundException();
-	// TODO: Implement function
+	/** \todo Implement function */
 }
 
 void ModuleManager::loadModules() {
-	// TODO: Implement function
+	/** \todo Implement function */
 }
 
 ModuleInfo & ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
-	// TODO: Implement try loading module before throwing
+	/** \todo Implement try loading module before throwing */
 	try {
 		return this->modules.at(name);
 	}
