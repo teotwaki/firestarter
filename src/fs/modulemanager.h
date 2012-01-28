@@ -15,16 +15,13 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
 
-#if HAVE_LTDL_H
-	#include <ltdl.h>
-#endif
+#include <ltdl.h>
 
 #include "helper.h"
 
 namespace firestarter {
 	namespace ModuleManager {
 
-#if HAVE_LTDL_H
 typedef boost::tuple<libconfig::Config *, int, lt_dlhandle *, create_module *, destroy_module *> ModuleInfo;
 /*             |     ^- module config     |    |              |                |                 ^- Type name
                ^- tuple                   |    |              |                ^- delete function pointer
@@ -32,7 +29,6 @@ typedef boost::tuple<libconfig::Config *, int, lt_dlhandle *, create_module *, d
                                           |    ^- shared library file handle
                                           ^- module version
 */
-#endif
 
 typedef boost::unordered_map<std::string, ModuleInfo> ModuleMap;
 /*             ^- hash map   |            |           ^- Type name

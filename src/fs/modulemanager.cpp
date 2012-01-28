@@ -17,7 +17,6 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 		throw firestarter::exception::InvalidConfigurationException("Configuration file does not contain application.modules.");
 	}
 
-#if HAVE_LTDL_H
 	/** The following two lines are supposed to be used should we need to support platforms 
 	  * that do not use dynamic libraries, however, if we do use it, there is a conflict 
 	  * with how Boost.Test is designed. 
@@ -38,7 +37,6 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 			LOG_ERROR(logger, "lt_dlerror(): " << lt_dlerror());
 		return;
 	}
-#endif
 
 	if (this->configuration.exists("application.module_path")) {
 		this->module_path = (const char *) this->configuration.lookup("application.module_path");
@@ -49,7 +47,6 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 
 	else {
 		LOG_WARN(logger, "Couldn't find module_path configuration key.");
-#if HAVE_LTDL_H
 		if (lt_dlgetsearchpath() == NULL) {
 			LOG_DEBUG(logger, "Default search path: `NULL'.");
 			LOG_DEBUG(logger, "Setting default search path to: `/usr/lib/firestarter'.");
@@ -60,18 +57,12 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 			LOG_DEBUG(logger, "Default search path: `NULL'.");
 			this->module_path = lt_dlgetsearchpath();
 		}
-#else
-		LOG_DEBUG(logger, "Setting default search path to: `/usr/lib/firestarter'.");
-		this->module_path = "/usr/lib/firestarter";
-#endif
 	}
 
-#if HAVE_LTDL_H
 	if (not module_path.empty()) {
 		LOG_INFO(logger, "Setting ltdl library search path to " << this->module_path);
 		lt_dlsetsearchpath(module_path.c_str());
 	}
-#endif
 
 	/** \todo Implement reading list of modules in config file */
 	Setting & config_modules = this->configuration.lookup("application.modules");
@@ -137,14 +128,11 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 
 ModuleManager::~ModuleManager() {
 	foreach(ModuleMap::value_type module, this->modules) {
-#if HAVE_LTDL_H
 		lt_dlhandle * moduleHandle = module.second.get<2>();
 		if (lt_dlclose(*moduleHandle) != 0)
 			LOG_ERROR(logger, "An error occured while closing module `" << module.first << "': " << lt_dlerror());
-#endif
 	}
 
-#if HAVE_LTDL_H
 	if (ltdl == 0) {
 		LOG_DEBUG(logger, "Shutting down ltdl library.");
 		this->ltdl = lt_dlexit();
@@ -154,7 +142,6 @@ ModuleManager::~ModuleManager() {
 				LOG_ERROR(logger, "lt_dlerror(): " << lt_dlerror());
 		}
 	}
-#endif
 
 }
 
