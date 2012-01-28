@@ -40,14 +40,14 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 	}
 #endif
 
-	try {
+	if (this->configuration.exists("application.module_path")) {
 		this->module_path = (const char *) this->configuration.lookup("application.module_path");
 		if (not this->module_path.empty()) {
-			LOG_DEBUG(logger, "Setting module search path to `" << this->module_path << "'.");
+			LOG_DEBUG(logger, "Setting module search path to `"<< this->module_path << "'.");
 		}
 	}
 
-	catch (libconfig::SettingNotFoundException e) {
+	else {
 		LOG_WARN(logger, "Couldn't find module_path configuration key.");
 #if HAVE_LTDL_H
 		if (lt_dlgetsearchpath() == NULL) {
