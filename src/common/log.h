@@ -10,6 +10,9 @@
 #ifndef IN_UNIT_TESTING
 	#define DECLARE_LOG(var, name) \
 		log4cxx::LoggerPtr var(log4cxx::Logger::getLogger(name))
+
+	#define DECLARE_EXTERN_LOG(var) \
+		extern log4cxx::LoggerPtr var
 	
 	#define LOG_TRACE(logger, msg)	LOG4CXX_TRACE(logger, msg)
 	#define LOG_T(msg)				LOG4CXX_TRACE(logger, msg)
@@ -30,7 +33,8 @@
 	#define LOG_W(msg)				LOG4CXX_WARN(logger, msg)
 
 #else
-	#define DECLARE_LOG(var, name) 
+	#define DECLARE_LOG(var, name)
+	#define DECLARE_EXTERN_LOG(var)
 	
 	#define LOG_TRACE(logger, msg)
 	#define LOG_T(msg)

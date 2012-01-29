@@ -30,6 +30,7 @@ pkglib_LTLIBRARIES = dummy.la signalEmitter.la signalReceiver.la
 ## included in distribution archives of the project.
 firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
                       src/fs/modulemanager.h src/fs/modulemanager.cpp \
+                      src/fs/dependencygraph.h src/fs/dependencygraph.cpp \
                       src/common/log.h src/common/log.cpp
 
 ## Set the library dependencies for the "firestarter" target to the value obtained

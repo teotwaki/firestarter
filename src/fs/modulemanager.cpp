@@ -61,69 +61,12 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 
 	if (not module_path.empty()) {
 		LOG_INFO(logger, "Setting ltdl library search path to " << this->module_path);
-		lt_dlsetsearchpath(module_path.c_str());
+		lt_dlsetsearchpath(this->module_path.c_str());
 	}
 
-	/** \todo Implement reading list of modules in config file */
-	Setting & config_modules = this->configuration.lookup("application.modules");
+	this->lookupDependencies(this->configuration);
 
-	Graph graph;
-	VertexMap vertices;
-	/** We need a root vertex just so that a core module with no dependencies
-	  * wouldn't end up breaking the graph. */
-	const Graph::vertex_descriptor rootVertex = boost::add_vertex(string("root"), graph);
-
-	for (int i = 0; i < config_modules.getLength(); i++) {
-		string module_name = config_modules[i];
-		/** Using a pointer instead of a reference because libconfig::Config does not support
-		  * Copy constructor... Not really sure why, as I use it fine in this constructor...
-		  * \todo Make libconfig::Config in ModuleInfo a reference rather than a pointer. */
-		Config * module_config = new Config();
-
-		try {
-			/** \todo Use Boost.Filesystem to convert the slash into platform independent path separator. */
-			module_config->readFile((this->module_path + '/' + module_name).c_str());
-		}
-		catch (ParseException pex) {
-			LOG_ERROR(logger, "Invalid configuration file for module `" << module_name << "': Parse Exception.");
-			throw firestarter::exception::InvalidConfigurationException("Invalid configuration file for module: Parse Exception.");
-		}
-		catch (FileIOException fex) {
-			LOG_ERROR(logger, "Could not read configuration file for module `" << module_name << "': File IO Exception.");
-			throw firestarter::exception::InvalidConfigurationException("Could not read configuration file for module: File IO Exception.");
-		}
-
-		LOG_INFO(logger, "Inserting `" << module_name << "' into ModuleMap");
-		modules[module_name] = ModuleInfo(module_config, 1, static_cast<lt_dlhandle *>(NULL), 
-		                                                    static_cast<create_module *>(NULL), 
-		                                                    static_cast<destroy_module *>(NULL));
-		if (vertices.find(module_name) == vertices.end())
-			vertices[module_name] = boost::add_vertex(module_name, graph);
-		boost::add_edge(rootVertex, vertices.at(module_name), graph);
-
-		if (module_config->exists("module.components")) {
-			Setting & components = module_config->lookup("module.components");
-
-			for (int j = 0; j < components.getLength(); j++) {
-				string component_name = components[j];
-				if (vertices.find(component_name) == vertices.end())
-					vertices[component_name] = boost::add_vertex(component_name, graph);
-				boost::add_edge(vertices.at(module_name), vertices.at(component_name), graph);
-			}
-		}
-	}
-
-	boost::topological_sort(graph, std::back_inserter(this->dependencies));
-
-	boost::property_map<Graph, boost::vertex_name_t>::type module_name = boost::get(boost::vertex_name, graph);
-
-	for (ModuleDependencyContainer::iterator dep = this->dependencies.begin();
-	     dep != this->dependencies.end(); dep++) {
-		LOG_INFO(logger, "Topological ordering of dependencies:");
-		LOG_DEBUG(logger, "mabite" << module_name[*dep]);
-		LOG_DEBUG(logger, "moncouteau");
-	}
-
+	this->dependencies.resolve();
 }
 
 ModuleManager::~ModuleManager() {
@@ -143,6 +86,72 @@ ModuleManager::~ModuleManager() {
 		}
 	}
 
+}
+
+void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException) {
+
+	using namespace libconfig;
+	using namespace std;
+
+	if (not config.exists("application.modules") && not config.exists("module.components")) {
+		LOG_ERROR(logger, "Configuration file does not contain application.modules nor module.components");
+		throw firestarter::exception::InvalidConfigurationException("Configuration file does not contain application.modules nor module.components.");
+	}
+
+	string configuration_key = "application.modules";
+	string parent_name = "root";
+
+	if (config.exists("module.components")) {
+		configuration_key = "module.components";
+		parent_name = (const char *) config.lookup("module.name");
+	}
+
+	Setting & module_dependencies = config.lookup(configuration_key);
+
+	for (int i = 0; i < module_dependencies.getLength(); i++) {
+		string module_name = module_dependencies[i];
+		/** Using a pointer instead of a reference because libconfig::Config does not support
+		  * Copy constructor... Not really sure why, as I use it fine in this constructor...
+		  * \todo Make libconfig::Config in ModuleInfo a reference rather than a pointer. 
+		  * \todo Catch/throw exceptions */
+		Config * module_config = this->loadModuleConfiguration(module_name);
+
+		LOG_INFO(logger, "Inserting `" << module_name << "' into ModuleMap");
+		this->modules[module_name] = ModuleInfo(module_config, 1, static_cast<lt_dlhandle *>(NULL), 
+		                                                    static_cast<create_module *>(NULL), 
+		                                                    static_cast<destroy_module *>(NULL));
+
+		this->dependencies.addDependency(module_name, parent_name);
+
+		if (module_config->exists("module.components"))
+			this->lookupDependencies(*module_config);
+
+	}
+
+}
+
+libconfig::Config * ModuleManager::loadModuleConfiguration(const std::string & module_name) {
+
+	using namespace libconfig;
+
+	Config * module_config = new Config();
+
+	try {
+		/** \todo Use Boost.Filesystem to convert the slash into platform independent path separator. */
+		module_config->readFile((this->module_path + '/' + module_name).c_str());
+	}
+
+	catch (ParseException pex) {
+		LOG_ERROR(logger, "Invalid configuration file for module `" << module_name << "': Parse Exception.");
+		throw firestarter::exception::InvalidConfigurationException("Invalid configuration file for module: Parse Exception.");
+	}
+
+	catch (FileIOException fex) {
+		LOG_ERROR(logger, "Could not read configuration file for module `" << module_name << "': File IO Exception.");
+		throw firestarter::exception::InvalidConfigurationException("Could not read configuration file for module: File IO Exception.");
+	}
+
+	return module_config;
 }
 
 void ModuleManager::loadModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
