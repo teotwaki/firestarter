@@ -72,7 +72,7 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 ModuleManager::~ModuleManager() {
 	foreach(ModuleMap::value_type module, this->modules) {
 		lt_dlhandle * moduleHandle = module.second.get<2>();
-		if (lt_dlclose(*moduleHandle) != 0)
+		if (moduleHandle != NULL && lt_dlclose(*moduleHandle) != 0)
 			LOG_ERROR(logger, "An error occured while closing module `" << module.first << "': " << lt_dlerror());
 	}
 
@@ -110,21 +110,27 @@ void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(f
 
 	for (int i = 0; i < module_dependencies.getLength(); i++) {
 		string module_name = module_dependencies[i];
-		/** Using a pointer instead of a reference because libconfig::Config does not support
-		  * Copy constructor... Not really sure why, as I use it fine in this constructor...
-		  * \todo Make libconfig::Config in ModuleInfo a reference rather than a pointer. 
-		  * \todo Catch/throw exceptions */
-		Config * module_config = this->loadModuleConfiguration(module_name);
-
-		LOG_INFO(logger, "Inserting `" << module_name << "' into ModuleMap");
-		this->modules[module_name] = ModuleInfo(module_config, 1, static_cast<lt_dlhandle *>(NULL), 
-		                                                    static_cast<create_module *>(NULL), 
-		                                                    static_cast<destroy_module *>(NULL));
 
 		this->dependencies.addDependency(module_name, parent_name);
 
-		if (module_config->exists("module.components"))
-			this->lookupDependencies(*module_config);
+		if (this->modules.find(module_name) == this->modules.end()) {
+
+			/** Using a pointer instead of a reference because libconfig::Config does not support
+			  * Copy constructor... Not really sure why, as I use it fine in this constructor...
+			  * \todo Make libconfig::Config in ModuleInfo a reference rather than a pointer. 
+			  * \todo Catch/throw exceptions */
+			Config * module_config = this->loadModuleConfiguration(module_name);
+	
+			LOG_INFO(logger, "Inserting `" << module_name << "' into ModuleMap");
+			this->modules[module_name] = ModuleInfo(module_config, 1, static_cast<lt_dlhandle *>(NULL), 
+			                                                          static_cast<create_module *>(NULL), 
+			                                                          static_cast<destroy_module *>(NULL));
+
+			if (module_config->exists("module.components"))
+				this->lookupDependencies(*module_config);
+
+
+		}
 
 	}
 
@@ -138,7 +144,10 @@ libconfig::Config * ModuleManager::loadModuleConfiguration(const std::string & m
 
 	try {
 		/** \todo Use Boost.Filesystem to convert the slash into platform independent path separator. */
-		module_config->readFile((this->module_path + '/' + module_name).c_str());
+		std::string config_file = this->module_path + '/' + module_name + ".cfg";
+		boost::algorithm::to_lower(config_file);
+		LOG_DEBUG(logger, "Attempting to read `" << config_file << "'.");
+		module_config->readFile(config_file.c_str());
 	}
 
 	catch (ParseException pex) {

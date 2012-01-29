@@ -12,6 +12,7 @@
 #include <boost/foreach.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <ltdl.h>
 
@@ -42,7 +43,7 @@ class ModuleManager {
 	const libconfig::Config & configuration;
 	std::string module_path;
 	int ltdl;
-	DependencyGraph dependencies;
+	DependencyGraph::DependencyGraph dependencies;
 
 	public:
 	ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException);

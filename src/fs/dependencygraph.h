@@ -15,11 +15,12 @@
 
 namespace firestarter {
 	namespace ModuleManager {
+		namespace DependencyGraph {
 
 /* Graph for dependency resolution */
 typedef boost::adjacency_list< boost::listS, // Store all out edges as an std::vector
                                boost::vecS, // Store all vertices in an std::vector
-                               boost::undirectedS, // Relationships can go both ways
+                               boost::directedS, // Relationships can go both ways
                                boost::property<boost::vertex_name_t, std::string> // Vertices have a name
                              > Graph;
 
@@ -44,6 +45,7 @@ class DependencyGraph {
 };
 
 /* Closing the namespace */
+		}
 	}
 }
 

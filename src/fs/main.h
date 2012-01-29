@@ -19,6 +19,7 @@
 #endif
 
 #include "helper.h"
+#include "modulemanager.h"
 
 using namespace std;
 

@@ -189,99 +189,39 @@ ModuleDependencyMap * run_beforeFilter(ModuleMap & modules, list<string> & inval
 }
 
 int main(void) {
-	cout << "--- Firestarter initialising. ---" << endl;
+
+	using namespace firestarter::ModuleManager;
 
 	set_logfile_name("main");
+	LOG_INFO(logger, "Firestarter initialising.");
 
 	libconfig::Config	config;
-	ModuleMap			modules;
 
 	try {
-		LOG_INFO(logger, "Loading the configuration...");
+		LOG_DEBUG(logger, "Loading the configuration...");
 		config.readFile("/etc/firestarter/fs.cfg");
-		LOG_INFO(logger, "done");
-
-		LOG_INFO(logger, "Modules that will be loaded:");
-		{
-			bool end = false;
-			int i = 0;
-			libconfig::Setting & conf_modules = config.lookup("application.modules");
-
-			while (!end) {
-				try {
-					LOG_DEBUG(logger, "Retrieving conf_modules[" << i << "]");
-					string module_name = conf_modules[i++];
-
-					string path = "firestarter/" + module_name + ".so";
-					boost::to_lower(path);
-
-					LOG_DEBUG(logger, "Storing modulePaths[" << module_name << "] = " << path);
-					modules[module_name] = ModuleTuple(path, 0, NULL, static_cast<create_module *>(NULL), static_cast<destroy_module *>(NULL));
-//					modules[module_name] = boost::make_tuple(path, 0, NULL, static_cast<create_module *>(NULL), static_cast<destroy_module *>(NULL));
-/*					modulePaths[module_name] = path;*/
-					LOG_INFO(logger, "\t- " << module_name);
-				}
-				catch (libconfig::SettingNotFoundException e) {
-					end = true;
-					LOG_DEBUG(logger, "Reached end of application.modules list (Caught libconfig::SettingNotFoundException)");
-				}
-			}
-		}
 	}
+
 	catch (libconfig::SettingTypeException e) {
-		LOG_ERROR(logger, "Caught SettingTypeException");
+		LOG_ERROR(logger, "Caught SettingTypeException while loading the configuration file.");
 	}
 
 	catch (libconfig::SettingNameException e) {
-		LOG_ERROR(logger, "Caught SettingNameException");
+		LOG_ERROR(logger, "Caught SettingNameException while loading the configuration file.");
 	}
 
 	catch (libconfig::ParseException e) {
-		LOG_ERROR(logger, "Caught ParseException");
+		LOG_ERROR(logger, "Caught ParseException while loading the configuration file.");
 	}
 
 	catch (libconfig::FileIOException e) {
-		LOG_ERROR(logger, "Caught FileIOException");
+		LOG_ERROR(logger, "Caught FileIOException while loading the configuration file.");
 	}
 
 	catch (...) {
-		LOG_ERROR(logger, "Failed.");
+		LOG_ERROR(logger, "Failed loading the configuration file.");
 	}
 
-	LOG_DEBUG(logger, "Going over the modules list");
+	ModuleManager module_manager(config);
 
-	list<string> invalidModules;
-
-	loadModules(modules, invalidModules);
-
-	if (invalidModules.size() != 0) {
-		LOG_WARN(logger, "Invalid modules have been detected.");
-		foreach(string name, invalidModules) {
-			LOG_WARN(logger, "Removing " << name << " from list.");
-			modules.erase(name);
-		}
-		invalidModules.clear();
-	}
-	ModuleDependencyMap dependencies;
-	ModuleDependencyMap * d = NULL;
-
-	d = run_beforeFilter(modules, invalidModules);
-
-	/*while (d != NULL && d->size() > 0) {
-		ModuleDependencyMap * tmp = d;
-		dependencies += (*d);
-		foreach(ModuleMap::value_type i, tmp->second) {
-			
-		}
-	}
-	do {
-		if (d != NULL) {
-			dependencies += (*d);
-		}
-		d = run_beforeFilter(modules, invalidModules);
-		if (d == NULL)
-			break;
-	} while (dependencies.size() < d->size());*/
-
-	LOG_INFO(logger, "Firestarter exit.");
 }
