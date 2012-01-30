@@ -6,6 +6,11 @@ namespace firestarter { namespace ModuleManager {
 
 using namespace firestarter::ModuleManager;
 
+void ModuleInfo::setHandle(const lt_dlhandle & module_handle) {
+	this->handle = reinterpret_cast<lt_dlhandle *>(malloc(sizeof(handle)));
+	memcpy(this->handle, &handle, sizeof(handle));
+}
+
 ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException):
 	configuration(config) {
 
@@ -64,17 +69,28 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 		lt_dlsetsearchpath(this->module_path.c_str());
 	}
 
+	LOG_DEBUG(logger, "Initialising ltdl advise.");
+	lt_dladvise_init(&(this->advise));
+	lt_dladvise_ext(&(this->advise));
+	lt_dladvise_global(&(this->advise));
+
 	this->lookupDependencies(this->configuration);
 
 	this->dependencies.resolve();
+
+	this->loadModules();
 }
 
 ModuleManager::~ModuleManager() {
 	foreach(ModuleMap::value_type module, this->modules) {
-		lt_dlhandle * moduleHandle = module.second.get<2>();
-		if (moduleHandle != NULL && lt_dlclose(*moduleHandle) != 0)
+		lt_dlhandle * moduleHandle = module.second->getHandle();
+		LOG_DEBUG(logger, "lt_dlhandle for `" << module.first << "' = " << moduleHandle);
+		if (moduleHandle != NULL && lt_dlclose(*moduleHandle) != 0) {
 			LOG_ERROR(logger, "An error occured while closing module `" << module.first << "': " << lt_dlerror());
+		}
 	}
+
+	lt_dladvise_destroy(&(this->advise));
 
 	if (ltdl == 0) {
 		LOG_DEBUG(logger, "Shutting down ltdl library.");
@@ -122,9 +138,8 @@ void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(f
 			Config * module_config = this->loadModuleConfiguration(module_name);
 	
 			LOG_INFO(logger, "Inserting `" << module_name << "' into ModuleMap");
-			this->modules[module_name] = ModuleInfo(module_config, 1, static_cast<lt_dlhandle *>(NULL), 
-			                                                          static_cast<create_module *>(NULL), 
-			                                                          static_cast<destroy_module *>(NULL));
+			this->modules[module_name] = new ModuleInfo();
+			this->modules[module_name]->setConfiguration(module_config);
 
 			if (module_config->exists("module.components"))
 				this->lookupDependencies(*module_config);
@@ -144,10 +159,10 @@ libconfig::Config * ModuleManager::loadModuleConfiguration(const std::string & m
 
 	try {
 		/** \todo Use Boost.Filesystem to convert the slash into platform independent path separator. */
-		std::string config_file = this->module_path + '/' + module_name + ".cfg";
-		boost::algorithm::to_lower(config_file);
-		LOG_DEBUG(logger, "Attempting to read `" << config_file << "'.");
-		module_config->readFile(config_file.c_str());
+		std::string config_file_path = this->module_path + '/' + module_name + ".cfg";
+		boost::algorithm::to_lower(config_file_path);
+		LOG_DEBUG(logger, "Attempting to read `" << config_file_path << "'.");
+		module_config->readFile(config_file_path.c_str());
 	}
 
 	catch (ParseException pex) {
@@ -163,16 +178,77 @@ libconfig::Config * ModuleManager::loadModuleConfiguration(const std::string & m
 	return module_config;
 }
 
-void ModuleManager::loadModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
-	throw firestarter::exception::ModuleNotFoundException();
-	/** \todo Implement function */
+void ModuleManager::loadModule(const std::string & module_name) throw(firestarter::exception::ModuleNotFoundException) {
+
+	using namespace std;
+
+	LOG_INFO(logger, "Attempting to load module `" << module_name << "'.");
+
+	if (modules.find(module_name) == modules.end()) {
+		LOG_ERROR(logger, "Couldn't find module `" << module_name << "' in list of modules.");
+		throw firestarter::exception::ModuleNotFoundException("Coulnd't find module in list of modules.");
+	}
+
+	LOG_DEBUG(logger, "Converting module name to lowercase");
+	string module_name_lowercase = module_name;
+	boost::algorithm::to_lower(module_name_lowercase);
+
+	LOG_DEBUG(logger, "Opening module's shared library");
+	lt_dlhandle module_handle = lt_dlopenadvise(module_name_lowercase.c_str(), this->advise);
+
+	if (module_handle == NULL) {
+		LOG_ERROR(logger, "An error occured while opening `" << module_name_lowercase << "'.");
+		LOG_ERROR(logger, lt_dlerror())
+		throw firestarter::exception::ModuleNotFoundException();
+	}
+	
+	LOG_DEBUG(logger, "Retrieving module's factory symbol");
+	create_module * factory = reinterpret_cast<create_module *>(lt_dlsym(module_handle, ("create" + module_name).c_str()));
+	if (factory == NULL) {
+		LOG_ERROR(logger, "Unable to load symbol `create" << module_name << "'.");
+		/** \todo Throw exception if unable to load symbol */
+	}
+
+	LOG_DEBUG(logger, "Retrieving module's destructor symbol");
+	destroy_module * destructor = reinterpret_cast<destroy_module *>(lt_dlsym(module_handle, ("destroy" + module_name).c_str()));
+	if (destructor == NULL) {
+		LOG_ERROR(logger, "Unable to load symbol `destroy" << module_name << "'.");
+		/** \todo Throw exception if unable to load symbol */
+	}
+
+	LOG_DEBUG(logger, "Retrieving module's version symbol");
+	module_version * version = reinterpret_cast<module_version *>(lt_dlsym(module_handle, ("version" + module_name).c_str()));
+	if (version == NULL) {
+		LOG_ERROR(logger, "Unable to load symbol `version" << module_name << "'.");
+		/** \todo Throw exception if unable to load symbol */
+	}
+
+	LOG_DEBUG(logger, "Storing module's information into modules (" << this->modules[module_name] << ")");
+	LOG_DEBUG(logger, "Storing module version from " << version);
+	this->modules[module_name]->setVersion(version != NULL ? version() : 1);
+	LOG_DEBUG(logger, "Storing module's handle " << module_handle);
+	this->modules[module_name]->setHandle(module_handle);
+	LOG_DEBUG(logger, "Storing module's factory " << factory);
+	this->modules[module_name]->setFactory(factory);
+	LOG_DEBUG(logger, "Storing module's destructor " << destructor);
+	this->modules[module_name]->setRecyclingFacility(destructor);
+
 }
 
 void ModuleManager::loadModules() {
-	/** \todo Implement function */
+
+	LOG_INFO(logger, "Attempting to open all modules.");
+	std::list<std::string> * module_list = this->dependencies.getModules();
+
+	foreach(std::string module_name, *module_list) {
+		this->loadModule(module_name);
+	}
+
+	delete module_list;
+
 }
 
-ModuleInfo & ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
+ModuleInfo * ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
 	/** \todo Implement try loading module before throwing */
 	try {
 		return this->modules.at(name);

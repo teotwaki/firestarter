@@ -51,10 +51,10 @@ void DependencyGraph::removeDependency(const std::string & child_name, const std
 std::list<std::string> * DependencyGraph::resolve() {
 	LOG_INFO(logger, "Attempting to resolve the dependency graph.");
 	boost::topological_sort(graph, std::back_inserter(this->dependencies));
-	return this->getModuleMap();
+	return this->getModules();
 }
 
-std::list<std::string> * DependencyGraph::getModuleMap() {
+std::list<std::string> * DependencyGraph::getModules() {
 
 	boost::property_map<Graph, boost::vertex_name_t>::type module_names = boost::get(boost::vertex_name, this->graph);
 	std::list<std::string> * modules = new std::list<std::string>;

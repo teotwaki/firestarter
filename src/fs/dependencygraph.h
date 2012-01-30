@@ -40,7 +40,7 @@ class DependencyGraph {
 	void addDependency(const std::string & child_name, const std::string & parent_name = "root");
 	void removeDependency(const std::string & child_name, const std::string & parent_name = "root");
 	std::list<std::string> * resolve();
-	std::list<std::string> * getModuleMap();
+	std::list<std::string> * getModules();
 
 };
 
