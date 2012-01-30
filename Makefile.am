@@ -21,7 +21,7 @@ TESTS = modulemanager_tests
 check_PROGRAMS = $(TESTS)
 
 ## Define the different module libraries that will be compiled and installed
-pkglib_LTLIBRARIES = dummy.la signalEmitter.la signalReceiver.la
+pkglib_LTLIBRARIES = dummy.la signalemitter.la signalreceiver.la
 
 ## Define the list of source files for the "firestarter" target. The file extension
 ## .cpp is recognized by Automake, and causes it to produce rules which invoke
@@ -38,8 +38,8 @@ firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
 ## passed to the linker in addition to the other linker flags.
 firestarter_LDADD = $(DEPS_LIBS) \
                     -dlopen dummy.la \
-                    -dlopen signalEmitter.la \
-                    -dlopen signalReceiver.la
+                    -dlopen signalemitter.la \
+                    -dlopen signalreceiver.la
 
 ## Set the libtool flags
 firestarter_LDFLAGS = -export-dynamic
@@ -54,17 +54,17 @@ dummy_la_SOURCES = src/modules/core/dummy/dummy.cpp \
 
 dummy_la_LDFLAGS = -module -avoid-version -export-dynamic
 
-signalReceiver_la_SOURCES = src/modules/core/signalReceiver/signalreceiver.cpp \
+signalreceiver_la_SOURCES = src/modules/core/signalReceiver/signalreceiver.cpp \
                             src/modules/core/signalReceiver/signalreceiver.h
 
-signalReceiver_la_LDFLAGS = -module -avoid-version -export-dynamic
-signalReceiver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
+signalreceiver_la_LDFLAGS = -module -avoid-version -export-dynamic
+signalreceiver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 
-signalEmitter_la_SOURCES = src/modules/core/signalEmitter/signalemitter.cpp \
+signalemitter_la_SOURCES = src/modules/core/signalEmitter/signalemitter.cpp \
                            src/modules/core/signalEmitter/signalemitter.h
 
-signalEmitter_la_LDFLAGS = -module -avoid-version -export-dynamic
-signalEmitter_la_CPPFLAGS = $(MODULES_CPPFLAGS)
+signalemitter_la_LDFLAGS = -module -avoid-version -export-dynamic
+signalemitter_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                                src/fs/modulemanager.cpp src/fs/modulemanager.h
