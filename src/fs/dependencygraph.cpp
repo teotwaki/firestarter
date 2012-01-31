@@ -8,16 +8,26 @@ namespace firestarter { namespace ModuleManager { namespace DependencyGraph {
 
 using namespace firestarter::ModuleManager::DependencyGraph;
 
+/** \brief Initialises a DependencyGraph
+  *
+  * This constructor initialises the object so that it can be used immediately.
+  */
 DependencyGraph::DependencyGraph() : cached(false) {
 	this->vertices["root"] = boost::add_vertex(std::string("root"), this->graph);
 }
 
+/** \brief Destroys the object
+  *
+  * The destructor deletes the cache if it exists.
+  */
 DependencyGraph::~DependencyGraph() {
 	if (this->modules != NULL)
 		delete this->modules;
 }
 
 /** \brief Add a module to the graph
+  *
+  * Add a dependency to the graph. An exception is thrown if the second argument can not be found in the graph.
   */
 void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, /** [in] */ const std::string & parent_name) {
 
@@ -38,6 +48,9 @@ void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, 
 }
 
 /** \brief Remove a dependency from the graph
+  *
+  * As the method's name indicates, it removes a dependency from the graph. If the first or second parameter can't be found
+  * in the graph, an exception is thrown (or will be, in the future).
   */
 void DependencyGraph::removeDependency(/** [in] */ const std::string & child_name, /** [in] */ const std::string & parent_name) {
 
@@ -59,6 +72,12 @@ void DependencyGraph::removeDependency(/** [in] */ const std::string & child_nam
 
 
 /** \brief Sort the graph topologically
+  *
+  * This method applies boost::topological_sort to the stored graph.
+  * After sorting the graph, it invalidates the cache.
+  *
+  * \return The cache computed by getModules()
+  * \see getModules
   */
 std::list<std::string> * DependencyGraph::resolve() {
 	LOG_INFO(logger, "Attempting to resolve the dependency graph.");
