@@ -6,18 +6,17 @@
 	#include <config.h>
 #endif
 
+#include "helper.h"
+#include "dependencygraph.h"
+
 #include <libconfig.h++>
 #include <list>
 #include <exception>
-#include <boost/foreach.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <ltdl.h>
-
-#include "helper.h"
-#include "dependencygraph.h"
 
 namespace firestarter {
 	namespace ModuleManager {

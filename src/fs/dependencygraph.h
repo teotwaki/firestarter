@@ -5,13 +5,13 @@
 	#include <config.h>
 #endif
 
+#include "helper.h"
+
 #include <list>
 #include <exception>
 #include <boost/tuple/tuple.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
-
-#include "helper.h"
 
 namespace firestarter {
 	namespace ModuleManager {

@@ -16,6 +16,11 @@
 	#define reverse_foreach BOOST_FOREACH_REVERSE
 #endif
 
+// There is a bug in boost 1.48 which requires foreach to be defined
+// before including foreach.hpp
+
+#include <boost/foreach.hpp>
+
 bool file_exists(std::string path);
 
 #endif
