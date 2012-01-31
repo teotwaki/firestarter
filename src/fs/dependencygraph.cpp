@@ -8,8 +8,13 @@ namespace firestarter { namespace ModuleManager { namespace DependencyGraph {
 
 using namespace firestarter::ModuleManager::DependencyGraph;
 
-DependencyGraph::DependencyGraph() {
+DependencyGraph::DependencyGraph() : cached(false) {
 	this->vertices["root"] = boost::add_vertex(std::string("root"), this->graph);
+}
+
+DependencyGraph::~DependencyGraph() {
+	if (this->modules != NULL)
+		delete modules;
 }
 
 void DependencyGraph::addDependency(const std::string & child_name, const std::string & parent_name) {
@@ -51,12 +56,46 @@ void DependencyGraph::removeDependency(const std::string & child_name, const std
 std::list<std::string> * DependencyGraph::resolve() {
 	LOG_INFO(logger, "Attempting to resolve the dependency graph.");
 	boost::topological_sort(graph, std::back_inserter(this->dependencies));
+	this->cached = false;
 	return this->getModules();
 }
 
+/** \brief Obtain the order in which the modules should be loaded to avoid dependency issues.
+  *
+  * The getModules method extracts from the (previously resolve()'d) Graph the list of modules in the order in which they should be loaded.
+  * The order is important, as it enables specific modules to provide symbols that other modules require.
+  *
+  * A small level of caching is implemented: Once returned, the pointer to the list will remain the same as long as resolve() is not called
+  * (and hence, the cache invalidated). This being said, the cache is only invalidated upon calling getModules(). So this for example is valid:
+  * \code
+  * DependencyGraph graph;
+  * graph.addDependency("bar");
+  * graph.addDependency("foo", "bar");
+  * std::list<std::string> * module_order = graph.resolve(); // getModules() is called by resolve()
+  * graph.addDependency("taz", "bar");
+  * // Here, even though the graph has changed, the module_order pointer is still valid
+  * std::list<std::string> * first = graph.resolve(); // module_order now points to invalid memory
+  * std::list<std::string> * second = graph.getModules(); // first == second
+  * \endcode
+  *
+  * \return Pointer to a list of strings.
+  * This pointer is managed, which means it should not be deleted by the receiver.
+  * If the graph has not been resolve()'d before calling getModules(), the value returned will point to an empty list.
+  *
+  * \see resolve
+  */
 std::list<std::string> * DependencyGraph::getModules() {
 
+	if (cached)
+		return this->modules;
+
+	else if (this->modules != NULL) {
+		delete this->modules;
+		this->module = NULL;
+	}
+
 	boost::property_map<Graph, boost::vertex_name_t>::type module_names = boost::get(boost::vertex_name, this->graph);
+	
 	std::list<std::string> * modules = new std::list<std::string>;
 
 	LOG_DEBUG(logger, "Topological ordering of dependencies:");
@@ -69,6 +108,8 @@ std::list<std::string> * DependencyGraph::getModules() {
 			modules->push_back(module_names[*dependency]);
 		}
 	}
+
+	this->cached = true;
 
 	return modules;
 }
