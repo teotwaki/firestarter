@@ -14,7 +14,7 @@ DependencyGraph::DependencyGraph() : cached(false) {
 
 DependencyGraph::~DependencyGraph() {
 	if (this->modules != NULL)
-		delete modules;
+		delete this->modules;
 }
 
 /** \brief Add a module to the graph
@@ -102,7 +102,7 @@ std::list<std::string> * DependencyGraph::getModules() {
 	else if (this->modules != NULL) {
 		LOG_DEBUG(logger, "Cache is out-of-date. Deleting.");
 		delete this->modules;
-		this->module = NULL;
+		this->modules = NULL;
 	}
 
 	boost::property_map<Graph, boost::vertex_name_t>::type module_names = boost::get(boost::vertex_name, this->graph);
