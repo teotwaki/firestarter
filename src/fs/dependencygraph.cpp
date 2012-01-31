@@ -17,7 +17,9 @@ DependencyGraph::~DependencyGraph() {
 		delete modules;
 }
 
-void DependencyGraph::addDependency(const std::string & child_name, const std::string & parent_name) {
+/** \brief Add a module to the graph
+  */
+void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, /** [in] */ const std::string & parent_name) {
 
 	LOG_INFO(logger, "Storing `" << child_name << "' to be used by `" << parent_name << "'.");
 
@@ -35,7 +37,9 @@ void DependencyGraph::addDependency(const std::string & child_name, const std::s
 	boost::add_edge(this->vertices.at(child_name), this->vertices.at(parent_name), this->graph);
 }
 
-void DependencyGraph::removeDependency(const std::string & child_name, const std::string & parent_name) {
+/** \brief Remove a dependency from the graph
+  */
+void DependencyGraph::removeDependency(/** [in] */ const std::string & child_name, /** [in] */ const std::string & parent_name) {
 
 	LOG_INFO(logger, "Removing `" << child_name << "' from `" << parent_name << "'.");
 
@@ -53,9 +57,13 @@ void DependencyGraph::removeDependency(const std::string & child_name, const std
 	boost::remove_edge(this->vertices.at(parent_name), this->vertices.at(child_name), this->graph);
 }
 
+
+/** \brief Sort the graph topologically
+  */
 std::list<std::string> * DependencyGraph::resolve() {
 	LOG_INFO(logger, "Attempting to resolve the dependency graph.");
 	boost::topological_sort(graph, std::back_inserter(this->dependencies));
+	LOG_DEBUG(logger, "Invalidating cache.");
 	this->cached = false;
 	return this->getModules();
 }
@@ -86,30 +94,35 @@ std::list<std::string> * DependencyGraph::resolve() {
   */
 std::list<std::string> * DependencyGraph::getModules() {
 
-	if (cached)
+	if (cached) {
+		LOG_DEBUG(logger, "Returning cached results");
 		return this->modules;
+	}
 
 	else if (this->modules != NULL) {
+		LOG_DEBUG(logger, "Cache is out-of-date. Deleting.");
 		delete this->modules;
 		this->module = NULL;
 	}
 
 	boost::property_map<Graph, boost::vertex_name_t>::type module_names = boost::get(boost::vertex_name, this->graph);
 	
+	LOG_DEBUG(logger, "Creating new cache.");
 	std::list<std::string> * modules = new std::list<std::string>;
 
-	LOG_DEBUG(logger, "Topological ordering of dependencies:");
-
+	LOG_DEBUG(logger, "Populating cache.");
 	for (ModuleDependencyContainer::reverse_iterator dependency = this->dependencies.rbegin();
 	     dependency != this->dependencies.rend(); 
 	     dependency++) {
 		if (module_names[*dependency] != "root") {
-			LOG_DEBUG(logger, "- " << module_names[*dependency]);
+			LOG_DEBUG(logger, "Adding `" << module_names[*dependency] << "' to cache.");
 			modules->push_back(module_names[*dependency]);
 		}
 	}
 
+	LOG_DEBUG(logger, "Setting cache as valid.");
 	this->cached = true;
 
+	LOG_DEBUG(logger, "Returning cache.");
 	return modules;
 }
