@@ -35,6 +35,10 @@ typedef boost::unordered_map<std::string, Graph::vertex_descriptor> VertexMap;
   *
   * DependencyGraph enables dependency resolution through the use of the Boost.Graph library, and more specificaly the topological_sort algorithm.
   * It abstracts the complexity of using Boost.Graph by providing an easy to use interface. It is mainly used by ModuleManager.
+  *
+  * A small caching layer is implemented, to prevent useless graph sorting or list computation. 
+  * The cache is invalidated when addDependency() or removeDependency() is called.
+  *
   * \see ModuleManager
   */
 class DependencyGraph {
@@ -44,7 +48,12 @@ class DependencyGraph {
 	VertexMap vertices;
 	ModuleDependencyContainer dependencies;
 	std::list<std::string> * modules;
-	bool cached;
+
+	void invalidateCache();
+	void initCache();
+	inline std::list<std::string> * getCache() { return this->modules; };
+	inline void setCache(std::list<std::string> * cache) { this->modules = cache; };
+	inline bool cacheIsValid() { return (this->getCache() != NULL) ? true : false; };
 
 	public:
 	DependencyGraph();

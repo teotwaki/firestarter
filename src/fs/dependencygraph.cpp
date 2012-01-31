@@ -12,7 +12,8 @@ using namespace firestarter::ModuleManager::DependencyGraph;
   *
   * This constructor initialises the object so that it can be used immediately.
   */
-DependencyGraph::DependencyGraph() : cached(false) {
+DependencyGraph::DependencyGraph() {
+	this->setCache(NULL);
 	this->vertices["root"] = boost::add_vertex(std::string("root"), this->graph);
 }
 
@@ -21,13 +22,14 @@ DependencyGraph::DependencyGraph() : cached(false) {
   * The destructor deletes the cache if it exists.
   */
 DependencyGraph::~DependencyGraph() {
-	if (this->modules != NULL)
-		delete this->modules;
+	this->invalidateCache();
 }
 
 /** \brief Add a module to the graph
   *
   * Add a dependency to the graph. An exception is thrown if the second argument can not be found in the graph.
+  *
+  * \warning If it exists, the getModules() cache is invalidated.
   */
 void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, /** [in] */ const std::string & parent_name) {
 
@@ -45,12 +47,16 @@ void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, 
 
 	LOG_DEBUG(logger, "Adding edge from child module `" << child_name << "' to parent module `" << parent_name << "'.");
 	boost::add_edge(this->vertices.at(child_name), this->vertices.at(parent_name), this->graph);
+
+	this->invalidateCache();
 }
 
 /** \brief Remove a dependency from the graph
   *
   * As the method's name indicates, it removes a dependency from the graph. If the first or second parameter can't be found
   * in the graph, an exception is thrown (or will be, in the future).
+  * 
+  * \warning If it exists, the getModules() cache is invalidated.
   */
 void DependencyGraph::removeDependency(/** [in] */ const std::string & child_name, /** [in] */ const std::string & parent_name) {
 
@@ -68,42 +74,48 @@ void DependencyGraph::removeDependency(/** [in] */ const std::string & child_nam
 
 	LOG_DEBUG(logger, "Removing edge from parent module `" << parent_name << "' to child module `" << child_name << "'.");
 	boost::remove_edge(this->vertices.at(parent_name), this->vertices.at(child_name), this->graph);
+
+	this->invalidateCache();
 }
 
 
 /** \brief Sort the graph topologically
   *
   * This method applies boost::topological_sort to the stored graph.
-  * After sorting the graph, it invalidates the cache.
+  * The graph is only sorted when the cache is invalid.
   *
   * \return The cache computed by getModules()
   * \see getModules
   */
 std::list<std::string> * DependencyGraph::resolve() {
 	LOG_INFO(logger, "Attempting to resolve the dependency graph.");
+
+	if (this->cacheIsValid()) {
+		LOG_DEBUG(logger, "Returning cached results.");
+		return this->getCache();
+	}
+
 	boost::topological_sort(graph, std::back_inserter(this->dependencies));
-	LOG_DEBUG(logger, "Invalidating cache.");
-	this->cached = false;
 	return this->getModules();
 }
 
 /** \brief Obtain the order in which the modules should be loaded to avoid dependency issues.
   *
-  * The getModules method extracts from the (previously resolve()'d) Graph the list of modules in the order in which they should be loaded.
-  * The order is important, as it enables specific modules to provide symbols that other modules require.
+  * The getModules method extracts from the (previously resolve()'d) Graph the list of modules in the order 
+  * in which they should be loaded. The order is important, as it enables specific modules to provide symbols 
+  * that other modules require.
   *
-  * A small level of caching is implemented: Once returned, the pointer to the list will remain the same as long as resolve() is not called
-  * (and hence, the cache invalidated). This being said, the cache is only invalidated upon calling getModules(). So this for example is valid:
+  * A small level of caching is implemented: Once returned, the pointer to the list will remain the same as 
+  * long as addDependency() or removeDependency() is not called (and hence, the cache invalidated). For example:
   * \code
   * DependencyGraph graph;
   * graph.addDependency("bar");
   * graph.addDependency("foo", "bar");
-  * std::list<std::string> * module_order = graph.resolve(); // getModules() is called by resolve()
-  * graph.addDependency("taz", "bar");
-  * // Here, even though the graph has changed, the module_order pointer is still valid
-  * std::list<std::string> * first = graph.resolve(); // module_order now points to invalid memory
+  * std::list<std::string> * module_order = graph.resolve(); // getModules() is called by resolve(), cache is initialised
+  * graph.addDependency("taz", "bar"); // cache is invalidated, module_order should not be used anymore
+  * std::list<std::string> * first = graph.resolve(); // cache is initialised
   * std::list<std::string> * second = graph.getModules(); // first == second
-  * \endcode
+  * \endcode 
   *
   * \return Pointer to a list of strings.
   * This pointer is managed, which means it should not be deleted by the receiver.
@@ -113,35 +125,48 @@ std::list<std::string> * DependencyGraph::resolve() {
   */
 std::list<std::string> * DependencyGraph::getModules() {
 
-	if (cached) {
+	if (this->cacheIsValid()) {
 		LOG_DEBUG(logger, "Returning cached results");
-		return this->modules;
+		return this->getCache();
 	}
 
-	else if (this->modules != NULL) {
-		LOG_DEBUG(logger, "Cache is out-of-date. Deleting.");
-		delete this->modules;
-		this->modules = NULL;
-	}
+	this->initCache();
 
 	boost::property_map<Graph, boost::vertex_name_t>::type module_names = boost::get(boost::vertex_name, this->graph);
 	
-	LOG_DEBUG(logger, "Creating new cache.");
-	std::list<std::string> * modules = new std::list<std::string>;
-
 	LOG_DEBUG(logger, "Populating cache.");
 	for (ModuleDependencyContainer::reverse_iterator dependency = this->dependencies.rbegin();
 	     dependency != this->dependencies.rend(); 
 	     dependency++) {
 		if (module_names[*dependency] != "root") {
 			LOG_DEBUG(logger, "Adding `" << module_names[*dependency] << "' to cache.");
-			modules->push_back(module_names[*dependency]);
+			this->getCache()->push_back(module_names[*dependency]);
 		}
 	}
-
-	LOG_DEBUG(logger, "Setting cache as valid.");
-	this->cached = true;
 
 	LOG_DEBUG(logger, "Returning cache.");
 	return modules;
 }
+
+/** If it exists, the cache is invalidated
+  */
+void DependencyGraph::invalidateCache() {
+	if (this->cacheIsValid()) {
+		LOG_DEBUG(logger, "Invalidating current DependencyGraph cache (" << this->getCache() << ").");
+		delete this->getCache();
+		this->setCache(NULL);
+	}
+}
+
+/** Instantiate a new cache
+  *
+  * If a cache already exists, it is invalidated first.
+  *
+  * \see invalidateCache
+  */
+void DependencyGraph::initCache() {
+	this->invalidateCache();
+	LOG_DEBUG(logger, "Initialising new DependencyGraph cache (" << this->getCache() << ").");
+	this->setCache(new std::list<std::string>);
+}
+
