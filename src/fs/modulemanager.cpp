@@ -151,7 +151,7 @@ libconfig::Config * ModuleManager::loadModuleConfiguration(const std::string & m
 	Config * module_config = new Config();
 
 	try {
-		/** \todo Use Boost.Filesystem to convert the slash into platform independent path separator. */
+		/// \todo Use Boost.Filesystem to convert the slash into platform independent path separator.
 		std::string config_file_path = this->module_path + '/' + module_name + ".cfg";
 		boost::algorithm::to_lower(config_file_path);
 		LOG_DEBUG(logger, "Attempting to read `" << config_file_path << "'.");
@@ -201,21 +201,21 @@ void ModuleManager::loadModule(const std::string & module_name) throw(firestarte
 	create_module * factory = reinterpret_cast<create_module *>(lt_dlsym(module->getHandle(), ("create" + module_name).c_str()));
 	if (factory == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `create" << module_name << "'.");
-		/** \todo Throw exception if unable to load symbol */
+		/// \todo Throw exception if unable to load symbol
 	}
 
 	LOG_DEBUG(logger, "Retrieving module's destructor symbol");
 	destroy_module * destructor = reinterpret_cast<destroy_module *>(lt_dlsym(module->getHandle(), ("destroy" + module_name).c_str()));
 	if (destructor == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `destroy" << module_name << "'.");
-		/** \todo Throw exception if unable to load symbol */
+		/// \todo Throw exception if unable to load symbol
 	}
 
 	LOG_DEBUG(logger, "Retrieving module's version symbol");
 	module_version * version = reinterpret_cast<module_version *>(lt_dlsym(module->getHandle(), ("version" + module_name).c_str()));
 	if (version == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `version" << module_name << "'.");
-		/** \todo Throw exception if unable to load symbol */
+		/// \todo Throw exception if unable to load symbol
 	}
 
 	LOG_DEBUG(logger, "Storing module's information into modules (" << module << ")");
@@ -242,7 +242,7 @@ void ModuleManager::loadModules() {
 }
 
 ModuleInfo * ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
-	/** \todo Implement try loading module before throwing */
+	/// \todo Implement try loading module before throwing
 	try {
 		return this->modules.at(name);
 	}

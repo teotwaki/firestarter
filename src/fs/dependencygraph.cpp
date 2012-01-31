@@ -18,7 +18,7 @@ void DependencyGraph::addDependency(const std::string & child_name, const std::s
 
 	if (this->vertices.find(parent_name) == this->vertices.end()) {
 		LOG_ERROR(logger, "Parent module `" << parent_name << "' does not exist in list of vertices.");
-		/** \todo Throw exception if the parent module does not exist in the list of vertices */
+		/// \todo Throw exception if the parent module does not exist in the list of vertices
 	}
 
 	if (this->vertices.find(child_name) == this->vertices.end()) {
@@ -36,12 +36,12 @@ void DependencyGraph::removeDependency(const std::string & child_name, const std
 
 	if (this->vertices.find(parent_name) == this->vertices.end()) {
 		LOG_ERROR(logger, "Parent module `" << parent_name << "' does not exist in the list of vertices.");
-		/** \todo Throw exception if the parent module does not exist in the list of vertices */
+		/// \todo Throw exception if the parent module does not exist in the list of vertices
 	}
 
 	if (this->vertices.find(child_name) == this->vertices.end()) {
 		LOG_ERROR(logger, "Parent module `" << child_name << "' does not exist in the list of vertices.");
-		/** \todo Throw exception if the child module does not exist in the list of vertices */
+		/// \todo Throw exception if the child module does not exist in the list of vertices 
 	}
 
 	LOG_DEBUG(logger, "Removing edge from parent module `" << parent_name << "' to child module `" << child_name << "'.");
