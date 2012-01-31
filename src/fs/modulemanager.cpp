@@ -6,11 +6,6 @@ namespace firestarter { namespace ModuleManager {
 
 using namespace firestarter::ModuleManager;
 
-void ModuleInfo::setHandle(const lt_dlhandle & module_handle) {
-	this->handle = reinterpret_cast<lt_dlhandle *>(malloc(sizeof(handle)));
-	memcpy(this->handle, &handle, sizeof(handle));
-}
-
 ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException):
 	configuration(config) {
 
@@ -83,9 +78,7 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 
 ModuleManager::~ModuleManager() {
 	foreach(ModuleMap::value_type module, this->modules) {
-		lt_dlhandle * moduleHandle = module.second->getHandle();
-		LOG_DEBUG(logger, "lt_dlhandle for `" << module.first << "' = " << moduleHandle);
-		if (moduleHandle != NULL && lt_dlclose(*moduleHandle) != 0) {
+		if (lt_dlclose(module.second->getHandle()) != 0) {
 			LOG_ERROR(logger, "An error occured while closing module `" << module.first << "': " << lt_dlerror());
 		}
 	}
@@ -193,45 +186,45 @@ void ModuleManager::loadModule(const std::string & module_name) throw(firestarte
 	string module_name_lowercase = module_name;
 	boost::algorithm::to_lower(module_name_lowercase);
 
-	LOG_DEBUG(logger, "Opening module's shared library");
-	lt_dlhandle module_handle = lt_dlopenadvise(module_name_lowercase.c_str(), this->advise);
+	ModuleInfo * module = this->modules[module_name];
 
-	if (module_handle == NULL) {
+	LOG_DEBUG(logger, "Opening module's shared library");
+	module->setHandle(lt_dlopenadvise(module_name_lowercase.c_str(), this->advise));
+
+	if (module->getHandle() == NULL) {
 		LOG_ERROR(logger, "An error occured while opening `" << module_name_lowercase << "'.");
 		LOG_ERROR(logger, lt_dlerror())
 		throw firestarter::exception::ModuleNotFoundException();
 	}
 	
 	LOG_DEBUG(logger, "Retrieving module's factory symbol");
-	create_module * factory = reinterpret_cast<create_module *>(lt_dlsym(module_handle, ("create" + module_name).c_str()));
+	create_module * factory = reinterpret_cast<create_module *>(lt_dlsym(module->getHandle(), ("create" + module_name).c_str()));
 	if (factory == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `create" << module_name << "'.");
 		/** \todo Throw exception if unable to load symbol */
 	}
 
 	LOG_DEBUG(logger, "Retrieving module's destructor symbol");
-	destroy_module * destructor = reinterpret_cast<destroy_module *>(lt_dlsym(module_handle, ("destroy" + module_name).c_str()));
+	destroy_module * destructor = reinterpret_cast<destroy_module *>(lt_dlsym(module->getHandle(), ("destroy" + module_name).c_str()));
 	if (destructor == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `destroy" << module_name << "'.");
 		/** \todo Throw exception if unable to load symbol */
 	}
 
 	LOG_DEBUG(logger, "Retrieving module's version symbol");
-	module_version * version = reinterpret_cast<module_version *>(lt_dlsym(module_handle, ("version" + module_name).c_str()));
+	module_version * version = reinterpret_cast<module_version *>(lt_dlsym(module->getHandle(), ("version" + module_name).c_str()));
 	if (version == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `version" << module_name << "'.");
 		/** \todo Throw exception if unable to load symbol */
 	}
 
-	LOG_DEBUG(logger, "Storing module's information into modules (" << this->modules[module_name] << ")");
+	LOG_DEBUG(logger, "Storing module's information into modules (" << module << ")");
 	LOG_DEBUG(logger, "Storing module version from " << version);
-	this->modules[module_name]->setVersion(version != NULL ? version() : 1);
-	LOG_DEBUG(logger, "Storing module's handle " << module_handle);
-	this->modules[module_name]->setHandle(module_handle);
+	module->setVersion(version != NULL ? version() : 1);
 	LOG_DEBUG(logger, "Storing module's factory " << factory);
-	this->modules[module_name]->setFactory(factory);
+	module->setFactory(factory);
 	LOG_DEBUG(logger, "Storing module's destructor " << destructor);
-	this->modules[module_name]->setRecyclingFacility(destructor);
+	module->setRecyclingFacility(destructor);
 
 }
 

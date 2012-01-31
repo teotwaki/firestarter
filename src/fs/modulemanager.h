@@ -27,20 +27,20 @@ class ModuleInfo {
 	private:
 	libconfig::Config * configuration;
 	int version;
-	lt_dlhandle * handle;
+	lt_dlhandle handle;
 	create_module * factory;
 	destroy_module * recycling_facility;
 
 	public:
 	inline libconfig::Config * getConfiguration() { return this->configuration; };
 	inline int getVersion() { return this->version; };
-	inline lt_dlhandle * getHandle() { return this->handle != NULL ? this->handle : NULL; };
+	inline lt_dlhandle getHandle() { return this->handle != NULL ? this->handle : NULL; };
 	inline Module * instantiate() { return this->factory != NULL ? this->factory() : NULL; };
 	inline void destroy(Module * module) { if (this->recycling_facility != NULL) this->recycling_facility(module); };
 
-	ModuleInfo() : handle(NULL), factory(NULL), recycling_facility(NULL) { };
+	ModuleInfo() : factory(NULL), recycling_facility(NULL) { };
 	inline void setConfiguration(libconfig::Config * configuration) { this->configuration = configuration; };
-	void setHandle(const lt_dlhandle & module_handle);
+	inline void setHandle(const lt_dlhandle handle) { this->handle = handle; };
 	inline void setVersion(int version) { this->version = version; };
 	inline void setFactory(create_module * factory) { this->factory = factory; };
 	inline void setRecyclingFacility(destroy_module * recycling_facility) { this->recycling_facility = recycling_facility; };
