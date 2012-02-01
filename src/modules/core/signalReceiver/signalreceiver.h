@@ -14,7 +14,7 @@ namespace firestarter {
 		namespace core {
 			namespace SignalReceiver {
 
-	class SignalReceiver : Module {
+	class SignalReceiver : public Module {
 		private:
 
 		public:

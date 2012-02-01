@@ -13,7 +13,7 @@ namespace firestarter {
 		namespace core {
 			namespace SignalEmitter {
 
-	class SignalEmitter : Module {
+	class SignalEmitter : public Module {
 	
 		public:
 		SignalEmitter();

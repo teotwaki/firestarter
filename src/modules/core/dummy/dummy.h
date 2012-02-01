@@ -10,7 +10,7 @@ namespace firestarter {
 		namespace core {
 			namespace Dummy {
 
-	class Dummy : Module {
+	class Dummy : public Module {
 		private:
 	
 		public:
