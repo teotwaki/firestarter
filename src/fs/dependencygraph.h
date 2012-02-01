@@ -7,6 +7,8 @@
 
 #include "helper.h"
 
+#include "simplecache.h"
+
 #include <list>
 #include <exception>
 #include <boost/tuple/tuple.hpp>
@@ -41,19 +43,12 @@ typedef boost::unordered_map<std::string, Graph::vertex_descriptor> VertexMap;
   *
   * \see ModuleManager
   */
-class DependencyGraph {
+class DependencyGraph : private SimpleCache<std::list<std::string> > {
 
 	private:
 	Graph graph;
 	VertexMap vertices;
 	ModuleDependencyContainer dependencies;
-	std::list<std::string> * modules;
-
-	void invalidateCache();
-	void initCache();
-	inline std::list<std::string> * getCache() { return this->modules; };
-	inline void setCache(std::list<std::string> * cache) { this->modules = cache; };
-	inline bool cacheIsValid() { return (this->getCache() != NULL) ? true : false; };
 
 	public:
 	DependencyGraph();

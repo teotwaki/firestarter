@@ -12,8 +12,7 @@ using namespace firestarter::ModuleManager::DependencyGraph;
   *
   * This constructor initialises the object so that it can be used immediately.
   */
-DependencyGraph::DependencyGraph() {
-	this->setCache(NULL);
+DependencyGraph::DependencyGraph() : SimpleCache<std::list<std::string> >(NULL) {
 	this->vertices["root"] = boost::add_vertex(std::string("root"), this->graph);
 }
 
@@ -145,28 +144,6 @@ std::list<std::string> * DependencyGraph::getModules() {
 	}
 
 	LOG_DEBUG(logger, "Returning cache.");
-	return modules;
-}
-
-/** If it exists, the cache is invalidated
-  */
-void DependencyGraph::invalidateCache() {
-	if (this->cacheIsValid()) {
-		LOG_DEBUG(logger, "Invalidating current DependencyGraph cache (" << this->getCache() << ").");
-		delete this->getCache();
-		this->setCache(NULL);
-	}
-}
-
-/** Instantiate a new cache
-  *
-  * If a cache already exists, it is invalidated first.
-  *
-  * \see invalidateCache
-  */
-void DependencyGraph::initCache() {
-	this->invalidateCache();
-	LOG_DEBUG(logger, "Initialising new DependencyGraph cache (" << this->getCache() << ").");
-	this->setCache(new std::list<std::string>);
+	return this->getCache();
 }
 
