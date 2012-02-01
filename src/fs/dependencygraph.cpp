@@ -12,7 +12,7 @@ using namespace firestarter::ModuleManager::DependencyGraph;
   *
   * This constructor initialises the object so that it can be used immediately.
   */
-DependencyGraph::DependencyGraph() : SimpleCache<std::list<std::string> >(NULL) {
+DependencyGraph::DependencyGraph() : SimpleCache<std::list<std::string> >() {
 	this->vertices["root"] = boost::add_vertex(std::string("root"), this->graph);
 }
 
