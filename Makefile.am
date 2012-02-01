@@ -67,7 +67,8 @@ signalemitter_la_LDFLAGS = -module -avoid-version -export-dynamic
 signalemitter_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
-                               src/fs/modulemanager.cpp src/fs/modulemanager.h
+                              src/fs/modulemanager.cpp src/fs/modulemanager.h \
+                              src/fs/dependencygraph.cpp src/fs/dependencygraph.h
 modulemanager_tests_LDADD = $(TESTS_LIBS)
 modulemanager_tests_CPPFLAGS = $(TESTS_CPPFLAGS)
 

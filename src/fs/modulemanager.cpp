@@ -237,8 +237,6 @@ void ModuleManager::loadModules() {
 		this->loadModule(module_name);
 	}
 
-	delete module_list;
-
 }
 
 ModuleInfo * ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
