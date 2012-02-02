@@ -21,28 +21,60 @@
 namespace firestarter {
 	namespace ModuleManager {
 
+/** \brief Encapsulates module information
+  *
+  * The ModuleInfo class encapsulates all the different aspects of a module (as seen from the ModuleManager class' perspective)
+  * in order to provide a unified way to access the data (for example, by abstracting ugly things like function pointers in instantiate(), etc.). 
+  * It also provides a very basic inspection ability implemented by isValid().
+  *
+  * This class is mainly used by ModuleManager, which is why it shares the header file.
+  *
+  * \see ModuleManager 
+  */
 class ModuleInfo {
 
 	private:
+	/// \brief Pointer to the module's configuration object
 	libconfig::Config * configuration;
+	/// \brief Module version (not really used yet)
 	int version;
+	/// \brief Handle to the shared library object file
 	lt_dlhandle handle;
+	/// \brief Function pointer to the factory function
 	create_module * factory;
+	/// \brief Function pointer to the descructor function
 	destroy_module * recycling_facility;
 
 	public:
+	/// \brief Constructs the class to a ready-to-use state
+	ModuleInfo() : configuration(NULL), version(0), handle(NULL), factory(NULL), recycling_facility(NULL) { };
+	/// \brief Returns a pointer to the configuration object
 	inline libconfig::Config * getConfiguration() { return this->configuration; };
 	inline int getVersion() { return this->version; };
-	inline lt_dlhandle getHandle() { return this->handle != NULL ? this->handle : NULL; };
+	inline lt_dlhandle getHandle() { return this->handle; };
+	/** \brief Instantiates the module
+	  *
+	  * This method returns an instance of the module as returned by the create__MODULENAME__ function in the shared library.
+	  * It is implemented by simply calling the function pointer. No error checking is made.
+	  *
+	  * This pointer needs to be passed back to destroy() for proper deletion, instead of calling delete on it.
+	  */
 	inline Module * instantiate() { return this->factory != NULL ? this->factory() : NULL; };
+	/** \brief Call the destructor for the module
+	  *
+	  * This method provides a way to delete the module. It is not possible to directly call the destructor or delete,
+	  * as this would call the Module baseclass destructor, rather than the actual instantiated destructor (and spawn memory leaks).
+	  *
+	  * \warning Please take care to correctly destroy instantiated modules.
+	  */
 	inline void destroy(Module * module) { if (this->recycling_facility != NULL) this->recycling_facility(module); };
 
-	ModuleInfo() : factory(NULL), recycling_facility(NULL) { };
 	inline void setConfiguration(libconfig::Config * configuration) { this->configuration = configuration; };
 	inline void setHandle(const lt_dlhandle handle) { this->handle = handle; };
 	inline void setVersion(int version) { this->version = version; };
 	inline void setFactory(create_module * factory) { this->factory = factory; };
 	inline void setRecyclingFacility(destroy_module * recycling_facility) { this->recycling_facility = recycling_facility; };
+	inline bool isValid() { if (this->configuration != NULL && this->handle != NULL && this->factory != NULL && this->recycling_facility != NULL) return true; return false };
 	
 };
 
