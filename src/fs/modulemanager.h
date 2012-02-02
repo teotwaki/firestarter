@@ -79,7 +79,7 @@ class ModuleInfo {
 	  * The isValid() method provides a very basic check to see if all the components are correctly initialised. It does not do any complex
 	  * analysis, and can for example, return true even though some of the data structures point to discarded or invalid memory.
 	  */
-	inline bool isValid() { if (this->configuration != NULL && this->handle != NULL && this->factory != NULL && this->recycling_facility != NULL) return true; return false };
+	inline bool isValid() { if (this->configuration != NULL && this->handle != NULL && this->factory != NULL && this->recycling_facility != NULL) return true; return false; };
 	
 };
 
