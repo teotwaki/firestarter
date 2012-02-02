@@ -12,8 +12,6 @@ namespace firestarter {
 		namespace core {
 			namespace WebServer {
 
-
-
 	class WebServer : public Module {
 		private:
 		Wt::WServer server;
