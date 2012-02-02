@@ -69,11 +69,16 @@ class ModuleInfo {
 	  */
 	inline void destroy(Module * module) { if (this->recycling_facility != NULL) this->recycling_facility(module); };
 
-	inline void setConfiguration(libconfig::Config * configuration) { this->configuration = configuration; };
-	inline void setHandle(const lt_dlhandle handle) { this->handle = handle; };
-	inline void setVersion(int version) { this->version = version; };
-	inline void setFactory(create_module * factory) { this->factory = factory; };
-	inline void setRecyclingFacility(destroy_module * recycling_facility) { this->recycling_facility = recycling_facility; };
+	inline void setConfiguration(/** [in] */ libconfig::Config * configuration) { this->configuration = configuration; };
+	inline void setHandle(/** [in] */ const lt_dlhandle handle) { this->handle = handle; };
+	inline void setVersion(/** [in] */ int version) { this->version = version; };
+	inline void setFactory(/** [in] */ create_module * factory) { this->factory = factory; };
+	inline void setRecyclingFacility(/** [in] */ destroy_module * recycling_facility) { this->recycling_facility = recycling_facility; };
+	/** \brief Check if the module seems valid
+	  *
+	  * The isValid() method provides a very basic check to see if all the components are correctly initialised. It does not do any complex
+	  * analysis, and can for example, return true even though some of the data structures point to discarded or invalid memory.
+	  */
 	inline bool isValid() { if (this->configuration != NULL && this->handle != NULL && this->factory != NULL && this->recycling_facility != NULL) return true; return false };
 	
 };
