@@ -12,10 +12,12 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 # Checks for header files
-AC_CHECK_HEADERS([stdlib.h ltdl.h])
+AC_CHECK_HEADERS([stdlib.h ltdl.h Wt/WApplication Wt/WServer])
 
 # Checks for library functions.
 AC_SEARCH_LIBS([lt_dlinit], [ltdl])
+AC_SEARCH_LIBS([Wt::WRun], [lwthttp])
+AC_SEARCH_LIBS([Wt::WApplication], [lwt])
 
 # Check if the boost libraries are available
 BOOST_REQUIRE([1.42])

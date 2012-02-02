@@ -15,9 +15,7 @@ namespace firestarter {
 	
 		public:
 		Dummy();
-		void beforeFilter();
 		void setup();
-		void afterFilter();
 	};
 	
 	extern "C" Dummy * createDummy() {

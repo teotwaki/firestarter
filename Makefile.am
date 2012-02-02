@@ -21,7 +21,7 @@ TESTS = modulemanager_tests
 check_PROGRAMS = $(TESTS)
 
 ## Define the different module libraries that will be compiled and installed
-pkglib_LTLIBRARIES = dummy.la signalemitter.la signalreceiver.la
+pkglib_LTLIBRARIES = dummy.la webserver.la
 
 ## Define the list of source files for the "firestarter" target. The file extension
 ## .cpp is recognized by Automake, and causes it to produce rules which invoke
@@ -38,8 +38,7 @@ firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
 ## passed to the linker in addition to the other linker flags.
 firestarter_LDADD = $(DEPS_LIBS) \
                     -dlopen dummy.la \
-                    -dlopen signalemitter.la \
-                    -dlopen signalreceiver.la
+                    -dlopen webserver.la
 
 ## Set the libtool flags
 firestarter_LDFLAGS = -export-dynamic
@@ -54,17 +53,11 @@ dummy_la_SOURCES = src/modules/core/dummy/dummy.cpp \
 
 dummy_la_LDFLAGS = -module -avoid-version -export-dynamic
 
-signalreceiver_la_SOURCES = src/modules/core/signalReceiver/signalreceiver.cpp \
-                            src/modules/core/signalReceiver/signalreceiver.h
+webserver_la_SOURCES = src/modules/core/webServer/webserver.cpp \
+                       src/modules/core/webServer/webserver.h
 
-signalreceiver_la_LDFLAGS = -module -avoid-version -export-dynamic
-signalreceiver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
-
-signalemitter_la_SOURCES = src/modules/core/signalEmitter/signalemitter.cpp \
-                           src/modules/core/signalEmitter/signalemitter.h
-
-signalemitter_la_LDFLAGS = -module -avoid-version -export-dynamic
-signalemitter_la_CPPFLAGS = $(MODULES_CPPFLAGS)
+webserver_la_LDFLAGS = -module -avoid-version -export-dynamic
+webserver_la_CPPFLAGS = $(MODULES_CPPFLAGS) -lwt -lwthttp
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                               src/fs/modulemanager.cpp src/fs/modulemanager.h \
