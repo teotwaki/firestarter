@@ -71,7 +71,7 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 
 	this->lookupDependencies(this->configuration);
 
-	this->dependencies.resolve();
+	this->graph.resolve();
 
 	this->loadModules();
 }
@@ -120,7 +120,7 @@ void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(f
 	for (int i = 0; i < module_dependencies.getLength(); i++) {
 		string module_name = module_dependencies[i];
 
-		this->dependencies.addDependency(module_name, parent_name);
+		this->graph.addDependency(module_name, parent_name);
 
 		if (this->modules.find(module_name) == this->modules.end()) {
 
@@ -231,7 +231,7 @@ void ModuleManager::loadModule(const std::string & module_name) throw(firestarte
 void ModuleManager::loadModules() {
 
 	LOG_INFO(logger, "Attempting to open all modules.");
-	std::list<std::string> * module_list = this->dependencies.getModules();
+	std::list<std::string> * module_list = this->graph.getModules();
 
 	foreach(std::string module_name, *module_list) {
 		this->loadModule(module_name);

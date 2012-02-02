@@ -7,6 +7,7 @@
 #endif
 
 #include "helper.h"
+#include "simplecache.h"
 #include "dependencygraph.h"
 
 #include <libconfig.h++>
@@ -83,21 +84,39 @@ class ModuleInfo {
 	
 };
 
+/// ModuleInfo hashmap with the module's name as key
 typedef boost::unordered_map<std::string, ModuleInfo *> ModuleMap;
 /*             ^- hash map   |            |           ^- Type name
                              |            ^- module info
                              ^- key (module name)
 */
 
+/** \brief Manages the module's loading priority
+  *
+  * The ModuleManager class abstracts the complexities of having to manually open the shared libraries, configuration files
+  * and manually track the modules' respective dependencies. The only thing it needs is a reference to the application's configuration
+  * file. Its constructor will do most of the heavy lifting (read the config, resolve the dependencies, load the modules, etc), 
+  * even though convenience methods are available should modules be loaded after the initial constructor run.
+  *
+  * This class relies on DependencyGraph and ModuleInfo.
+  *
+  * \see DependencyGraph
+  * \see ModuleInfo
+  */
 class ModuleManager {
 
 	private:
+	/// \brief Contains the currently loaded modules
 	ModuleMap modules;
+	/// \brief Reference to the application configuration
 	const libconfig::Config & configuration;
 	std::string module_path;
+	/// \brief libltdl status flag
 	int ltdl;
+	/// \brief advise object passed to ltdl during module loading
 	lt_dladvise advise;
-	DependencyGraph::DependencyGraph dependencies;
+	/// \brief Dependency graph used for dependency resolution.
+	DependencyGraph::DependencyGraph graph;
 
 	public:
 	ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException);
