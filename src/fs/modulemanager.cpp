@@ -102,16 +102,16 @@ void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(f
 	using namespace libconfig;
 	using namespace std;
 
-	if (not config.exists("application.modules") && not config.exists("module.components")) {
-		LOG_ERROR(logger, "Configuration file does not contain application.modules nor module.components");
-		throw firestarter::exception::InvalidConfigurationException("Configuration file does not contain application.modules nor module.components.");
+	if (not config.exists("application.modules") && not config.exists("module.dependencies")) {
+		LOG_ERROR(logger, "Configuration file does not contain application.modules nor module.dependencies");
+		throw firestarter::exception::InvalidConfigurationException("Configuration file does not contain application.modules nor module.dependencies.");
 	}
 
 	string configuration_key = "application.modules";
 	string parent_name = "root";
 
-	if (config.exists("module.components")) {
-		configuration_key = "module.components";
+	if (config.exists("module.dependencies")) {
+		configuration_key = "module.dependencies";
 		parent_name = (const char *) config.lookup("module.name");
 	}
 
@@ -134,7 +134,7 @@ void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(f
 			this->modules[module_name] = new ModuleInfo();
 			this->modules[module_name]->setConfiguration(module_config);
 
-			if (module_config->exists("module.components"))
+			if (module_config->exists("module.dependencies"))
 				this->lookupDependencies(*module_config);
 
 
