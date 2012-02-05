@@ -2,6 +2,7 @@
 AC_PREREQ([2.64])
 AC_INIT([Firestarter], [0.1], [slauwers@gmail.com], [firestarter], [http://firestarter.example.com])
 AM_INIT_AUTOMAKE([1.11 no-define subdir-objects color-tests parallel-tests])
+AM_SILENT_RULES([yes])
 
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
@@ -23,7 +24,7 @@ BOOST_REQUIRE([1.42])
 # BOOST_ARRAY
 BOOST_TEST
 
-PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2])
+PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 protobuf >= 2.4.0])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_MACRO_DIR([m4])
