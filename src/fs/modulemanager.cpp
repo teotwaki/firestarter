@@ -193,7 +193,20 @@ void ModuleManager::loadModule(const std::string & module_name) throw(firestarte
 
 	if (module->getHandle() == NULL) {
 		LOG_ERROR(logger, "An error occured while opening `" << module_name_lowercase << "'.");
-		LOG_ERROR(logger, lt_dlerror())
+#ifdef LTDL_DEBUG
+		string error;
+		if ((error = lt_dlerror()) != "file not found") {
+			LOG_ERROR(logger, error);
+		}
+
+		else {
+			LOG_DEBUG(logger, "lt_dlerror() is useless. We need to trigger another error with dlerror().");
+			if (dlopen((this->module_path + '/' + module_name_lowercase + ".so").c_str(), RTLD_NOW) == NULL)
+				LOG_ERROR(logger, dlerror());
+		}
+#else
+		LOG_ERROR(logger, lt_dlerror());
+#endif
 		throw firestarter::exception::ModuleNotFoundException();
 	}
 	

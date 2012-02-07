@@ -16,6 +16,11 @@
 #include <boost/algorithm/string.hpp>
 
 #include <ltdl.h>
+#ifdef LTDL_DEBUG
+	// We need dlopen() and dlerror() in order to get around the lt_dlopen bug that prevents us
+	// from knowing why a module didn't load.
+	#include <dlfcn.h>
+#endif
 
 namespace firestarter {
 	namespace ModuleManager {
