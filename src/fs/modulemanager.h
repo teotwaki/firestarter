@@ -12,9 +12,7 @@
 
 #include <libconfig.h++>
 #include <list>
-#include <exception>
 #include <boost/tr1/unordered_map.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <ltdl.h>
@@ -81,6 +79,21 @@ class ModuleInfo {
 	  * analysis, and can for example, return true even though some of the data structures point to discarded or invalid memory.
 	  */
 	inline bool isValid() { if (this->configuration != NULL && this->handle != NULL && this->factory != NULL && this->recycling_facility != NULL) return true; return false; };
+	/** \brief Check if the module needs to be auto-started
+	  *
+	  * \return The value of the module.autostart configuration key or true if it can't be found
+	  */
+	inline bool shouldAutostart() { return this->getConfiguration()->exists("module.autostart") ? this->getConfiguration()->lookup("module.autostart") : true; };
+	/** \brief Check if the module wants to run in its own thread
+	  *
+	  * \return The value of the module.threaded configuration key or false if it can't be found
+	  */
+	inline bool shouldRunThreaded() { return this->getConfiguration()->exists("module.threaded") ? static_cast<bool>(this->getConfiguration()->lookup("module.threaded")) : false; };
+	/** \brief Check if the module wants to run in its own process
+	  *
+	  * \return The value of the module.standalone configuration key or false if it can't be found
+	  */
+	inline bool shouldRunStandAlone() { return this->getConfiguration()->exists("module.standalone") ? static_cast<bool>(this->getConfiguration()->lookup("module.standalone")) : false; };
 	
 };
 
@@ -125,8 +138,8 @@ class ModuleManager {
 	void loadModules();
 	void lookupDependencies(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException);
 	libconfig::Config * loadModuleConfiguration(const std::string & module_name);
-	ModuleInfo * getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
-	inline ModuleMap & getModuleList() { return this->modules; }
+	ModuleInfo * getModuleInfo(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
+	inline std::list<std::string> * getModuleList() { return this->graph.getModules(); }
 	inline bool is_initialised() { return not (this->ltdl != 0); }
 	inline std::string getModulePath() { return this->module_path; }
 

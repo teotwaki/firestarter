@@ -186,7 +186,7 @@ void ModuleManager::loadModule(const std::string & module_name) throw(firestarte
 	string module_name_lowercase = module_name;
 	boost::algorithm::to_lower(module_name_lowercase);
 
-	ModuleInfo * module = this->modules[module_name];
+	ModuleInfo * module = this->getModuleInfo(module_name);
 
 	LOG_DEBUG(logger, "Opening module's shared library");
 	module->setHandle(lt_dlopenadvise(module_name_lowercase.c_str(), this->advise));
@@ -229,17 +229,15 @@ void ModuleManager::loadModule(const std::string & module_name) throw(firestarte
 }
 
 void ModuleManager::loadModules() {
-
 	LOG_INFO(logger, "Attempting to open all modules.");
 	std::list<std::string> * module_list = this->graph.getModules();
 
 	foreach(std::string module_name, *module_list) {
 		this->loadModule(module_name);
 	}
-
 }
 
-ModuleInfo * ModuleManager::getModule(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
+ModuleInfo * ModuleManager::getModuleInfo(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
 	/// \todo Implement try loading module before throwing
 	try {
 		return this->modules.at(name);
@@ -250,3 +248,4 @@ ModuleInfo * ModuleManager::getModule(const std::string & name) throw(firestarte
 		throw firestarter::exception::ModuleNotFoundException();
 	}
 }
+
