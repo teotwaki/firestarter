@@ -26,7 +26,7 @@ BOOST_REQUIRE([1.42])
 # BOOST_ARRAY
 BOOST_TEST
 
-PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 protobuf >= 2.4.0])
+PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 protobuf >= 2.3.0])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_MACRO_DIR([m4])
