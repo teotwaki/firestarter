@@ -11,6 +11,7 @@ AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common
 MODULES_CPPFLAGS = $(AM_CPPFLAGS) -I src/modules
 TESTS_CPPFLAGS = $(AM_CPPFLAGS) -DIN_UNIT_TESTING
 TESTS_LIBS = $(DEPS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
+WITTY_LIBS = -lwt -lwthttp -lwtext
 
 ## Define an executable target "firestarter", which will be installed into the
 ## directory named by the predefined variable $(bindir).
@@ -64,7 +65,8 @@ webserver_la_SOURCES = src/modules/core/webServer/webserver.cpp \
                        src/modules/core/webServer/webserver.h
 
 webserver_la_LDFLAGS = -module -avoid-version -export-dynamic
-webserver_la_CPPFLAGS = $(MODULES_CPPFLAGS) -lwt -lwthttp
+webserver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
+webserver_la_LIBADD = $(WITTY_LIBS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                               src/fs/modulemanager.cpp src/fs/modulemanager.h \
