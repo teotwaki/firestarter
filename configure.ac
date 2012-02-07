@@ -1,6 +1,6 @@
 
 AC_PREREQ([2.64])
-AC_INIT([Firestarter], [0.1], [slauwers@gmail.com], [firestarter], [http://firestarter.example.com])
+AC_INIT([Firestarter], [0.1], [sebastian.lauwers@gmail.com], [firestarter], [http://firestarter.example.com])
 AM_INIT_AUTOMAKE([1.11 no-define subdir-objects color-tests parallel-tests])
 AM_SILENT_RULES([yes])
 
