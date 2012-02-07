@@ -42,3 +42,7 @@ stamp-h1
 *.l[ao]
 .libs
 .dirstamp
+
+# Ignore protobuf files
+*.pb.h
+*.pb.cc

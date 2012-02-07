@@ -1,0 +1,30 @@
+
+package firestarter.protocol.module;
+
+enum RunLevel {
+	INIT = 1;
+	RUNNING = 2;
+	RESET = 3;
+	SHUTDOWN = 4;
+}
+
+enum RunLevelResult {
+	QUEUED = 1;
+	SUCCESS = 2;
+	FAILED = 3;
+}
+
+message RunlevelChangeRequest {
+	required RunLevel runlevel = 1 [default = INIT];
+	required bool immediate = 2 [default = false];
+}
+
+message RunlevelChangeResponse {
+	required RunLevel runlevel = 1 [default = INIT];
+	required RunLevelResult result = 2 [default = SUCCESS];
+}
+
+message RunlevelInformation {
+	required RunLevel runlevel = 1 [default = RUNNING];
+	repeated RunLevel previous = 2;
+}
