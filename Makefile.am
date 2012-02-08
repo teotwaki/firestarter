@@ -57,12 +57,15 @@ firestarter_LDFLAGS = -export-dynamic
 ## header files (.h) do not result in object files by themselves, but will be
 ## included in distribution archives of the project
 dummy_la_SOURCES = src/modules/core/dummy/dummy.cpp \
-                   src/modules/core/dummy/dummy.h
-
+                   src/modules/core/dummy/dummy.h \
+                   src/common/module.h src/common/module.cpp \
+                   protobuf/module.pb.h protobuf/module.pb.cc src/common/zmqhelper.h src/common/zmq.hpp
 dummy_la_LDFLAGS = -module -avoid-version -export-dynamic
+dummy_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 
 webserver_la_SOURCES = src/modules/core/webServer/webserver.cpp \
                        src/modules/core/webServer/webserver.h \
+                       src/common/module.h src/common/module.cpp \
                        protobuf/module.pb.h protobuf/module.pb.cc src/common/zmqhelper.h src/common/zmq.hpp
 webserver_la_LDFLAGS = -module -avoid-version -export-dynamic
 webserver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
