@@ -47,8 +47,12 @@ BOOST_REQUIRE([1.42])
 # you can check for specific parts of the boost library with:
 # BOOST_ARRAY
 BOOST_TEST
+BOOST_FOREACH
+BOOST_TUPLE
+BOOST_GRAPH
+BOOST_STRING_ALGO
 
-PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 protobuf >= 2.3.0 libzmq >= 3.0])
+PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_MACRO_DIR([m4])
