@@ -22,19 +22,4 @@
 
 using namespace std;
 
-typedef boost::tuple<string, int, void *, create_module *, destroy_module *> ModuleTuple;
-typedef boost::unordered_map<string, ModuleTuple> ModuleMap;
-//typedef boost::unordered_map<string, boost::tuple<string, int, void *, create_module *, destroy_module *> > ModuleMap;
-/*                             ^- name              ^- path |    |       ^- factory       ^- delete           ^- Type name
-                                                            |    ^- file handle
-                                                            ^-version
-
-	See src/common/module.h for more information concerning create_module and destroy_module.
-*/
-
-typedef boost::unordered_map<string, ModuleMap> ModuleDependencyMap;
-/*                           ^- name |          ^- Type name
-                                     ^- List of children modules
-*/
-
 #endif
