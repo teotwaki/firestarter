@@ -25,6 +25,8 @@
 namespace firestarter {
 	namespace ModuleManager {
 
+using namespace firestarter::module;
+
 /** \brief Encapsulates module information
   *
   * The ModuleInfo class encapsulates all the different aspects of a module (as seen from the ModuleManager class' perspective)

@@ -9,6 +9,12 @@
 #include "zmqhelper.h"
 #include "protobuf/module.pb.h"
 
+DECLARE_EXTERN_LOG(logger);
+
+namespace firestarter {
+	namespace module {
+
+
 class Module {
 	protected:
 
@@ -31,11 +37,17 @@ class RunnableModule : public Module {
 	public:
 	RunnableModule();
 	void setContext(zmq::context_t * context) { this->context = context; };
+	virtual void shutdown() { LOG_WARN(logger, "shutdown() not implemented in RunnableModule (this = " << this << ")!"); };
+	virtual void restart() { LOG_WARN(logger, "restart() not implemented in RunnableModule (this = " << this << ")!"); };
 	
 };
 
 typedef Module * create_module();
 typedef void destroy_module(Module *);
 typedef int module_version();
+
+/* Close namespaces */
+	}
+}
 
 #endif
