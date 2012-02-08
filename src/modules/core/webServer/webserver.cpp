@@ -6,7 +6,7 @@ namespace firestarter { namespace module { namespace core { namespace WebServer 
 
 using namespace firestarter::module::core::WebServer;
 
-WebServer::WebServer() : server("firestarter") {
+WebServer::WebServer() : RunnableModule(), server("firestarter") {
 	LOG_INFO(logger, "WebServer being created.");
 }
 

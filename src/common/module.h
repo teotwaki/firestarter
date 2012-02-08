@@ -28,14 +28,11 @@ class RunnableModule : public Module {
 	zmq::context_t * context;
 	zmq::socket_t * manager;
 
-	inline void createManagementSocket() { 
-		this->manager = new zmq::socket_t(*(this->context), ZMQ_REP); 
-		this->manager->connect(MANAGER_SOCKET_URI); 
-	};
+	RunnableModule() : running(false), context(NULL), manager(NULL) { };
+	void createManagementSocket();
 	virtual void send(google::protobuf::Message & pb_message, zmq::socket_t * socket);
 
 	public:
-	RunnableModule();
 	void setContext(zmq::context_t * context) { this->context = context; };
 	virtual void shutdown() { LOG_WARN(logger, "shutdown() not implemented in RunnableModule (this = " << this << ")!"); };
 	virtual void restart() { LOG_WARN(logger, "restart() not implemented in RunnableModule (this = " << this << ")!"); };
