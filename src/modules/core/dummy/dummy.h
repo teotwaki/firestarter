@@ -14,16 +14,16 @@ namespace firestarter {
 		private:
 	
 		public:
-		Dummy();
+		Dummy(zmq::context_t * context);
 		void setup();
 	};
 	
-	extern "C" Dummy * createDummy() {
-		return new Dummy;
+	extern "C" Dummy * createDummy(zmq::context_t * context) {
+		return new Dummy(context);
 	}
 	
 	extern "C" void destroyDummy(Module * dummy) {
-		delete dummy;
+		delete reinterpret_cast<Dummy *>(dummy);
 	}
 	
 	extern "C" int versionDummy() {

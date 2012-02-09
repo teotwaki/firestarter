@@ -6,7 +6,7 @@ namespace firestarter { namespace module { namespace core { namespace Dummy {
 
 using namespace firestarter::module::core::Dummy;
 
-Dummy::Dummy() {
+Dummy::Dummy(zmq::context_t * context) : Module(context) {
 	set_logfile_name("Dummy");
 	LOG_DEBUG(logger, "Dummy being created.");
 }

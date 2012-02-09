@@ -17,29 +17,32 @@ namespace firestarter {
 
 class Module {
 	protected:
+	zmq::context_t * context;
+
+	Module(zmq::context_t * context) : context(context) { };
 
 	public:
 	virtual void setup() = 0; /**< pure virtual */
+	void setContext(zmq::context_t * context) { this->context = context; };
 };
 
 class RunnableModule : public Module {
 	protected:
 	bool running;
-	zmq::context_t * context;
 	zmq::socket_t * manager;
 
-	RunnableModule() : running(false), context(NULL), manager(NULL) { };
+	RunnableModule(zmq::context_t * context) : Module(context), running(false), manager(NULL) { };
 	void createManagementSocket();
 	virtual void send(google::protobuf::Message & pb_message, zmq::socket_t * socket);
 
 	public:
-	void setContext(zmq::context_t * context) { this->context = context; };
+	virtual void run() = 0; /**< pure virtual */
 	virtual void shutdown() { LOG_WARN(logger, "shutdown() not implemented in RunnableModule (this = " << this << ")!"); };
 	virtual void restart() { LOG_WARN(logger, "restart() not implemented in RunnableModule (this = " << this << ")!"); };
 	
 };
 
-typedef Module * create_module();
+typedef Module * create_module(zmq::context_t * context);
 typedef void destroy_module(Module *);
 typedef int module_version();
 

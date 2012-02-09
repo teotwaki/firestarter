@@ -6,8 +6,12 @@ namespace firestarter { namespace module { namespace core { namespace WebServer 
 
 using namespace firestarter::module::core::WebServer;
 
-WebServer::WebServer() : RunnableModule(), server("firestarter") {
+WebServer::WebServer(zmq::context_t * context) : RunnableModule(context), server("firestarter") {
 	LOG_INFO(logger, "WebServer being created.");
+}
+
+void WebServer::run() {
+	LOG_INFO(logger, "Running the WebServer's main function.");
 }
 
 void WebServer::setup() {

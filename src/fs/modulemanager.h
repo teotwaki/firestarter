@@ -9,6 +9,7 @@
 #include "helper.h"
 #include "simplecache.h"
 #include "dependencygraph.h"
+#include "zmqhelper.h"
 
 #include <libconfig.h++>
 #include <list>
@@ -50,10 +51,12 @@ class ModuleInfo {
 	create_module * factory;
 	/// \brief Function pointer to the descructor function
 	destroy_module * recycling_facility;
+	/// \brief The ZMQ Context to use when instantiating modules
+	zmq::context_t * context;
 
 	public:
 	/// \brief Constructs the class to a ready-to-use state
-	ModuleInfo() : configuration(NULL), version(0), handle(NULL), factory(NULL), recycling_facility(NULL) { };
+	ModuleInfo() : configuration(NULL), version(0), handle(NULL), factory(NULL), recycling_facility(NULL), context(NULL) { };
 	/// \brief Returns a pointer to the configuration object
 	inline libconfig::Config * getConfiguration() { return this->configuration; };
 	inline int getVersion() { return this->version; };
@@ -65,7 +68,12 @@ class ModuleInfo {
 	  *
 	  * This pointer needs to be passed back to destroy() for proper deletion, instead of calling delete on it.
 	  */
-	inline Module * instantiate() { return this->factory != NULL ? this->factory() : NULL; };
+	inline Module * instantiate() { return this->factory != NULL ? this->factory(this->context) : NULL; };
+	/** \brief Instantiates the module within a specific context
+	  *
+	  * Same as the regular instantiate() method, excepted that you can pass a specific ZMQ context instead.
+	  */
+	inline Module * instantiate(zmq::context_t * context) { return this->factory != NULL ? this->factory(context) : NULL; };
 	/** \brief Call the destructor for the module
 	  *
 	  * This method provides a way to delete the module. It is not possible to directly call the destructor or delete,
@@ -80,6 +88,7 @@ class ModuleInfo {
 	inline void setVersion(/** [in] */ int version) { this->version = version; };
 	inline void setFactory(/** [in] */ create_module * factory) { this->factory = factory; };
 	inline void setRecyclingFacility(/** [in] */ destroy_module * recycling_facility) { this->recycling_facility = recycling_facility; };
+	inline void setContext(/** [in] */ zmq::context_t * context) { this->context = context; };
 	/** \brief Check if the module seems valid
 	  *
 	  * The isValid() method provides a very basic check to see if all the components are correctly initialised. It does not do any complex
