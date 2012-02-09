@@ -59,9 +59,14 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 		}
 	}
 
-	if (not module_path.empty()) {
+	if (not this->module_path.empty()) {
 		LOG_INFO(logger, "Setting ltdl library search path to " << this->module_path);
 		lt_dlsetsearchpath(this->module_path.c_str());
+	}
+
+	else {
+		LOG_WARN(logger, "Module path configuration is empty.");
+		LOG_DEBUG(logger, "Module search path: " << lt_dlgetsearchpath());
 	}
 
 	LOG_DEBUG(logger, "Initialising ltdl advise.");
@@ -77,12 +82,17 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 }
 
 ModuleManager::~ModuleManager() {
+	LOG_INFO(logger, "Destructing ModuleManager object (" << this << ").");
+
+	LOG_DEBUG(logger, "Unloading modules.");
 	foreach(ModuleMap::value_type module, this->modules) {
+		LOG_DEBUG(logger, "Closing module `" << module.first <<"'.");
 		if (lt_dlclose(module.second->getHandle()) != 0) {
 			LOG_ERROR(logger, "An error occured while closing module `" << module.first << "': " << lt_dlerror());
 		}
 	}
 
+	LOG_DEBUG(logger, "Destroying advise object.");
 	lt_dladvise_destroy(&(this->advise));
 
 	if (ltdl == 0) {
@@ -95,6 +105,7 @@ ModuleManager::~ModuleManager() {
 		}
 	}
 
+	LOG_INFO(logger, "ModuleManager correctly shut down. The end is nigh.");
 }
 
 void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException) {
