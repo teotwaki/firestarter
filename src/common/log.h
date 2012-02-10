@@ -13,6 +13,13 @@
 
 	#define DECLARE_EXTERN_LOG(var) \
 		extern log4cxx::LoggerPtr var
+
+	#define DECLARE_MODULE_LOG(name) \
+		namespace firestarter { namespace module { \
+			DECLARE_LOG(logger, "module.core." #name); \
+			namespace core { namespace name { \
+				DECLARE_LOG(logger, "module.core." #name); \
+		} } } }
 	
 	#define LOG_TRACE(logger, msg)	LOG4CXX_TRACE(logger, msg)
 	#define LOG_T(msg)				LOG4CXX_TRACE(logger, msg)
