@@ -10,6 +10,7 @@
 #include "simplecache.h"
 #include "dependencygraph.h"
 #include "zmqhelper.h"
+#include "module.h"
 
 #include <libconfig.h++>
 #include <list>
@@ -68,12 +69,12 @@ class ModuleInfo {
 	  *
 	  * This pointer needs to be passed back to destroy() for proper deletion, instead of calling delete on it.
 	  */
-	inline Module * instantiate() { return this->factory != NULL ? this->factory(this->context) : NULL; };
+	inline Module * instantiate() { return this->factory != NULL ? this->factory(*(this->context)) : NULL; };
 	/** \brief Instantiates the module within a specific context
 	  *
 	  * Same as the regular instantiate() method, excepted that you can pass a specific ZMQ context instead.
 	  */
-	inline Module * instantiate(zmq::context_t * context) { return this->factory != NULL ? this->factory(context) : NULL; };
+	inline Module * instantiate(zmq::context_t & context) { return this->factory != NULL ? this->factory(context) : NULL; };
 	/** \brief Call the destructor for the module
 	  *
 	  * This method provides a way to delete the module. It is not possible to directly call the destructor or delete,
@@ -88,7 +89,7 @@ class ModuleInfo {
 	inline void setVersion(/** [in] */ int version) { this->version = version; };
 	inline void setFactory(/** [in] */ create_module * factory) { this->factory = factory; };
 	inline void setRecyclingFacility(/** [in] */ destroy_module * recycling_facility) { this->recycling_facility = recycling_facility; };
-	inline void setContext(/** [in] */ zmq::context_t * context) { this->context = context; };
+	inline void setContext(/** [in] */ zmq::context_t & context) { this->context = &context; };
 	/** \brief Check if the module seems valid
 	  *
 	  * The isValid() method provides a very basic check to see if all the components are correctly initialised. It does not do any complex
@@ -156,7 +157,7 @@ class ModuleManager {
 	libconfig::Config * loadModuleConfiguration(const std::string & module_name);
 	ModuleInfo * getModuleInfo(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
 	inline std::list<std::string> * getModuleList() { return this->graph.getModules(); }
-	inline bool is_initialised() { return not (this->ltdl != 0); }
+	inline bool isInitialised() { return not (this->ltdl != 0); }
 	inline std::string getModulePath() { return this->module_path; }
 
 };
