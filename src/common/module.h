@@ -9,40 +9,39 @@
 #include "zmqhelper.h"
 #include "protobuf/module.pb.h"
 
-DECLARE_EXTERN_LOG(logger);
-
 namespace firestarter {
 	namespace module {
 
-
 class Module {
 	protected:
-	zmq::context_t * context;
+	zmq::context_t & context;
 
-	Module(zmq::context_t * context) : context(context) { };
+	Module(zmq::context_t & context) : context(context) { };
 
 	public:
 	virtual void setup() = 0; /**< pure virtual */
-	void setContext(zmq::context_t * context) { this->context = context; };
 };
 
 class RunnableModule : public Module {
+	private:
+	void createManagementSocket();
+
 	protected:
 	bool running;
 	zmq::socket_t * manager;
+	firestarter::protocol::module::RunLevel runlevel;
 
-	RunnableModule(zmq::context_t * context) : Module(context), running(false), manager(NULL) { };
-	void createManagementSocket();
+	RunnableModule(zmq::context_t & context) : Module(context), running(false), manager(NULL), runlevel(firestarter::protocol::module::NONE) { this->createManagementSocket(); };
 	virtual void send(google::protobuf::Message & pb_message, zmq::socket_t * socket);
 
 	public:
 	virtual void run() = 0; /**< pure virtual */
-	virtual void shutdown() { LOG_WARN(logger, "shutdown() not implemented in RunnableModule (this = " << this << ")!"); };
-	virtual void restart() { LOG_WARN(logger, "restart() not implemented in RunnableModule (this = " << this << ")!"); };
+	virtual void shutdown();
+	virtual void restart();
 	
 };
 
-typedef Module * create_module(zmq::context_t * context);
+typedef Module * create_module(zmq::context_t & context);
 typedef void destroy_module(Module *);
 typedef int module_version();
 

@@ -1,12 +1,16 @@
 #include "module.h"
 
+namespace firestarter { namespace module {
+	DECLARE_EXTERN_LOG(logger);
+} }
+
 using namespace firestarter::module;
 
 void RunnableModule::createManagementSocket() {
 	LOG_INFO(logger, "Initialising socket to manager.");
 	
 	LOG_DEBUG(logger, "Creating new socket.");
-	this->manager = new zmq::socket_t(*(this->context), ZMQ_REP); 
+	this->manager = new zmq::socket_t(this->context, ZMQ_REP); 
 	LOG_DEBUG(logger, "Connecting to manager endpoint (" << MANAGER_SOCKET_URI << ").");
 	this->manager->connect(MANAGER_SOCKET_URI); 
 }
@@ -23,3 +27,11 @@ void RunnableModule::send(google::protobuf::Message & pb_message, zmq::socket_t 
 	/** \todo Test return value to see if sending succeeded */
 	socket->send(message);
 }	
+
+void RunnableModule::shutdown() { 
+	LOG_WARN(logger, "shutdown() not implemented in RunnableModule (this = " << this << ")!");
+}
+
+void RunnableModule::restart() { 
+	LOG_WARN(logger, "restart() not implemented in RunnableModule (this = " << this << ")!");
+};
