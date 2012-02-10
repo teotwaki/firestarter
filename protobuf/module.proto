@@ -6,6 +6,7 @@ enum RunLevel {
 	RUNNING = 2;
 	RESET = 3;
 	SHUTDOWN = 4;
+	NONE = 5;
 }
 
 enum RunLevelResult {
