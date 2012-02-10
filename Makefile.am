@@ -37,6 +37,7 @@ pkglib_LTLIBRARIES = dummy.la webserver.la
 ## included in distribution archives of the project.
 firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
                       src/fs/modulemanager.h src/fs/modulemanager.cpp \
+                      src/fs/instancemanager.h src/fs/instancemanager.cpp \
                       src/fs/dependencygraph.h src/fs/dependencygraph.cpp \
                       src/common/log.h src/common/log.cpp src/common/simplecache.h \
                       protobuf/module.pb.cc protobuf/module.pb.h src/common/zmqhelper.h src/common/zmq.hpp
@@ -44,7 +45,7 @@ firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
 ## Set the library dependencies for the "firestarter" target to the value obtained
 ## from pkg-config via PKG_CHECK_MODULES in configure.ac.  These libraries are
 ## passed to the linker in addition to the other linker flags.
-firestarter_LDADD = $(DEPS_LIBS) \
+firestarter_LDADD = $(DEPS_LIBS) $(BOOST_THREAD_LIBS) \
                     -dlopen dummy.la \
                     -dlopen webserver.la
 

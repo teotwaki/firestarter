@@ -8,6 +8,7 @@
 
 #include "helper.h"
 #include "modulemanager.h"
+#include "instancemanager.h"
 
 #include <libconfig.h++>
 #include <iostream>

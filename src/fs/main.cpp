@@ -5,11 +5,12 @@ DECLARE_LOG(logger, "main");
 int main(void) {
 
 	using namespace firestarter::ModuleManager;
+	using namespace firestarter::InstanceManager;
 
 	set_logfile_name("main");
 	LOG_INFO(logger, "Firestarter initialising.");
 
-	libconfig::Config	config;
+	libconfig::Config config;
 
 	try {
 		LOG_DEBUG(logger, "Loading the configuration...");
@@ -36,6 +37,11 @@ int main(void) {
 		LOG_ERROR(logger, "Failed loading the configuration file.");
 	}
 
+	LOG_DEBUG(logger, "Creating ZMQ context");
+	zmq::context_t context(1);
+
 	ModuleManager module_manager(config);
+	InstanceManager instance_manager(module_manager, context);
+	instance_manager.runAll();
 
 }
