@@ -17,13 +17,13 @@ namespace firestarter {
 		Wt::WServer server;
 	
 		public:
-		WebServer(zmq::context_t * context);
+		WebServer(zmq::context_t & context);
 		virtual void run();
 		virtual void setup();
 		virtual void shutdown();
 	};
 	
-	extern "C" WebServer * createWebServer(zmq::context_t * context) {
+	extern "C" WebServer * createWebServer(zmq::context_t & context) {
 		return new WebServer(context);
 	}
 	

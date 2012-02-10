@@ -1,17 +1,57 @@
 #include "webserver.h"
 
-namespace firestarter { namespace module { namespace core { namespace WebServer {
-	DECLARE_LOG(logger, "module.core.WebServer");
-} } } }
+DECLARE_MODULE_LOG(WebServer);
 
 using namespace firestarter::module::core::WebServer;
 
-WebServer::WebServer(zmq::context_t * context) : RunnableModule(context), server("firestarter") {
+WebServer::WebServer(zmq::context_t & context) : RunnableModule(context), server("firestarter") {
+	using namespace firestarter::protocol::module;
+
 	LOG_INFO(logger, "WebServer being created.");
 }
 
 void WebServer::run() {
-	LOG_INFO(logger, "Running the WebServer's main function.");
+	using namespace firestarter::protocol::module;
+
+	/*LOG_INFO(logger, "Running the WebServer's main function.");
+
+	while (this->running || this->runlevel == NONE) {
+		zmq::message_t message;
+		
+		if (this->runlevel == NONE) {
+			LOG_INFO(logger, "Thread is in NONE state. Waiting for orders.");
+
+			this->manager->recv(&message);
+			RunlevelChangeRequest request;
+
+			LOG_DEBUG(logger, "Received message from manager.");
+			if (request.ParseFromString(static_cast<const char *>(message.data()))) {
+				LOG_DEBUG(logger, "Manager wants us to start up. Buckle up boys.");
+			}
+
+			else {
+				LOG_WARN(logger, "Couldn't parse message received from manager.");
+				return;
+			}
+
+			switch(request.runlevel()) {
+				case INIT:
+					this->setup();
+					break;
+
+				default:
+					LOG_WARN(logger, "Unexpected runlevel change request received. Shutting down.");
+					return;
+					break;
+			}
+		}
+
+		else {
+			LOG_ERROR(logger, "Not implemented yet.");
+			return;
+		}
+		
+	}*/
 }
 
 void WebServer::setup() {
@@ -20,6 +60,7 @@ void WebServer::setup() {
 	try {
 		this->server.setServerConfiguration(0, NULL, "/etc/wt/wt_config.xml");
 		this->server.start();
+		this->running = true;
 	}
 
 	catch (Wt::WServer::Exception & wex) {
