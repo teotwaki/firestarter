@@ -7,13 +7,13 @@ using namespace firestarter::module::core::WebServer;
 WebServer::WebServer(zmq::context_t & context) : RunnableModule(context), server("firestarter") {
 	using namespace firestarter::protocol::module;
 
-	LOG_INFO(logger, "WebServer being created.");
+	LOG_INFO(logger, "WebServer object being created.");
 }
 
 void WebServer::run() {
 	using namespace firestarter::protocol::module;
 
-	/*LOG_INFO(logger, "Running the WebServer's main function.");
+	LOG_INFO(logger, "Running the WebServer's main function.");
 
 	while (this->running || this->runlevel == NONE) {
 		zmq::message_t message;
@@ -25,7 +25,8 @@ void WebServer::run() {
 			RunlevelChangeRequest request;
 
 			LOG_DEBUG(logger, "Received message from manager.");
-			if (request.ParseFromString(static_cast<const char *>(message.data()))) {
+			LOG_DEBUG(logger, "Message size: " << message.size());
+			if (request.ParseFromArray(message.data(), message.size())) {
 				LOG_DEBUG(logger, "Manager wants us to start up. Buckle up boys.");
 			}
 
@@ -51,16 +52,19 @@ void WebServer::run() {
 			return;
 		}
 		
-	}*/
+	}
 }
 
 void WebServer::setup() {
 	LOG_INFO(logger, "WebServer being set up.");
-	LOG_DEBUG(logger, "Attempting to set the web server's configuration.");
 	try {
-		this->server.setServerConfiguration(0, NULL, "/etc/wt/wt_config.xml");
+		LOG_DEBUG(logger, "Attempting to set the web server's configuration.");
+		this->server.setServerConfiguration(0, NULL, "/etc/firestarter/httpd.cfg");
+		LOG_DEBUG(logger, "Starting httpd thread.");
 		this->server.start();
+		LOG_DEBUG(logger, "Setting this thread's state.");
 		this->running = true;
+		this->runlevel = firestarter::protocol::module::INIT;
 	}
 
 	catch (Wt::WServer::Exception & wex) {

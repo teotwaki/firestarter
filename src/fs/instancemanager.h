@@ -30,6 +30,10 @@ class InstanceManager {
 	ThreadMap threads;
 	zmq::context_t & context;
 	zmq::socket_t modules;
+	bool running;
+
+	void send(google::protobuf::Message & pb_message, zmq::socket_t & socket);
+	int pollIn(zmq::socket_t & socket);
 
 	public:
 	InstanceManager(firestarter::ModuleManager::ModuleManager & modulemanager, zmq::context_t & context) throw(std::invalid_argument); 
@@ -37,7 +41,8 @@ class InstanceManager {
 	void runAll(bool autostart = false);
 	void stop(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
 	void stopAll();
-	void poll();
+	void tick();
+	inline bool isRunning() { return this->running; };
 
 };
 
