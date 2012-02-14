@@ -52,6 +52,7 @@ BOOST_TUPLE
 BOOST_GRAPH
 BOOST_STRING_ALGO
 BOOST_THREADS
+BOOST_DATE_TIME
 
 PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
 
