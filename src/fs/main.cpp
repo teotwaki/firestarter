@@ -44,4 +44,11 @@ int main(void) {
 	InstanceManager instance_manager(module_manager, context);
 	instance_manager.runAll();
 
+	boost::posix_time::microseconds delay(1000000);
+
+	while (instance_manager.isRunning()) {
+		boost::this_thread::sleep(delay);
+		instance_manager.tick();
+	}
+
 }
