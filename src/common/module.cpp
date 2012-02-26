@@ -9,10 +9,15 @@ using namespace firestarter::module;
 void RunnableModule::createManagementSocket() {
 	LOG_INFO(logger, "Initialising socket to manager.");
 	
-	LOG_DEBUG(logger, "Creating new socket.");
-	this->manager = new zmq::socket_t(this->context, ZMQ_REP); 
+	LOG_DEBUG(logger, "Creating new sockets.");
+	this->manager = new zmq::socket_t(this->context, ZMQ_REQ); 
 	LOG_DEBUG(logger, "Connecting to manager endpoint (" << MANAGER_SOCKET_URI << ").");
 	this->manager->connect(MANAGER_SOCKET_URI); 
+	this->orders = new zmq::socket_t(this->context, ZMQ_SUB);
+	LOG_DEBUG(logger, "Connect to module orders endpoint (" << MODULE_ORDERS_SOCKET_URI << ").");
+	this->orders->connect(MODULE_ORDERS_SOCKET_URI);
+	this->orders->setsockopt(ZMQ_SUBSCRIBE, "", 0);
+
 }
 
 void RunnableModule::send(google::protobuf::Message & pb_message, zmq::socket_t * socket) {

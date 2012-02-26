@@ -9,8 +9,8 @@ namespace firestarter { namespace InstanceManager {
 using namespace firestarter::InstanceManager;
 
 InstanceManager::InstanceManager(firestarter::ModuleManager::ModuleManager & modulemanager, zmq::context_t & context) throw(std::invalid_argument)
-							: modulemanager(modulemanager), context(context), modules(context, ZMQ_REQ),
-							  running(false) {
+							: modulemanager(modulemanager), context(context), orders(context, ZMQ_PUB), modules(context, ZMQ_REP),
+							  running(false), pending_modules(0) {
 
 	LOG_INFO(logger, "Constructing InstanceManager object");
 
@@ -19,7 +19,10 @@ InstanceManager::InstanceManager(firestarter::ModuleManager::ModuleManager & mod
 		throw std::invalid_argument("modulemanager");
 	}
 
-	LOG_DEBUG(logger, "Binding socket to manager endpoint (" << MANAGER_SOCKET_URI << ").");
+	LOG_DEBUG(logger, "Connecting socket to module orders endpoint (" << MODULE_ORDERS_SOCKET_URI << ").");
+	this->orders.bind(MODULE_ORDERS_SOCKET_URI);
+
+	LOG_DEBUG(logger, "Connecting socket to manager endpoint (" << MANAGER_SOCKET_URI << ").");
 	this->modules.bind(MANAGER_SOCKET_URI);
 
 };
@@ -56,6 +59,7 @@ void InstanceManager::run(const std::string & name, bool autostart) throw(firest
 		RunnableModule * module = reinterpret_cast<RunnableModule *>(this->instances[name]);
 		boost::thread * thread = new boost::thread(&RunnableModule::run, module);
 		this->threads[name] = std::make_pair(thread, module);
+		this->pending_modules++;
 	}
 	
 }
@@ -70,10 +74,6 @@ void InstanceManager::runAll(bool autostart) {
 		this->run(module_name, autostart);
 	}
 
-	RunlevelChangeRequest request;
-	request.set_runlevel(INIT);
-	request.set_immediate(true);
-	this->send(request, this->modules);
 }
 
 void InstanceManager::send(google::protobuf::Message & pb_message, zmq::socket_t & socket) {
@@ -86,6 +86,12 @@ void InstanceManager::send(google::protobuf::Message & pb_message, zmq::socket_t
 	memcpy((void *) message.data(), pb_serialised.c_str(), pb_serialised.size());
 	LOG_DEBUG(logger, "Sending message");
 	/** \todo Test return value to see if sending succeeded */
+	socket.send(message);
+}
+
+void InstanceManager::send(zmq::socket_t & socket) {
+	LOG_INFO(logger, "Sending empty message on socket (" << &socket << ").");
+	zmq::message_t message(0);
 	socket.send(message);
 }
 
@@ -103,12 +109,22 @@ void InstanceManager::tick() {
 
 	LOG_DEBUG(logger, "Called tick().");
 
-	zmq::message_t response;
-	if (this->modules.recv(&response, 1)) {
-		LOG_DEBUG(logger, "Received a response!");
-		RunlevelChangeResponse pb_response;
-		pb_response.ParseFromString(static_cast<const char *>(response.data()));
-		LOG_DEBUG(logger, "Received status changed message to " << pb_response.runlevel());
+	zmq::message_t request;
+	if (this->modules.recv(&request, -1)) {
+		LOG_DEBUG(logger, "Received a request!");
+		RunlevelChangeResponse pb_request;
+		pb_request.ParseFromString(static_cast<const char *>(request.data()));
+		LOG_DEBUG(logger, "Received status changed message to " << pb_request.runlevel());
+		// Send an empty message to synchronise everyone
+		this->send(this->modules);
+		this->pending_modules--;
+	}
+
+	if (this->pending_modules > 0) {
+		RunlevelChangeRequest request;
+		request.set_runlevel(INIT);
+		request.set_immediate(true);
+		this->send(request, this->orders);
 	}
 
 }

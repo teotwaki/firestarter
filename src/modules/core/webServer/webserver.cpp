@@ -12,6 +12,7 @@ WebServer::WebServer(zmq::context_t & context) : RunnableModule(context), server
 
 void WebServer::run() {
 	using namespace firestarter::protocol::module;
+	boost::posix_time::microseconds delay(1000000);
 
 	LOG_INFO(logger, "Running the WebServer's main function.");
 
@@ -21,24 +22,33 @@ void WebServer::run() {
 		if (this->runlevel == NONE) {
 			LOG_INFO(logger, "Thread is in NONE state. Waiting for orders.");
 
-			this->manager->recv(&message);
-			RunlevelChangeRequest request;
+			this->orders->recv(&message);
+			RunlevelChangeRequest order;
 
-			LOG_DEBUG(logger, "Received message from manager.");
-			LOG_DEBUG(logger, "Message size: " << message.size());
-			if (request.ParseFromArray(message.data(), message.size())) {
+			LOG_DEBUG(logger, "Received message from manager (" << message.size() << " bytes).");
+			if (order.ParseFromArray(message.data(), message.size())) {
 				LOG_DEBUG(logger, "Manager wants us to start up. Buckle up boys.");
 			}
 
 			else {
-				LOG_WARN(logger, "Couldn't parse message received from manager.");
+				LOG_WARN(logger, "Couldn't parse message received from manager. Shutting down.");
 				return;
 			}
 
-			switch(request.runlevel()) {
-				case INIT:
+			switch(order.runlevel()) {
+				case INIT: {
 					this->setup();
+					LOG_DEBUG(logger, "Creating response message");
+					RunlevelChangeResponse response;
+					response.set_runlevel(INIT);
+					response.set_result(SUCCESS);
+					this->send(response, this->manager);
+					LOG_DEBUG(logger, "Listening for empty reponse");
+					zmq::message_t empty;
+					// Listen for empty response
+					this->manager->recv(&empty);
 					break;
+				}
 
 				default:
 					LOG_WARN(logger, "Unexpected runlevel change request received. Shutting down.");
@@ -48,8 +58,8 @@ void WebServer::run() {
 		}
 
 		else {
-			LOG_ERROR(logger, "Not implemented yet.");
-			return;
+			LOG_ERROR(logger, "Cool, the webserver is now running. Let's pretend to be doing something.");
+			boost::this_thread::sleep(delay);
 		}
 		
 	}

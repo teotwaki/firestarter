@@ -4,6 +4,8 @@
 
 #include <string>
 #include <boost/tr1/unordered_map.hpp>
+#include <cstdlib>
+#include <ctime>
 
 #include "helper.h"
 #include "zmqhelper.h"
@@ -28,10 +30,11 @@ class RunnableModule : public Module {
 
 	protected:
 	bool running;
+	zmq::socket_t * orders;
 	zmq::socket_t * manager;
 	firestarter::protocol::module::RunLevel runlevel;
 
-	RunnableModule(zmq::context_t & context) : Module(context), running(false), manager(NULL), runlevel(firestarter::protocol::module::NONE) { this->createManagementSocket(); };
+	RunnableModule(zmq::context_t & context) : Module(context), running(false), orders(NULL), manager(NULL), runlevel(firestarter::protocol::module::NONE) { this->createManagementSocket(); };
 	virtual void send(google::protobuf::Message & pb_message, zmq::socket_t * socket);
 
 	public:

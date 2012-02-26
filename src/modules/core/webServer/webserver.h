@@ -6,6 +6,8 @@
 #include "log.h"
 
 #include <Wt/WServer>
+#include <boost/thread.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace firestarter {
 	namespace module {

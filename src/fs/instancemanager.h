@@ -29,10 +29,13 @@ class InstanceManager {
 	InstanceMap instances;
 	ThreadMap threads;
 	zmq::context_t & context;
+	zmq::socket_t orders;
 	zmq::socket_t modules;
 	bool running;
+	int pending_modules;
 
 	void send(google::protobuf::Message & pb_message, zmq::socket_t & socket);
+	void send(zmq::socket_t & socket);
 	int pollIn(zmq::socket_t & socket);
 
 	public:
