@@ -9,7 +9,7 @@
 #include "helper.h"
 #include "simplecache.h"
 #include "dependencygraph.h"
-#include "zmqhelper.h"
+#include "zmq/zmqhelper.h"
 #include "module.h"
 
 #include <libconfig.h++>

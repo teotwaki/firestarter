@@ -4,7 +4,7 @@ DECLARE_MODULE_LOG(Dummy);
 
 using namespace firestarter::module::core::Dummy;
 
-Dummy::Dummy(zmq::context_t & context) : Module(context) {
+Dummy::Dummy(zmq::context_t & context) : Module() {
 	set_logfile_name("Dummy");
 	LOG_DEBUG(logger, "Dummy being created.");
 }
