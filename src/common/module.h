@@ -8,34 +8,25 @@
 #include <ctime>
 
 #include "helper.h"
-#include "zmqhelper.h"
+#include "clients/instancemanager.h"
 #include "protobuf/module.pb.h"
+#include "zmq/zmqhelper.h"
 
 namespace firestarter {
 	namespace module {
 
 class Module {
-	protected:
-	zmq::context_t & context;
-
-	Module(zmq::context_t & context) : context(context) { };
-
 	public:
 	virtual void setup() = 0; /**< pure virtual */
 };
 
 class RunnableModule : public Module {
-	private:
-	void createManagementSocket();
-
 	protected:
 	bool running;
-	zmq::socket_t * orders;
-	zmq::socket_t * manager;
+	firestarter::InstanceManager::InstanceManagerClientSocket manager_socket;
 	firestarter::protocol::module::RunLevel runlevel;
 
-	RunnableModule(zmq::context_t & context) : Module(context), running(false), orders(NULL), manager(NULL), runlevel(firestarter::protocol::module::NONE) { this->createManagementSocket(); };
-	virtual void send(google::protobuf::Message & pb_message, zmq::socket_t * socket);
+	RunnableModule(zmq::context_t & context) : running(false), manager_socket(context) , runlevel(firestarter::protocol::module::NONE) { };
 
 	public:
 	virtual void run() = 0; /**< pure virtual */
