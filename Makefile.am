@@ -40,7 +40,9 @@ firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
                       src/fs/instancemanager.h src/fs/instancemanager.cpp \
                       src/fs/dependencygraph.h src/fs/dependencygraph.cpp \
                       src/common/log.h src/common/log.cpp src/common/simplecache.h \
-                      protobuf/module.pb.cc protobuf/module.pb.h src/common/zmqhelper.h src/common/zmq.hpp
+                      protobuf/module.pb.cc protobuf/module.pb.h \
+                      src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
+                      src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp
 
 ## Set the library dependencies for the "firestarter" target to the value obtained
 ## from pkg-config via PKG_CHECK_MODULES in configure.ac.  These libraries are
@@ -67,7 +69,10 @@ dummy_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 webserver_la_SOURCES = src/modules/core/webServer/webserver.cpp \
                        src/modules/core/webServer/webserver.h \
                        src/common/module.h src/common/module.cpp \
-                       protobuf/module.pb.h protobuf/module.pb.cc src/common/zmqhelper.h src/common/zmq.hpp
+                       protobuf/module.pb.cc protobuf/module.pb.h \
+                       src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
+                       src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp \
+                       src/common/clients/instancemanager.h
 webserver_la_LDFLAGS = -module -avoid-version -export-dynamic
 webserver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 webserver_la_LIBADD = $(WITTY_LIBS)
