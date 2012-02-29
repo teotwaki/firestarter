@@ -7,10 +7,9 @@
 
 #include "helper.h"
 #include "modulemanager.h"
-#include "zmqhelper.h"
+#include "zmq/zmqsocket.h"
 #include "module.h"
 
-#include <libconfig.h++>
 #include <list>
 #include <boost/thread.hpp>
 
@@ -19,6 +18,24 @@ namespace firestarter {
 
 typedef boost::unordered_map<std::string, firestarter::module::Module *> InstanceMap;
 typedef boost::unordered_map<std::string, std::pair<boost::thread *, firestarter::module::RunnableModule *> > ThreadMap;
+
+class InstanceManagerSocket {
+	private:
+	firestarter::sockets::ZMQPublisherSocket publisher;
+	firestarter::sockets::ZMQResponseSocket responder;
+
+	public:
+	InstanceManagerSocket(zmq::context_t & context) :
+							publisher(context, MODULE_ORDERS_SOCKET_URI), responder(context, MANAGER_SOCKET_URI) { };
+	inline bool send(google::protobuf::Message & pb_message) { return this->publisher.send(pb_message); };
+	inline bool reply(google::protobuf::Message & pb_message) { return this->responder.send(pb_message); };
+	inline bool receive(google::protobuf::Message & pb_message) { 
+		if (this->responder.receive(pb_message))
+			return this->ack();
+		return false;
+	 };
+	inline bool ack() { return this->responder.send(); };
+};
 
 /** \brief Manages the running instances of modules
   *
@@ -29,14 +46,9 @@ class InstanceManager {
 	InstanceMap instances;
 	ThreadMap threads;
 	zmq::context_t & context;
-	zmq::socket_t orders;
-	zmq::socket_t modules;
+	InstanceManagerSocket socket;
 	bool running;
 	int pending_modules;
-
-	void send(google::protobuf::Message & pb_message, zmq::socket_t & socket);
-	void send(zmq::socket_t & socket);
-	int pollIn(zmq::socket_t & socket);
 
 	public:
 	InstanceManager(firestarter::ModuleManager::ModuleManager & modulemanager, zmq::context_t & context) throw(std::invalid_argument); 

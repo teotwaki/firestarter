@@ -9,8 +9,7 @@ namespace firestarter { namespace InstanceManager {
 using namespace firestarter::InstanceManager;
 
 InstanceManager::InstanceManager(firestarter::ModuleManager::ModuleManager & modulemanager, zmq::context_t & context) throw(std::invalid_argument)
-							: modulemanager(modulemanager), context(context), orders(context, ZMQ_PUB), modules(context, ZMQ_REP),
-							  running(false), pending_modules(0) {
+							: modulemanager(modulemanager), context(context), socket(context), running(false), pending_modules(0) {
 
 	LOG_INFO(logger, "Constructing InstanceManager object");
 
@@ -18,12 +17,6 @@ InstanceManager::InstanceManager(firestarter::ModuleManager::ModuleManager & mod
 		LOG_ERROR(logger, "The ModuleManager object passed as argument isn't properly initialised.");
 		throw std::invalid_argument("modulemanager");
 	}
-
-	LOG_DEBUG(logger, "Connecting socket to module orders endpoint (" << MODULE_ORDERS_SOCKET_URI << ").");
-	this->orders.bind(MODULE_ORDERS_SOCKET_URI);
-
-	LOG_DEBUG(logger, "Connecting socket to manager endpoint (" << MANAGER_SOCKET_URI << ").");
-	this->modules.bind(MANAGER_SOCKET_URI);
 
 };
 
@@ -76,47 +69,14 @@ void InstanceManager::runAll(bool autostart) {
 
 }
 
-void InstanceManager::send(google::protobuf::Message & pb_message, zmq::socket_t & socket) {
-	LOG_INFO(logger, "Sending message (" << pb_message.GetTypeName() << ") on socket (" << &socket << ").");
-	std::string pb_serialised;
-	LOG_DEBUG(logger, "Serialising message.");
-	pb_message.SerializeToString(&pb_serialised);
-	zmq::message_t message(pb_serialised.size());
-	LOG_DEBUG(logger, "Copying message data to socket.");
-	memcpy((void *) message.data(), pb_serialised.c_str(), pb_serialised.size());
-	LOG_DEBUG(logger, "Sending message");
-	/** \todo Test return value to see if sending succeeded */
-	socket.send(message);
-}
-
-void InstanceManager::send(zmq::socket_t & socket) {
-	LOG_INFO(logger, "Sending empty message on socket (" << &socket << ").");
-	zmq::message_t message(0);
-	socket.send(message);
-}
-
-int InstanceManager::pollIn(zmq::socket_t & socket) {
-	zmq_pollitem_t item;
-	item.socket = (void *)(&this->modules);
-	item.fd = 0;
-	item.events = ZMQ_POLLIN;
-
-	return zmq::poll(&item, 1, 1);
-}
-
 void InstanceManager::tick() {
 	using namespace firestarter::protocol::module;
 
 	LOG_DEBUG(logger, "Called tick().");
 
-	zmq::message_t request;
-	if (this->modules.recv(&request, -1)) {
-		LOG_DEBUG(logger, "Received a request!");
-		RunlevelChangeResponse pb_request;
-		pb_request.ParseFromString(static_cast<const char *>(request.data()));
-		LOG_DEBUG(logger, "Received status changed message to " << pb_request.runlevel());
-		// Send an empty message to synchronise everyone
-		this->send(this->modules);
+	RunlevelChangeResponse response;
+	while (this->socket.receive(response)) {
+		LOG_DEBUG(logger, "Received status changed message to " << response.runlevel());
 		this->pending_modules--;
 	}
 
@@ -124,7 +84,7 @@ void InstanceManager::tick() {
 		RunlevelChangeRequest request;
 		request.set_runlevel(INIT);
 		request.set_immediate(true);
-		this->send(request, this->orders);
+		this->socket.send(request);
 	}
 
 }
