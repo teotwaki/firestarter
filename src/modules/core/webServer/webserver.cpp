@@ -17,20 +17,21 @@ void WebServer::run() {
 	LOG_INFO(logger, "Running the WebServer's main function.");
 
 	while (this->running || this->runlevel == NONE) {
-		zmq::message_t message;
+		RunlevelChangeRequest order;
 		
 		if (this->runlevel == NONE) {
 			LOG_INFO(logger, "Thread is in NONE state. Waiting for orders.");
 
-			this->orders->recv(&message);
-			RunlevelChangeRequest order;
-
-			LOG_DEBUG(logger, "Received message from manager (" << message.size() << " bytes).");
-			if (order.ParseFromArray(message.data(), message.size())) {
+			if (this->manager_socket.receive(order, true)) {
 				LOG_DEBUG(logger, "Manager wants us to start up. Buckle up boys.");
 			}
 
 			else {
+				LOG_ERROR(logger, order.DebugString());
+				LOG_ERROR(logger, order.InitializationErrorString());
+				if (order.IsInitialized()) {
+					LOG_ERROR(logger, "Weird, the message is initialised!");
+				}
 				LOG_WARN(logger, "Couldn't parse message received from manager. Shutting down.");
 				return;
 			}
@@ -42,11 +43,7 @@ void WebServer::run() {
 					RunlevelChangeResponse response;
 					response.set_runlevel(INIT);
 					response.set_result(SUCCESS);
-					this->send(response, this->manager);
-					LOG_DEBUG(logger, "Listening for empty reponse");
-					zmq::message_t empty;
-					// Listen for empty response
-					this->manager->recv(&empty);
+					this->manager_socket.send(response);
 					break;
 				}
 
