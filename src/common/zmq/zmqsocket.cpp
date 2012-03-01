@@ -69,7 +69,7 @@ bool ZMQReceivingSocket::receive(google::protobuf::Message & pb_message, bool bl
 	}
 
 	if (this->socket->recv(&message, flags))
-		if (pb_message.ParseFromString(static_cast<const char *>(message.data())))
+		if (pb_message.ParseFromArray(message.data(), message.size()))
 			return pb_message.IsInitialized();
 
 	return false;
