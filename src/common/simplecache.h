@@ -38,7 +38,7 @@
   */
 template<typename T> class SimpleCache {
 	protected:
-	/// \briefThe pointer to the data that will be held
+	/// \brief The pointer to the data that will be held
 	T * cache;
 
 	public:
