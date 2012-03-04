@@ -252,8 +252,8 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	  * \see subscribe()
 	  *
 	  * \param context A reference to the ZMQ context in which the socket should be created.
-	  * \param uri Optional reference to a string on which the socket should bind.
-	  * \param [in] subscribe If set to true, the socket will automatically subscribe to any kind
+	  * \param uri Optional reference to a string on which the socket should connect to.
+	  * \param subscribe If set to true, the socket will automatically subscribe to any kind
 	  * of messages. If set to false, no subscription will be done.
 	  */
 	ZMQSubscriberSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string & uri = "", 
@@ -303,17 +303,86 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	};
 };
 
+/** \brief An alternating request-reply (send/receive) socket
+  *
+  * Typically, a ZMQRequestSocket connects to a service and alternatingly sends requests and
+  * receives replies. Once a request has been sent, it is illegal to send another request.
+  * Before being able to send another request, receive() has to be called on the socket. Service
+  * providers should use the ZMQResponseSocket.
+  * 
+  * The response doesn't necessarily have to contain an actual message; an empty message that
+  * acquits the send/receive exchange is sufficient.
+  *
+  * Messages are sent to all services in a round-robin fashion. This means that if there are two
+  * services connected to on the socket, and 3 messages are sent, message 1 will go to service 1,
+  * message 2 to service 2, and message 3 to service 1. If the socket is connected to zero services
+  * or if the high water mark is reached, then the send() call will be blocking until a service
+  * becomes available, or the exceptional state ends.
+  *
+  * Please note that calling bind on this socket is nonsensical at the moment. Future versions
+  * of this API will probably refactor the classes to remove bind() from the member methods.
+  *
+  * \see ZMQReceivingSocket
+  * \see ZMQSendingSocket
+  * \see ZMQResponseSocket
+  */
 class ZMQRequestSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 	public:
-	ZMQRequestSocket(zmq::context_t & context, std::string & uri = "") { 
+	/** \brief Initialise the underlying socket and optionally connects to a service.
+	  *
+	  * The constructor initialises the underlying ZMQ socket by using the provided ZMQ
+	  * context. If a uri is provided, the socket will connect to it. The socket is usable
+	  * immediately (if a uri has been provided).
+	  *
+	  * \see connect()
+	  *
+	  * \param context A reference to the ZMQ context in which the socket should be created.
+	  * \param uri Optional reference to a string on which the socket should bind.
+	  */
+	ZMQRequestSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string & uri = "") { 
 		this->socket = new zmq::socket_t(context, ZMQ_REQ); 
 		this->connect(uri); 
 	};
+	/** \brief Constructor which initialises the underlying socket and connects to a list of uris
+	  *
+	  * This constructor provides the same functionalities as the other one, with the
+	  * exception that it requires a list of uris to which the socket should connect to.
+	  *
+	  * \param context A reference to the ZMQ context in which the socket should be created.
+	  * \param uris A reference to a list of strings to which the socket should connect to.
+	  */
+	ZMQRequestSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::list<std::string> & uris) {
+		this->socket = new zmq::socket_t(context, ZMQ_REQ);
+		this->connect(uris);
+	};
 };
 
+/** \brief An alternating reply-request (receive/send) socket
+  * \todo Fix the documentation on this one.
+  * Typically, a ZMQRequestSocket connects to a service and alternatingly sends requests and
+  * receives replies. Once a request has been sent, it is illegal to send another request.
+  * Before being able to send another request, receive() has to be called on the socket. Service
+  * providers should use the ZMQResponseSocket.
+  * 
+  * The response doesn't necessarily have to contain an actual message; an empty message that
+  * acquits the send/receive exchange is sufficient.
+  *
+  * Messages are sent to all services in a round-robin fashion. This means that if there are two
+  * services connected to on the socket, and 3 messages are sent, message 1 will go to service 1,
+  * message 2 to service 2, and message 3 to service 1. If the socket is connected to zero services
+  * or if the high water mark is reached, then the send() call will be blocking until a service
+  * becomes available, or the exceptional state ends.
+  *
+  * Please note that calling bind on this socket is nonsensical at the moment. Future versions
+  * of this API will probably refactor the classes to remove bind() from the member methods.
+  *
+  * \see ZMQReceivingSocket
+  * \see ZMQSendingSocket
+  * \see ZMQResponseSocket
+  */
 class ZMQResponseSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 	public:
-	ZMQResponseSocket(zmq::context_t & context, std::string & uri = "") { 
+	ZMQResponseSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string & uri = "") { 
 		this->socket = new zmq::socket_t(context, ZMQ_REP); 
 		this->bind(uri); 
 	};
