@@ -71,6 +71,7 @@ class ZMQReceivingSocket : virtual public ZMQSocket {
 	  * call).
 	  */
 	bool receive(/** [in] */ bool blocking = false);
+
 	/** \brief Receive a single message and deserialise it into a protobuf message
 	  *
 	  * Receive a message on the socket, deserialise it (using pb_message.ParseFromArray())
@@ -85,6 +86,7 @@ class ZMQReceivingSocket : virtual public ZMQSocket {
 	  * call).
 	  */
 	bool receive(/** [out] */ google::protobuf::Message & pb_message, /** [in] */ bool blocking = false);
+
 	/** \brief Connect the socket the a remote endpoint
 	  *
 	  * Connect the socket to a remote endpoint, as specified by the ZMQ API. This method
@@ -98,6 +100,7 @@ class ZMQReceivingSocket : virtual public ZMQSocket {
 			this->socket->connect(uri.c_str()); 
 		/** \todo Else throw exception */
 	};
+
 	/** \brief Connect to a list a remote endpoints
 	  *
 	  * This is basically a wrapper around the regular connect() method, enabling the user
@@ -135,6 +138,7 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 	  * \return True when the message was sent, false otherwise.
 	  */
 	bool send();
+
 	/** \brief Send a protobuf message
 	  *
 	  * This method takes a reference to a pb_message and tries to send it on the socket.
@@ -146,6 +150,7 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 	  * of messages, that will all be sent and delivered at once in an atomical manner.
 	  */
 	bool send(/** [in] */ google::protobuf::Message & pb_message, /** [in] */ bool send_more = false);
+
 	/** \brief Bind the socket to a local endpoint for incoming connections
 	  *
 	  * This method binds the socket to a specific endpoint for other sockets to connect to.
@@ -160,6 +165,7 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 			this->socket->bind(uri.c_str()); 
 		/** \todo Else throw exception */
 	};
+
 	/** \brief Bind the socket to a list of local endpoint for incoming connections
 	  *
 	  * This is basically a wrapper around the regular bind() method, enabling the user
@@ -209,6 +215,7 @@ class ZMQPublisherSocket : public ZMQSendingSocket {
 		this->socket = new zmq::socket_t(context, ZMQ_PUB); 
 		this->bind(uri); 
 	};
+
 	/** \brief Constructor which initialises the underlying socket and binds to a list of uris
 	  *
 	  * This constructor provides the same functionalities as the other one, with the
@@ -263,6 +270,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 		if (subscribe)
 			this->subscribe();
 	};
+
 	/** \brief Constructor which initialises the underlying socket and connects to a list of uris
 	  *
 	  * This constructor provides the same functionalities as the other one, with the
@@ -280,6 +288,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 		if (subscribe)
 			this->subscribe();
 	};
+
 	/** \brief Subscribe to a specific type of message
 	  *
 	  * Establish a new message filter that will be applied to incoming data. The content of the
@@ -291,6 +300,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	inline void subscribe(/** [in] */ const std::string & filter = std::string()) { 
 		this->socket->setsockopt(ZMQ_SUBSCRIBE, filter.c_str(), filter.size()); 
 	};
+
 	/** \brief Unsubscribe to a specific type of message
 	  *
 	  * Remove an existing message filter. If there are multiple equivalent filters applied to the
@@ -343,6 +353,7 @@ class ZMQRequestSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 		this->socket = new zmq::socket_t(context, ZMQ_REQ); 
 		this->connect(uri); 
 	};
+
 	/** \brief Constructor which initialises the underlying socket and connects to a list of uris
 	  *
 	  * This constructor provides the same functionalities as the other one, with the
@@ -397,6 +408,7 @@ class ZMQResponseSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 		this->socket = new zmq::socket_t(context, ZMQ_REP); 
 		this->bind(uri); 
 	};
+
 	/** \brief Constructor which initialises the underlying socket and connects to a list of uris
 	  *
 	  * This constructor provides the same functionalities as the other one, with the
