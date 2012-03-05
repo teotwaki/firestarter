@@ -93,7 +93,7 @@ class ZMQReceivingSocket : virtual public ZMQSocket {
 	  * \param uri A reference to a string containing the enpoint to which the socket
 	  * should connect.
 	  */
-	inline void connect(/** [in] */ std::string & uri) { 
+	inline void connect(/** [in] */ const std::string & uri) { 
 		if (not uri.empty())
 			this->socket->connect(uri.c_str()); 
 		/** \todo Else throw exception */
@@ -107,7 +107,7 @@ class ZMQReceivingSocket : virtual public ZMQSocket {
 	  * socket should connect.
 	  */
 	inline void connect(/** [in] */ std::list<std::string> & uris) {
-		foreach (std::string uri, uris) {
+		foreach (const std::string & uri, uris) {
 			this->connect(uri);
 		}
 	};
@@ -155,7 +155,7 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 	  * \param uri A reference to a string containing the endpoint to which the socket
 	  * should bind.
 	  */
-	inline void bind(/** [in] */ std::string & uri) { 
+	inline void bind(/** [in] */ const std::string & uri) { 
 		if (not uri.empty())
 			this->socket->bind(uri.c_str()); 
 		/** \todo Else throw exception */
@@ -170,7 +170,7 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 	  * socket should bind.
 	  */
 	inline void bind(/** [in] */ std::list<std::string> & uris) {
-		foreach (std::string uri, uris) {
+		foreach (const std::string & uri, uris) {
 			this->bind(uri);
 		}
 	};
@@ -205,7 +205,7 @@ class ZMQPublisherSocket : public ZMQSendingSocket {
 	  * \param context A reference to the ZMQ context in which the socket should be created.
 	  * \param uri Optional reference to a string on which the socket should bind.
 	  **/
-	ZMQPublisherSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string & uri = "") { 
+	ZMQPublisherSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::string & uri = std::string()) { 
 		this->socket = new zmq::socket_t(context, ZMQ_PUB); 
 		this->bind(uri); 
 	};
@@ -256,7 +256,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	  * \param subscribe If set to true, the socket will automatically subscribe to any kind
 	  * of messages. If set to false, no subscription will be done.
 	  */
-	ZMQSubscriberSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string & uri = "", 
+	ZMQSubscriberSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::string & uri = std::string(), 
 						/** [in] */ bool subscribe = true) { 
 		this->socket = new zmq::socket_t(context, ZMQ_SUB); 
 		this->connect(uri);
@@ -288,7 +288,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	  *
 	  * \param filter A reference to a string containing the filter data that should be added.
 	  */ 
-	inline void subscribe(/** [in] */ std::string & filter = "") { 
+	inline void subscribe(/** [in] */ const std::string & filter = std::string()) { 
 		this->socket->setsockopt(ZMQ_SUBSCRIBE, filter.c_str(), filter.size()); 
 	};
 	/** \brief Unsubscribe to a specific type of message
@@ -298,7 +298,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	  *
 	  * \param filter A reference to a string containing the filter data that should be removed
 	  */
-	inline void unsubscribe(/** [in] */ std::string & filter = "") {
+	inline void unsubscribe(/** [in] */ const std::string & filter = std::string()) {
 		this->socket->setsockopt(ZMQ_UNSUBSCRIBE, filter.c_str(), filter.size());
 	};
 };
@@ -339,7 +339,7 @@ class ZMQRequestSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 	  * \param context A reference to the ZMQ context in which the socket should be created.
 	  * \param uri Optional reference to a string on which the socket should bind.
 	  */
-	ZMQRequestSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string & uri = "") { 
+	ZMQRequestSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::string & uri = std::string()) { 
 		this->socket = new zmq::socket_t(context, ZMQ_REQ); 
 		this->connect(uri); 
 	};
@@ -382,7 +382,7 @@ class ZMQRequestSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
   */
 class ZMQResponseSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 	public:
-	ZMQResponseSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string & uri = "") { 
+	ZMQResponseSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::string & uri = std::string()) { 
 		this->socket = new zmq::socket_t(context, ZMQ_REP); 
 		this->bind(uri); 
 	};
