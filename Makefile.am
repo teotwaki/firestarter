@@ -28,7 +28,7 @@ BUILT_SOURCES = protobuf/module.pb.cc protobuf/module.pb.h
 EXTRA_DIST = protobuf/module.proto
 
 ## Define the different module libraries that will be compiled and installed
-pkglib_LTLIBRARIES = dummy.la webserver.la
+pkglib_LTLIBRARIES = webserver.la
 
 ## Define the list of source files for the "firestarter" target. The file extension
 ## .cpp is recognized by Automake, and causes it to produce rules which invoke
@@ -48,7 +48,6 @@ firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
 ## from pkg-config via PKG_CHECK_MODULES in configure.ac.  These libraries are
 ## passed to the linker in addition to the other linker flags.
 firestarter_LDADD = $(DEPS_LIBS) $(BOOST_THREAD_LIBS) \
-                    -dlopen dummy.la \
                     -dlopen webserver.la
 
 ## Set the libtool flags
@@ -59,12 +58,6 @@ firestarter_LDFLAGS = -export-dynamic
 ## the C++ compiler to produce an object file (.o) from each source file. THe
 ## header files (.h) do not result in object files by themselves, but will be
 ## included in distribution archives of the project
-dummy_la_SOURCES = src/modules/core/dummy/dummy.cpp \
-                   src/modules/core/dummy/dummy.h \
-                   src/common/module.h src/common/module.cpp \
-                   protobuf/module.pb.h protobuf/module.pb.cc src/common/zmqhelper.h src/common/zmq.hpp
-dummy_la_LDFLAGS = -module -avoid-version -export-dynamic
-dummy_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 
 webserver_la_SOURCES = src/modules/core/webServer/webserver.cpp \
                        src/modules/core/webServer/webserver.h \
