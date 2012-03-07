@@ -1,20 +1,20 @@
-#include "webserver.h"
+#include "wtserver.h"
 
-DECLARE_MODULE_LOG(WebServer);
+DECLARE_MODULE_LOG(WtServer);
 
-using namespace firestarter::module::core::WebServer;
+using namespace firestarter::module::core::WtServer;
 
-WebServer::WebServer(zmq::context_t & context) : RunnableModule(context), server("firestarter") {
+WtServer::WtServer(zmq::context_t & context) : RunnableModule(context), server("firestarter") {
 	using namespace firestarter::protocol::module;
 
-	LOG_INFO(logger, "WebServer object being created.");
+	LOG_INFO(logger, "WtServer object being created.");
 }
 
-void WebServer::run() {
+void WtServer::run() {
 	using namespace firestarter::protocol::module;
 	boost::posix_time::microseconds delay(1000000);
 
-	LOG_INFO(logger, "Running the WebServer's main function.");
+	LOG_INFO(logger, "Running the WtServer's main function.");
 
 	while (this->running || this->runlevel == NONE) {
 		RunlevelChangeRequest order;
@@ -55,15 +55,15 @@ void WebServer::run() {
 		}
 
 		else {
-			LOG_ERROR(logger, "Cool, the webserver is now running. Let's pretend to be doing something.");
+			LOG_ERROR(logger, "Cool, the wtserver is now running. Let's pretend to be doing something.");
 			boost::this_thread::sleep(delay);
 		}
 		
 	}
 }
 
-void WebServer::setup() {
-	LOG_INFO(logger, "WebServer being set up.");
+void WtServer::setup() {
+	LOG_INFO(logger, "WtServer being set up.");
 	try {
 		LOG_DEBUG(logger, "Attempting to set the web server's configuration.");
 		this->server.setServerConfiguration(0, NULL, "/etc/firestarter/httpd.cfg");
@@ -84,8 +84,8 @@ void WebServer::setup() {
 	}
 }
 
-void WebServer::shutdown() {
-	LOG_INFO(logger, "WebServer shutting down.");
+void WtServer::shutdown() {
+	LOG_INFO(logger, "WtServer shutting down.");
 	try {
 		this->server.stop();
 	}

@@ -28,7 +28,7 @@ BUILT_SOURCES = protobuf/module.pb.cc protobuf/module.pb.h
 EXTRA_DIST = protobuf/module.proto
 
 ## Define the different module libraries that will be compiled and installed
-pkglib_LTLIBRARIES = webserver.la
+pkglib_LTLIBRARIES = wtserver.la
 
 ## Define the list of source files for the "firestarter" target. The file extension
 ## .cpp is recognized by Automake, and causes it to produce rules which invoke
@@ -48,7 +48,7 @@ firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
 ## from pkg-config via PKG_CHECK_MODULES in configure.ac.  These libraries are
 ## passed to the linker in addition to the other linker flags.
 firestarter_LDADD = $(DEPS_LIBS) $(BOOST_THREAD_LIBS) \
-                    -dlopen webserver.la
+                    -dlopen wtserver.la
 
 ## Set the libtool flags
 firestarter_LDFLAGS = -export-dynamic
@@ -59,16 +59,16 @@ firestarter_LDFLAGS = -export-dynamic
 ## header files (.h) do not result in object files by themselves, but will be
 ## included in distribution archives of the project
 
-webserver_la_SOURCES = src/modules/core/webServer/webserver.cpp \
-                       src/modules/core/webServer/webserver.h \
+wtserver_la_SOURCES = src/modules/core/wtserver/wtserver.cpp \
+                       src/modules/core/wtserver/wtserver.h \
                        src/common/module.h src/common/module.cpp \
                        protobuf/module.pb.cc protobuf/module.pb.h \
                        src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
                        src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp \
                        src/common/clients/instancemanager.h
-webserver_la_LDFLAGS = -module -avoid-version -export-dynamic
-webserver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
-webserver_la_LIBADD = $(WITTY_LIBS)
+wtserver_la_LDFLAGS = -module -avoid-version -export-dynamic
+wtserver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
+wtserver_la_LIBADD = $(WITTY_LIBS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                               src/fs/modulemanager.cpp src/fs/modulemanager.h \
