@@ -26,7 +26,7 @@ class InstanceManagerSocket {
 
 	public:
 	InstanceManagerSocket(zmq::context_t & context) :
-							publisher(context, MODULE_ORDERS_SOCKET_URI), responder(context, MANAGER_SOCKET_URI) { };
+			publisher(context, MODULE_ORDERS_SOCKET_URI), responder(context, MANAGER_SOCKET_URI) { };
 	inline bool send(google::protobuf::Message & pb_message) { return this->publisher.send(pb_message); };
 	inline bool reply(google::protobuf::Message & pb_message) { return this->responder.send(pb_message); };
 	inline bool receive(google::protobuf::Message & pb_message) { 
@@ -51,8 +51,10 @@ class InstanceManager {
 	int pending_modules;
 
 	public:
-	InstanceManager(firestarter::ModuleManager::ModuleManager & modulemanager, zmq::context_t & context) throw(std::invalid_argument); 
-	void run(const std::string & name, bool autostart = false) throw(firestarter::exception::ModuleNotFoundException);
+	InstanceManager(firestarter::ModuleManager::ModuleManager & modulemanager, zmq::context_t & context) 
+			throw(std::invalid_argument); 
+	void run(const std::string & name, bool autostart = false) 
+			throw(firestarter::exception::ModuleNotFoundException);
 	void runAll(bool autostart = false);
 	void stop(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
 	void stopAll();

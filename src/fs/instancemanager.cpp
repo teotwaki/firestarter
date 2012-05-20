@@ -8,8 +8,9 @@ namespace firestarter { namespace InstanceManager {
 
 using namespace firestarter::InstanceManager;
 
-InstanceManager::InstanceManager(firestarter::ModuleManager::ModuleManager & modulemanager, zmq::context_t & context) throw(std::invalid_argument)
-							: modulemanager(modulemanager), context(context), socket(context), running(false), pending_modules(0) {
+InstanceManager::InstanceManager(firestarter::ModuleManager::ModuleManager & modulemanager, 
+		zmq::context_t & context) throw(std::invalid_argument) : 
+		modulemanager(modulemanager), context(context), socket(context), running(false), pending_modules(0) {
 
 	LOG_INFO(logger, "Constructing InstanceManager object");
 
@@ -20,7 +21,9 @@ InstanceManager::InstanceManager(firestarter::ModuleManager::ModuleManager & mod
 
 };
 
-void InstanceManager::run(const std::string & name, bool autostart) throw(firestarter::exception::ModuleNotFoundException) {
+void InstanceManager::run(const std::string & name, bool autostart) 
+		throw(firestarter::exception::ModuleNotFoundException) {
+
 	LOG_INFO(logger, "Attempting to run module `" << name << "'.")
 	firestarter::ModuleManager::ModuleInfo * module_info = this->modulemanager.getModuleInfo(name);
 
@@ -39,7 +42,8 @@ void InstanceManager::run(const std::string & name, bool autostart) throw(firest
 	this->instances[name] = module_info->instantiate(this->context);
 
 	if (module_info->shouldRunStandAlone()) {
-		LOG_ERROR(logger, "Module `" << name << "' wants to run in its own process, but this hasn't been implemented yet.");
+		LOG_ERROR(logger, "Module `" << name << "' wants to run in its own process, but "
+							"this hasn't been implemented yet.");
 		/// \todo Throw an exception instead of returning
 		/// \todo Implement process-spawning
 		return;
