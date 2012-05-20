@@ -30,7 +30,7 @@ namespace firestarter {
 	}
 	
 	extern "C" void destroyWtServer(Module * wtserver) {
-		delete reinterpret_cast<WtServer *>(wtserver);
+		delete dynamic_cast<WtServer *>(wtserver);
 	}
 	
 	extern "C" int versionWtServer() {
