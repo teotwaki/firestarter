@@ -78,14 +78,15 @@ void InstanceManager::tick() {
 
 	LOG_DEBUG(logger, "Called tick().");
 
-	RunlevelChangeResponse response;
+	RunlevelResponse response;
 	while (this->socket.receive(response)) {
 		LOG_DEBUG(logger, "Received status changed message to " << response.runlevel());
 		this->pending_modules--;
 	}
 
 	if (this->pending_modules > 0) {
-		RunlevelChangeRequest request;
+		RunlevelRequest request;
+		request.set_type(UPDATE);
 		request.set_runlevel(INIT);
 		request.set_immediate(true);
 		this->socket.send(request);

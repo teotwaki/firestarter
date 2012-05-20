@@ -9,23 +9,30 @@ enum RunLevel {
 	NONE = 5;
 }
 
-enum RunLevelResult {
+enum Result {
 	QUEUED = 1;
 	SUCCESS = 2;
-	FAILED = 3;
+	FAIL = 3;
+	DENIED = 4;
 }
 
-message RunlevelChangeRequest {
-	required RunLevel runlevel = 1 [default = INIT];
-	required bool immediate = 2 [default = false];
+enum Request {
+	GET = 1;
+	PUT = 2;
+	UPDATE = 3;
+	DELETE = 4;
+	MOVE = 5;
 }
 
-message RunlevelChangeResponse {
-	required RunLevel runlevel = 1 [default = INIT];
-	required RunLevelResult result = 2 [default = SUCCESS];
+message RunlevelRequest {
+	required Request type = 1 [default = GET];
+	optional RunLevel runlevel = 2 [default = INIT];
+	optional bool immediate = 3 [default = false];
 }
 
-message RunlevelInformation {
-	required RunLevel runlevel = 1 [default = RUNNING];
-	repeated RunLevel previous = 2;
+message RunlevelResponse {
+	optional Request type = 1 [default = GET];
+	optional Result result = 2 [default = SUCCESS];
+	optional RunLevel runlevel = 3 [default = INIT];
 }
+

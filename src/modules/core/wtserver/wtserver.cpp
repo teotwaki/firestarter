@@ -17,12 +17,12 @@ void WtServer::run() {
 	LOG_INFO(logger, "Running the WtServer's main function.");
 
 	while (this->running || this->runlevel == NONE) {
-		RunlevelChangeRequest order;
+		RunlevelRequest order;
 		
 		if (this->runlevel == NONE) {
 			LOG_INFO(logger, "Thread is in NONE state. Waiting for orders.");
 
-			if (this->manager_socket.receive(order, true)) {
+			if (this->manager_socket.receive(order, true) && order.type() == UPDATE) {
 				LOG_DEBUG(logger, "Manager wants us to start up. Buckle up boys.");
 			}
 
@@ -40,8 +40,8 @@ void WtServer::run() {
 				case INIT: {
 					this->setup();
 					LOG_DEBUG(logger, "Creating response message");
-					RunlevelChangeResponse response;
-					response.set_runlevel(INIT);
+					RunlevelResponse response;
+					response.set_runlevel(order.runlevel());
 					response.set_result(SUCCESS);
 					this->manager_socket.send(response);
 					break;
