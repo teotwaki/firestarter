@@ -23,10 +23,14 @@ ModuleManager::ModuleManager(const libconfig::Config & config)
 	  * libraries, however, if we do use it, there is a conflict with how Boost.Test is designed. As I understand it,
 	  * libltdl injects a specific symbol (lt__PROGRAM__LTX_preloaded_symbols) into the main executable. The
 	  * problematic issue is that the main executable is provided by the Boost.Test shared library. Hence, no insertion
-	  * of symbol can be done. */
+	  * of symbol can be done. Furthermore, if the following is active, we can't compile with clang for some reason.
+	  * I don't really have time to check this out, and just want to get on with things; if we ever need support for
+	  * platforms that require static linking. (Remove #if 0 to activate) */
+#if 0
 #ifndef IN_UNIT_TESTING
 	LOG_DEBUG(logger, "Setting preloaded symbols.");
 	LTDL_SET_PRELOADED_SYMBOLS();
+#endif
 #endif
 
 	LOG_DEBUG(logger, "Initialising ltdl library.");
