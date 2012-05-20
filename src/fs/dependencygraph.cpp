@@ -30,7 +30,8 @@ DependencyGraph::~DependencyGraph() {
   *
   * \warning If it exists, the getModules() cache is invalidated.
   */
-void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, /** [in] */ const std::string & parent_name) {
+void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, 
+                                    /** [in] */ const std::string & parent_name) {
 
 	LOG_INFO(logger, "Storing `" << child_name << "' to be used by `" << parent_name << "'.");
 
@@ -44,7 +45,8 @@ void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, 
 		this->vertices[child_name] = boost::add_vertex(child_name, this->graph);
 	}
 
-	LOG_DEBUG(logger, "Adding edge from child module `" << child_name << "' to parent module `" << parent_name << "'.");
+	LOG_DEBUG(logger, 
+		"Adding edge from child module `" << child_name << "' to parent module `" << parent_name << "'.");
 	boost::add_edge(this->vertices.at(child_name), this->vertices.at(parent_name), this->graph);
 
 	this->invalidateCache();
@@ -52,12 +54,13 @@ void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, 
 
 /** \brief Remove a dependency from the graph
   *
-  * As the method's name indicates, it removes a dependency from the graph. If the first or second parameter can't be found
-  * in the graph, an exception is thrown (or will be, in the future).
+  * As the method's name indicates, it removes a dependency from the graph. If the first or second parameter can't be
+  * found in the graph, an exception is thrown (or will be, in the future).
   * 
   * \warning If it exists, the getModules() cache is invalidated.
   */
-void DependencyGraph::removeDependency(/** [in] */ const std::string & child_name, /** [in] */ const std::string & parent_name) {
+void DependencyGraph::removeDependency(/** [in] */ const std::string & child_name, 
+                                       /** [in] */ const std::string & parent_name) {
 
 	LOG_INFO(logger, "Removing `" << child_name << "' from `" << parent_name << "'.");
 
@@ -71,7 +74,8 @@ void DependencyGraph::removeDependency(/** [in] */ const std::string & child_nam
 		/// \todo Throw exception if the child module does not exist in the list of vertices 
 	}
 
-	LOG_DEBUG(logger, "Removing edge from parent module `" << parent_name << "' to child module `" << child_name << "'.");
+	LOG_DEBUG(logger,
+		"Removing edge from parent module `" << parent_name << "' to child module `" << child_name << "'.");
 	boost::remove_edge(this->vertices.at(parent_name), this->vertices.at(child_name), this->graph);
 
 	this->invalidateCache();
@@ -80,8 +84,8 @@ void DependencyGraph::removeDependency(/** [in] */ const std::string & child_nam
 
 /** \brief Sort the graph topologically
   *
-  * This method applies boost::topological_sort to the stored graph.
-  * The graph is only sorted when the cache is invalid.
+  * This method applies boost::topological_sort to the stored graph. The graph is only sorted when the cache is
+  * invalid.
   *
   * \return The cache computed by getModules()
   * \see getModules
@@ -100,17 +104,17 @@ std::list<std::string> * DependencyGraph::resolve() {
 
 /** \brief Obtain the order in which the modules should be loaded to avoid dependency issues.
   *
-  * The getModules method extracts from the (previously resolve()'d) Graph the list of modules in the order 
-  * in which they should be loaded. The order is important, as it enables specific modules to provide symbols 
-  * that other modules require.
+  * The getModules method extracts from the (previously resolve()'d) Graph the list of modules in the order in which
+  * they should be loaded. The order is important, as it enables specific modules to provide symbols that other modules
+  * require.
   *
-  * A small level of caching is implemented: Once returned, the pointer to the list will remain the same as 
-  * long as addDependency() or removeDependency() is not called (and hence, the cache invalidated). For example:
+  * A small level of caching is implemented: Once returned, the pointer to the list will remain the same as long as
+  * addDependency() or removeDependency() is not called (and hence, the cache invalidated). For example:
   * \code
   * DependencyGraph graph;
   * graph.addDependency("bar");
   * graph.addDependency("foo", "bar");
-  * std::list<std::string> * module_order = graph.resolve(); // getModules() is called by resolve(), cache is initialised
+  * std::list<std::string> * module_order = graph.resolve(); // getModules() is called by resolve(), cache is init'd
   * graph.addDependency("taz", "bar"); // cache is invalidated, module_order should not be used anymore
   * std::list<std::string> * first = graph.resolve(); // cache is initialised
   * std::list<std::string> * second = graph.getModules(); // first == second

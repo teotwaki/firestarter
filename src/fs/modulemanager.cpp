@@ -6,7 +6,8 @@ namespace firestarter { namespace ModuleManager {
 
 using namespace firestarter::ModuleManager;
 
-ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException):
+ModuleManager::ModuleManager(const libconfig::Config & config) 
+	throw(firestarter::exception::InvalidConfigurationException) :
 	configuration(config) {
 
 	using namespace libconfig;
@@ -14,15 +15,15 @@ ModuleManager::ModuleManager(const libconfig::Config & config) throw(firestarter
 
 	if (not config.exists("application.modules")) {
 		LOG_ERROR(logger, "Configuration file does not contain application.modules.");
-		throw firestarter::exception::InvalidConfigurationException("Configuration file does not contain application.modules.");
+		throw firestarter::exception::InvalidConfigurationException(
+			"Configuration file does not contain application.modules.");
 	}
 
-	/** The following two lines are supposed to be used should we need to support platforms 
-	  * that do not use dynamic libraries, however, if we do use it, there is a conflict 
-	  * with how Boost.Test is designed. 
-	  * As I understand it, libltdl injects a specific symbol (lt__PROGRAM__LTX_preloaded_symbols) 
-	  * into the main executable. The problematic issue is that the main executable is provided 
-	  * by the Boost.Test shared library. Hence, no insertion of symbol can be done. */
+	/** The following two lines are supposed to be used should we need to support platforms that do not use dynamic
+	  * libraries, however, if we do use it, there is a conflict with how Boost.Test is designed. As I understand it,
+	  * libltdl injects a specific symbol (lt__PROGRAM__LTX_preloaded_symbols) into the main executable. The
+	  * problematic issue is that the main executable is provided by the Boost.Test shared library. Hence, no insertion
+	  * of symbol can be done. */
 #ifndef IN_UNIT_TESTING
 	LOG_DEBUG(logger, "Setting preloaded symbols.");
 	LTDL_SET_PRELOADED_SYMBOLS();
@@ -108,14 +109,16 @@ ModuleManager::~ModuleManager() {
 	LOG_INFO(logger, "ModuleManager correctly shut down. The end is nigh.");
 }
 
-void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(firestarter::exception::InvalidConfigurationException) {
+void ModuleManager::lookupDependencies(const libconfig::Config & config) 
+	throw(firestarter::exception::InvalidConfigurationException) {
 
 	using namespace libconfig;
 	using namespace std;
 
 	if (not config.exists("application.modules") && not config.exists("module.dependencies")) {
 		LOG_ERROR(logger, "Configuration file does not contain application.modules nor module.dependencies");
-		throw firestarter::exception::InvalidConfigurationException("Configuration file does not contain application.modules nor module.dependencies.");
+		throw firestarter::exception::InvalidConfigurationException(
+			"Configuration file does not contain application.modules nor module.dependencies.");
 	}
 
 	string configuration_key = "application.modules";
@@ -135,8 +138,8 @@ void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(f
 
 		if (this->modules.find(module_name) == this->modules.end()) {
 
-			/** Using a pointer instead of a reference because libconfig::Config does not support
-			  * Copy constructor... Not really sure why, as I use it fine in this constructor...
+			/** Using a pointer instead of a reference because libconfig::Config does not support copy constructor...
+			  * Not really sure why, as I use it fine in this constructor...
 			  * \todo Make libconfig::Config in ModuleInfo a reference rather than a pointer. 
 			  * \todo Catch/throw exceptions */
 			Config * module_config = this->loadModuleConfiguration(module_name);
@@ -147,7 +150,6 @@ void ModuleManager::lookupDependencies(const libconfig::Config & config) throw(f
 
 			if (module_config->exists("module.dependencies"))
 				this->lookupDependencies(*module_config);
-
 
 		}
 
@@ -171,18 +173,21 @@ libconfig::Config * ModuleManager::loadModuleConfiguration(const std::string & m
 
 	catch (ParseException pex) {
 		LOG_ERROR(logger, "Invalid configuration file for module `" << module_name << "': Parse Exception.");
-		throw firestarter::exception::InvalidConfigurationException("Invalid configuration file for module: Parse Exception.");
+		throw firestarter::exception::InvalidConfigurationException(
+			"Invalid configuration file for module: Parse Exception.");
 	}
 
 	catch (FileIOException fex) {
 		LOG_ERROR(logger, "Could not read configuration file for module `" << module_name << "': File IO Exception.");
-		throw firestarter::exception::InvalidConfigurationException("Could not read configuration file for module: File IO Exception.");
+		throw firestarter::exception::InvalidConfigurationException(
+			"Could not read configuration file for module: File IO Exception.");
 	}
 
 	return module_config;
 }
 
-void ModuleManager::loadModule(const std::string & module_name) throw(firestarter::exception::ModuleNotFoundException) {
+void ModuleManager::loadModule(const std::string & module_name) 
+	throw(firestarter::exception::ModuleNotFoundException) {
 
 	using namespace std;
 
@@ -222,21 +227,24 @@ void ModuleManager::loadModule(const std::string & module_name) throw(firestarte
 	}
 	
 	LOG_DEBUG(logger, "Retrieving module's factory symbol");
-	create_module * factory = reinterpret_cast<create_module *>(lt_dlsym(module->getHandle(), ("create" + module_name).c_str()));
+	create_module * factory = reinterpret_cast<create_module *>(lt_dlsym(module->getHandle(),
+	                                                                     ("create" + module_name).c_str()));
 	if (factory == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `create" << module_name << "'.");
 		/// \todo Throw exception if unable to load symbol
 	}
 
 	LOG_DEBUG(logger, "Retrieving module's destructor symbol");
-	destroy_module * destructor = reinterpret_cast<destroy_module *>(lt_dlsym(module->getHandle(), ("destroy" + module_name).c_str()));
+	destroy_module * destructor = reinterpret_cast<destroy_module *>(lt_dlsym(module->getHandle(),
+	                                                                          ("destroy" + module_name).c_str()));
 	if (destructor == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `destroy" << module_name << "'.");
 		/// \todo Throw exception if unable to load symbol
 	}
 
 	LOG_DEBUG(logger, "Retrieving module's version symbol");
-	module_version * version = reinterpret_cast<module_version *>(lt_dlsym(module->getHandle(), ("version" + module_name).c_str()));
+	module_version * version = reinterpret_cast<module_version *>(lt_dlsym(module->getHandle(), 
+	                                                                       ("version" + module_name).c_str()));
 	if (version == NULL) {
 		LOG_ERROR(logger, "Unable to load symbol `version" << module_name << "'.");
 		/// \todo Throw exception if unable to load symbol
@@ -261,14 +269,17 @@ void ModuleManager::loadModules() {
 	}
 }
 
-ModuleInfo * ModuleManager::getModuleInfo(const std::string & name) throw(firestarter::exception::ModuleNotFoundException) {
+ModuleInfo * ModuleManager::getModuleInfo(const std::string & name) 
+	throw(firestarter::exception::ModuleNotFoundException) {
+
 	/// \todo Implement try loading module before throwing
 	try {
 		return this->modules.at(name);
 	}
 
 	catch (...) {
-		LOG_ERROR(logger, "Exception occured in ModuleManager::getModule() when trying to access modules[" << name << "].");
+		LOG_ERROR(logger, 
+			"Exception occured in ModuleManager::getModule() when trying to access modules[" << name << "].");
 		throw firestarter::exception::ModuleNotFoundException();
 	}
 }

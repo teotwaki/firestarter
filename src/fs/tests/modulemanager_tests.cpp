@@ -9,7 +9,8 @@
 BOOST_AUTO_TEST_CASE(constructor_test) {
 	using namespace firestarter::ModuleManager;
 
-	BOOST_CHECK_THROW(ModuleManager m0 = ModuleManager(libconfig::Config()), firestarter::exception::InvalidConfigurationException);
+	BOOST_CHECK_THROW(ModuleManager m0 = ModuleManager(libconfig::Config()),
+	                                                   firestarter::exception::InvalidConfigurationException);
 }
 
 struct EmptyConfig {
