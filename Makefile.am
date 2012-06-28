@@ -7,7 +7,8 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 ## obtained from pkg-config via PKG_CHECK_MODULES in configure.ac.  These
 ## flags are passed to the compiler for both C and C++, in addition to the
 ## language-specific options.
-AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common
+AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common -DSYSCONFDIR=\"${sysconfdir}/firestarter\" \
+              -DMODCONFDIR=\"${localstatedir}/firestarter\" -DLIBDIR=\"${libdir}/firestarter\"
 MODULES_CPPFLAGS = $(AM_CPPFLAGS) -I src/modules
 TESTS_CPPFLAGS = $(AM_CPPFLAGS) -DIN_UNIT_TESTING
 TESTS_LIBS = $(DEPS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
@@ -29,6 +30,14 @@ EXTRA_DIST = protobuf/module.proto
 
 ## Define the different module libraries that will be compiled and installed
 pkglib_LTLIBRARIES = wtserver.la
+
+## FS configuration directories and files
+fsconfdir = ${sysconfdir}/firestarter
+fsconf_DATA = configuration/fs.cfg configuration/logging.cfg configuration/httpd.cfg
+
+## Modules configuration directories and files
+modconfdir = ${localstatedir}/firestarter
+modconf_DATA = configuration/modules/wtserver.cfg
 
 ## Define the list of source files for the "firestarter" target. The file extension
 ## .cpp is recognized by Automake, and causes it to produce rules which invoke
