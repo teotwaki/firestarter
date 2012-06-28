@@ -9,8 +9,9 @@
 BOOST_AUTO_TEST_CASE(constructor_test) {
 	using namespace firestarter::ModuleManager;
 
-	BOOST_CHECK_THROW(ModuleManager m0 = ModuleManager(libconfig::Config()),
-	                                                   firestarter::exception::InvalidConfigurationException);
+	libconfig::Config c;
+
+	BOOST_CHECK_THROW(ModuleManager m0 = ModuleManager(c), firestarter::exception::InvalidConfigurationException);
 }
 
 struct EmptyConfig {
@@ -28,10 +29,10 @@ BOOST_FIXTURE_TEST_CASE(constructor_test_emptyconfig, EmptyConfig) {
 	using namespace firestarter::ModuleManager;
 	ModuleManager m1 = ModuleManager(config);
 
-	BOOST_CHECK(m1.is_initialised());
+	BOOST_CHECK(m1.isInitialised());
 	BOOST_CHECK(not m1.getModulePath().empty());
-	BOOST_CHECK(m1.getModulePath() == "/usr/lib/firestarter");
-	BOOST_CHECK(m1.getModuleList().empty());
+	BOOST_CHECK(m1.getModulePath() == LIBDIR);
+	BOOST_CHECK(m1.getModuleList()->empty());
 }
 
 BOOST_FIXTURE_TEST_CASE(robustness_test, EmptyConfig) {
@@ -40,9 +41,9 @@ BOOST_FIXTURE_TEST_CASE(robustness_test, EmptyConfig) {
 
 	ModuleManager m2 = ModuleManager(config);
 
-	BOOST_CHECK_THROW(m2.getModule("this should throw an exception"), ModuleNotFoundException);
-	BOOST_CHECK_THROW(m2.getModule(NULL), std::logic_error);
-	BOOST_CHECK_THROW(m2.getModule(""), ModuleNotFoundException);
+	BOOST_CHECK_THROW(m2.getModuleInfo("this should throw an exception"), ModuleNotFoundException);
+	BOOST_CHECK_THROW(m2.getModuleInfo(NULL), std::logic_error);
+	BOOST_CHECK_THROW(m2.getModuleInfo(""), ModuleNotFoundException);
 
 	BOOST_CHECK_THROW(m2.loadModule("this should throw an exception"), ModuleNotFoundException);
 	BOOST_CHECK_THROW(m2.loadModule(NULL), std::logic_error);
@@ -74,9 +75,9 @@ BOOST_FIXTURE_TEST_CASE(constructor_test_fakeconfig, FakeConfig) {
 
 	ModuleManager m3 = ModuleManager(config);
 
-	BOOST_CHECK(m3.is_initialised());
+	BOOST_CHECK(m3.isInitialised());
 	BOOST_CHECK(not m3.getModulePath().empty());
 	BOOST_CHECK(m3.getModulePath() == fakepath);
-	BOOST_CHECK(not m3.getModuleList().empty());
-	BOOST_CHECK_EQUAL(m3.getModuleList().size(), 1);
+	BOOST_CHECK(not m3.getModuleList()->empty());
+	BOOST_CHECK_EQUAL(m3.getModuleList()->size(), 1);
 }
