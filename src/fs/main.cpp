@@ -14,7 +14,7 @@ int main(void) {
 
 	try {
 		LOG_DEBUG(logger, "Loading the configuration...");
-		config.readFile("/etc/firestarter/fs.cfg");
+		config.readFile(SYSCONFDIR "/fs.cfg");
 	}
 
 	catch (libconfig::SettingTypeException e) {

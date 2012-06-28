@@ -54,8 +54,8 @@ ModuleManager::ModuleManager(const libconfig::Config & config)
 		LOG_WARN(logger, "Couldn't find module_path configuration key.");
 		if (lt_dlgetsearchpath() == NULL) {
 			LOG_DEBUG(logger, "Default search path: `NULL'.");
-			LOG_DEBUG(logger, "Setting default search path to: `/usr/lib/firestarter'.");
-			this->module_path = "/usr/lib/firestarter";
+			LOG_DEBUG(logger, "Setting default search path to: `" LIBDIR "'.");
+			this->module_path = LIBDIR;
 		}
 
 		else {
@@ -169,7 +169,7 @@ libconfig::Config * ModuleManager::loadModuleConfiguration(const std::string & m
 
 	try {
 		/// \todo Use Boost.Filesystem to convert the slash into platform independent path separator.
-		std::string config_file_path = this->module_path + '/' + module_name + ".cfg";
+		std::string config_file_path = MODCONFDIR "/" + module_name + ".cfg";
 		boost::algorithm::to_lower(config_file_path);
 		LOG_DEBUG(logger, "Attempting to read `" << config_file_path << "'.");
 		module_config->readFile(config_file_path.c_str());

@@ -66,7 +66,7 @@ void WtServer::setup() {
 	LOG_INFO(logger, "WtServer being set up.");
 	try {
 		LOG_DEBUG(logger, "Attempting to set the web server's configuration.");
-		this->server.setServerConfiguration(0, NULL, "/etc/firestarter/httpd.cfg");
+		this->server.setServerConfiguration(0, NULL, SYSCONFDIR "/httpd.cfg");
 		LOG_DEBUG(logger, "Starting httpd thread.");
 		this->server.start();
 		LOG_DEBUG(logger, "Setting this thread's state.");
