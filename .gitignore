@@ -42,6 +42,7 @@ stamp-h1
 *.l[ao]
 .libs
 .dirstamp
+INSTALL
 
 # Ignore protobuf files
 *.pb.h
