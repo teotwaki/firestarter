@@ -70,14 +70,16 @@ firestarter_LDFLAGS = -export-dynamic
 
 webinterface_la_SOURCES = src/modules/core/webInterface/webinterface.cpp \
                           src/modules/core/webInterface/webinterface.h \
+                          src/modules/core/webInterface/mainpage.cpp \
+                          src/modules/core/webInterface/mainpage.h \
                           src/common/module.h src/common/module.cpp \
                           protobuf/module.pb.cc protobuf/module.pb.h \
                           src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
                           src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp \
                           src/common/clients/instancemanager.h
 webinterface_la_LDFLAGS = -module -avoid-version -export-dynamic
-webinterface_la_CPPFLAGS = $(MODULES_CPPFLAGS) $(FASTCGIPP_CFLAGS)
-webinterface_la_LIBADD = $(FASTCGIPP_LIBS)
+webinterface_la_CPPFLAGS = $(MODULES_CPPFLAGS) $(WEBDEPS_CFLAGS)
+webinterface_la_LIBADD = $(WEBDEPS_LIBS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                               src/fs/modulemanager.cpp src/fs/modulemanager.h \

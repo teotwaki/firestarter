@@ -14,7 +14,7 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 # Checks for header files
-AC_CHECK_HEADERS([stdlib.h ltdl.h Wt/WApplication Wt/WServer])
+AC_CHECK_HEADERS([stdlib.h ltdl.h])
 
 # Checks for library functions.
 AC_SEARCH_LIBS([lt_dlinit], [ltdl])
@@ -26,29 +26,6 @@ AX_CHECK_COMPILE_FLAG([-std=gnu++11], [CXXFLAGS="$CXXFLAGS -std=gnu++11"], [
 		])
 	])
 ])
-
-# We need to check some advanced stuff, as there are no pkg-config definition files for Wt
-#AC_CACHE_CHECK([for the Wt library], [firestarter_cv_Wt_lib],
-#	[firestarter_cv_Wt_lib=no
-#	SAVED_LDFLAGS=$LDFLAGS
-#	LDFLAGS="$LDFLAGS -lwt -lwtext"
-#	AC_LINK_IFELSE(
-#		[AC_LANG_PROGRAM([#include <Wt/WText>],
-#		[Wt::WText dummy])],
-#		[WITTY_LIBS="$WITTY_LIBS -lwt -lwtext"] [HAVE_WITTY=1] [firestarter_cv_Wt_lib=yes],
-#		[AC_MSG_ERROR([libwt is not installed.])])
-#	LDFLAGS=$SAVED_LDFLAGS])
-#
-#AC_CACHE_CHECK([for the Wt Http library], [firestarter_cv_Wt_Http_lib],
-#	[firestarter_cv_Wt_Http_lib=no
-#	SAVED_LDFLAGS=$LDFLAGS
-#	LDFLAGS="$LDFLAGS -lwt -lwthttp"
-#	AC_LINK_IFELSE(
-#		[AC_LANG_PROGRAM([#include <Wt/WServer>],
-#		[Wt::WServer dummy("dummy")])],
-#		[WITTY_LIBS="$WITTY_LIBS -lwthttp"] [firestarter_cv_Wt_Http_lib=yes],
-#		[AC_MSG_ERROR([libwthttp is not installed.])])
-#	LDFLAGS=$SAVED_LDFLAGS])
 
 # Check if the boost libraries are available
 BOOST_REQUIRE([1.42])
@@ -63,7 +40,7 @@ BOOST_THREADS
 BOOST_DATE_TIME
 
 PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
-PKG_CHECK_MODULES([FASTCGIPP], [fastcgi++ >= 2.0])
+PKG_CHECK_MODULES([WEBDEPS], [fastcgi++ >= 2.0 libctemplate >= 2.2])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_MACRO_DIR([m4])
