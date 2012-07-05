@@ -29,8 +29,8 @@ class InstanceManagerSocket {
 			publisher(context, MODULE_ORDERS_SOCKET_URI), responder(context, MANAGER_SOCKET_URI) { };
 	inline bool send(google::protobuf::Message & pb_message) { return this->publisher.send(pb_message); };
 	inline bool reply(google::protobuf::Message & pb_message) { return this->responder.send(pb_message); };
-	inline bool receive(google::protobuf::Message & pb_message) { 
-		if (this->responder.receive(pb_message))
+	inline bool receive(google::protobuf::Message & pb_message, bool blocking = false) { 
+		if (this->responder.receive(pb_message, blocking))
 			return this->ack();
 		return false;
 	 };
