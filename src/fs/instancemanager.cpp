@@ -54,7 +54,7 @@ void InstanceManager::run(const std::string & name, bool autostart)
 
 		LOG_INFO(logger, "Spawning thread for module `" << name << "'.");
 		RunnableModule * module = reinterpret_cast<RunnableModule *>(this->instances[name]);
-		boost::thread * thread = new boost::thread(&RunnableModule::run, module);
+		boost::thread * thread = new boost::thread(&RunnableModule::_initialiser, module);
 		this->threads[name] = std::make_pair(thread, module);
 		this->pending_modules++;
 	}

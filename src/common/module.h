@@ -32,6 +32,7 @@ class RunnableModule : public Module {
 	virtual void run() = 0; /**< pure virtual */
 	virtual void shutdown();
 	virtual void restart();
+	virtual void _initialiser();
 	
 };
 
