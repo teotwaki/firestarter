@@ -9,7 +9,14 @@ using namespace firestarter::sockets;
 bool ZMQSendingSocket::send() {
 	LOG_INFO(logger, "Sending empty message on socket (" << &(this->socket) << ").");
 	zmq::message_t message(0);
-	return socket->send(message, 0) == 0;
+	bool sent = socket->send(message, 0);
+	if (sent) {
+		LOG_DEBUG(logger, "Empty message sent succesfully.");
+	}
+	else {
+		LOG_ERROR(logger, "Empty message couldn't be sent.");
+	}
+	return sent;
 }
 
 bool ZMQSendingSocket::send(google::protobuf::Message & pb_message, bool send_more) {
@@ -34,7 +41,7 @@ bool ZMQSendingSocket::send(google::protobuf::Message & pb_message, bool send_mo
 	}
 
 	LOG_DEBUG(logger, "Sending message.");
-	return this->socket->send(message, flags) == 0;
+	return this->socket->send(message, flags);
 }
 
 bool ZMQReceivingSocket::receive(bool blocking) {
@@ -51,7 +58,7 @@ bool ZMQReceivingSocket::receive(bool blocking) {
 		LOG_DEBUG(logger, "No flags to add.");
 	}
 
-	return this->socket->recv(&message, flags) == 0;
+	return this->socket->recv(&message, flags);
 }
 
 bool ZMQReceivingSocket::receive(google::protobuf::Message & pb_message, bool blocking) {
