@@ -48,7 +48,6 @@ int main(void) {
 
 	while (instance_manager.isRunning()) {
 		boost::this_thread::sleep(delay);
-		instance_manager.tick();
 	}
 
 }

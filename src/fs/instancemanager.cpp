@@ -71,25 +71,39 @@ void InstanceManager::runAll(bool autostart) {
 		this->run(module_name, autostart);
 	}
 
-}
-
-void InstanceManager::tick() {
-	using namespace firestarter::protocol::module;
-
-	LOG_DEBUG(logger, "Called tick().");
-
-	RunlevelResponse response;
-	while (this->socket.receive(response)) {
-		LOG_DEBUG(logger, "Received status changed message to " << response.runlevel());
-		this->pending_modules--;
-	}
-
 	if (this->pending_modules > 0) {
 		RunlevelRequest request;
+		RunlevelResponse response;
 		request.set_type(UPDATE);
 		request.set_runlevel(INIT);
 		request.set_immediate(true);
 		this->socket.send(request);
+
+		int pending = this->pending_modules;
+
+		while (pending > 0) {
+			response.Clear();
+			this->socket.receive(response, true);
+			LOG_DEBUG(logger, "Received status updated message");
+			pending--;
+		}
+
+		request.Clear();
+		request.set_type(UPDATE);
+		request.set_runlevel(RUNNING);
+		request.set_immediate(true);
+		this->socket.send(request);
+
+		pending = this->pending_modules;
+
+		while (pending > 0) {
+			response.Clear();
+			this->socket.receive(response, true);
+			LOG_DEBUG(logger, "Received status update message");
+			pending--;
+		}
+
 	}
 
 }
+

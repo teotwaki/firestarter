@@ -58,7 +58,6 @@ class InstanceManager {
 	void runAll(bool autostart = false);
 	void stop(const std::string & name) throw(firestarter::exception::ModuleNotFoundException);
 	void stopAll();
-	void tick();
 	inline bool isRunning() { return this->running; };
 
 };
