@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/stat.h>
 
 namespace firestarter {
 	namespace module {
@@ -20,6 +21,7 @@ namespace firestarter {
 
 	class AdminPage : public Fastcgipp::Request<wchar_t> {
 		bool response() {
+			this->out << "Content-Type: text/html; charset=utf-8\r\n\r\n";
 			this->out << "Hello World";
 			return true;
 		}

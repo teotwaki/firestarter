@@ -34,6 +34,8 @@ void WebInterface::setup() {
 	int len;
 	struct sockaddr_un local, remote;
 
+	int old_umask = ::umask(~(0777&0777));
+
     if ((this->socket_fd = ::socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
 		LOG_ERROR(logger, "Couldn't socket().");
 		return;
@@ -47,6 +49,8 @@ void WebInterface::setup() {
 		LOG_ERROR(logger, "Couldn't bind().");
 		return;
 	}
+
+	::umask(old_umask);
 
 	if (::listen(this->socket_fd, 5) == -1) {
 		LOG_ERROR(logger, "Couldn't listen().");
