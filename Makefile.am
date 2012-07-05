@@ -12,7 +12,6 @@ AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common -DSYSCONFDIR=\"${sysconfdir}/firestar
 MODULES_CPPFLAGS = $(AM_CPPFLAGS) -I src/modules
 TESTS_CPPFLAGS = $(AM_CPPFLAGS) -DIN_UNIT_TESTING
 TESTS_LIBS = $(DEPS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
-WITTY_LIBS = -lwt -lwthttp -lwtext
 
 ## Define an executable target "firestarter", which will be installed into the
 ## directory named by the predefined variable $(bindir).
@@ -29,7 +28,7 @@ BUILT_SOURCES = protobuf/module.pb.cc protobuf/module.pb.h
 EXTRA_DIST = protobuf/module.proto
 
 ## Define the different module libraries that will be compiled and installed
-pkglib_LTLIBRARIES = wtserver.la
+pkglib_LTLIBRARIES = webinterface.la
 
 ## FS configuration directories and files
 fsconfdir = ${sysconfdir}/firestarter
@@ -37,7 +36,7 @@ fsconf_DATA = configuration/fs.cfg configuration/logging.cfg configuration/httpd
 
 ## Modules configuration directories and files
 modconfdir = ${localstatedir}/firestarter
-modconf_DATA = configuration/modules/wtserver.cfg
+modconf_DATA = configuration/modules/webinterface.cfg
 
 ## Define the list of source files for the "firestarter" target. The file extension
 ## .cpp is recognized by Automake, and causes it to produce rules which invoke
@@ -51,13 +50,14 @@ firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
                       src/common/log.h src/common/log.cpp src/common/simplecache.h \
                       protobuf/module.pb.cc protobuf/module.pb.h \
                       src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
-                      src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp
+                      src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp \
+                      src/common/module.h
 
 ## Set the library dependencies for the "firestarter" target to the value obtained
 ## from pkg-config via PKG_CHECK_MODULES in configure.ac.  These libraries are
 ## passed to the linker in addition to the other linker flags.
 firestarter_LDADD = $(DEPS_LIBS) $(BOOST_THREAD_LIBS) \
-                    -dlopen wtserver.la
+                    -dlopen webinterface.la
 
 ## Set the libtool flags
 firestarter_LDFLAGS = -export-dynamic
@@ -68,16 +68,16 @@ firestarter_LDFLAGS = -export-dynamic
 ## header files (.h) do not result in object files by themselves, but will be
 ## included in distribution archives of the project
 
-wtserver_la_SOURCES = src/modules/core/wtserver/wtserver.cpp \
-                       src/modules/core/wtserver/wtserver.h \
-                       src/common/module.h src/common/module.cpp \
-                       protobuf/module.pb.cc protobuf/module.pb.h \
-                       src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
-                       src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp \
-                       src/common/clients/instancemanager.h
-wtserver_la_LDFLAGS = -module -avoid-version -export-dynamic
-wtserver_la_CPPFLAGS = $(MODULES_CPPFLAGS)
-wtserver_la_LIBADD = $(WITTY_LIBS)
+webinterface_la_SOURCES = src/modules/core/webInterface/webinterface.cpp \
+                          src/modules/core/webInterface/webinterface.h \
+                          src/common/module.h src/common/module.cpp \
+                          protobuf/module.pb.cc protobuf/module.pb.h \
+                          src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
+                          src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp \
+                          src/common/clients/instancemanager.h
+webinterface_la_LDFLAGS = -module -avoid-version -export-dynamic
+webinterface_la_CPPFLAGS = $(MODULES_CPPFLAGS) $(FASTCGIPP_CFLAGS)
+webinterface_la_LIBADD = $(FASTCGIPP_LIBS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                               src/fs/modulemanager.cpp src/fs/modulemanager.h \

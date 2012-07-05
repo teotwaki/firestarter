@@ -63,6 +63,7 @@ BOOST_THREADS
 BOOST_DATE_TIME
 
 PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
+PKG_CHECK_MODULES([FASTCGIPP], [fastcgi++ >= 2.0])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_MACRO_DIR([m4])
