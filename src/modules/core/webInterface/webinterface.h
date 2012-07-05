@@ -4,6 +4,7 @@
 
 #include "module.h"
 #include "log.h"
+#include "mainpage.h"
 
 #include <fastcgi++/request.hpp>
 #include <fastcgi++/manager.hpp>
@@ -18,14 +19,6 @@ namespace firestarter {
 	namespace module {
 		namespace core {
 			namespace WebInterface {
-
-	class AdminPage : public Fastcgipp::Request<wchar_t> {
-		bool response() {
-			this->out << "Content-Type: text/html; charset=utf-8\r\n\r\n";
-			this->out << "Hello World";
-			return true;
-		}
-	};
 
 	class WebInterface : public firestarter::module::RunnableModule {
 		private:
