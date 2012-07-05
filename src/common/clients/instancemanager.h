@@ -21,7 +21,7 @@ class InstanceManagerClientSocket {
 		return false;
 	};
 	inline bool receive(google::protobuf::Message & pb_message, bool blocking = false) { return this->subscriber.receive(pb_message, blocking); };
-	inline bool receive_ack() { return this->requester.receive(); };
+	inline bool receive_ack() { return this->requester.receive(true); };
 };
 
 /* Closing namespaces */
