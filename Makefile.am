@@ -72,6 +72,8 @@ webinterface_la_SOURCES = src/modules/core/webInterface/webinterface.cpp \
                           src/modules/core/webInterface/webinterface.h \
                           src/modules/core/webInterface/mainpage.cpp \
                           src/modules/core/webInterface/mainpage.h \
+                          src/modules/core/webInterface/htmltemplates.cpp \
+                          src/modules/core/webInterface/htmltemplates.h \
                           src/common/module.h src/common/module.cpp \
                           protobuf/module.pb.cc protobuf/module.pb.h \
                           src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
