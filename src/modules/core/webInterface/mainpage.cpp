@@ -8,10 +8,36 @@ AdminPage::Sessions AdminPage::sessions(3600, 3600);
 
 bool AdminPage::response() {
 	using namespace Fastcgipp;
+	using namespace Templates;
 
 	this->sessions.cleanup();
-	this->session = sessions.find(environment().findCookie(L"SESSIONID").data());
+	this->session = sessions.find(environment().findCookie("SESSIONID").data());
 
+	using namespace Templates;
+
+	Headers h;
+	DocType dt;
+	this->out << h.render() << dt.render();
+
+	Tags::Html html;
+	Tags::Head head;
+	Tags::Title title;
+	Tags::Body body;
+	Tags::P paragraph;
+
+	html.setLang("en");
+	html.setXmllang("en");
+
+	title.setContents("Firestarter starts fires.");
+	paragraph.setContents("This is our first paragraph.");
+
+	html.addChild(&head);
+	head.addChild(&title);
+	html.addChild(&body);
+	body.addChild(&paragraph);
+
+	this->out << html.render();
+/*
 	std::wstring command = environment().findGet(L"command");
 
 	this->setloc(std::locale(getloc(), new boost::posix_time::time_facet("%a, %d-%b-%Y %H:%M:%S GMT")));
@@ -46,14 +72,16 @@ bool AdminPage::response() {
 	this->out << "<p>There are " << this->sessions.size() << " sessions open</p>\n"
 		"	</body>\n"
 		"</html>";
-
+*/
 	return true;
 }
 
 void AdminPage::handleSession() {
 	using namespace Fastcgipp;
 
-	this->out << "Content-Type: text/html; charset=utf-8\r\n\r\n"
+	using namespace Templates;
+
+/*	this->out << "Content-Type: text/html; charset=utf-8\r\n\r\n"
 		"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' "
 		" 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n"
 		"<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>\n"
@@ -65,7 +93,7 @@ void AdminPage::handleSession() {
 		"		<p>We are currently in a session. The session id is " << this->session->first << " and the session data"
 		" is \"" << encoding(HTML) << this->session->second << encoding(NONE) << "\". It will expire at "
 		<< this->sessions.getExpiry(this->session) << ".</p>\n"
-		"		<p>Click <a href='?command=logout'>here</a> to logout</p>\n";
+		"		<p>Click <a href='?command=logout'>here</a> to logout</p>\n";*/
 }
 
 void AdminPage::handleNoSession() {

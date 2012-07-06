@@ -3,7 +3,6 @@
 #define __MODULE_H
 
 #include <string>
-#include <boost/tr1/unordered_map.hpp>
 #include <cstdlib>
 #include <ctime>
 
