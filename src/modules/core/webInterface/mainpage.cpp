@@ -4,6 +4,8 @@ DECLARE_EXTERN_LOG(logger);
 
 using namespace firestarter::module::core::WebInterface;
 
+AdminPage::Sessions AdminPage::sessions(3600, 3600);
+
 bool AdminPage::response() {
 	using namespace Fastcgipp;
 
