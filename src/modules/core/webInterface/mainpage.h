@@ -12,8 +12,8 @@ namespace firestarter {
 		namespace core {
 			namespace WebInterface {
 
-	class AdminPage : public Fastcgipp::Request<char> {
-		typedef Fastcgipp::Http::Sessions<std::string> Sessions;
+	class AdminPage : public Fastcgipp::Request<wchar_t> {
+		typedef Fastcgipp::Http::Sessions<std::wstring> Sessions;
 		static Sessions sessions;
 		Sessions::iterator session;
 

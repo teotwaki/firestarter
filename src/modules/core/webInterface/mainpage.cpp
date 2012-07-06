@@ -9,33 +9,33 @@ AdminPage::Sessions AdminPage::sessions(3600, 3600);
 bool AdminPage::response() {
 	using namespace Fastcgipp;
 
-	sessions.cleanup();
-	this->session = sessions.find(environment().findCookie("SESSIONID").data());
+	this->sessions.cleanup();
+	this->session = sessions.find(environment().findCookie(L"SESSIONID").data());
 
-	std::string command = environment().findGet("command");
+	std::wstring command = environment().findGet(L"command");
 
 	this->setloc(std::locale(getloc(), new boost::posix_time::time_facet("%a, %d-%b-%Y %H:%M:%S GMT")));
 
 	if (this->session != sessions.end()) {
-		if (command == "logout") {
+		if (command == L"logout") {
 
 			this->out << "Set-Cookie: SESSIONID=deleted; expires=Thu, 01-Jan-1970 00:00:00 GMT;\n";
-            sessions.erase(session);
-            this->session = sessions.end();
+            this->sessions.erase(session);
+            this->session = this->sessions.end();
             this->handleNoSession();
 		}
 		else {
 			this->session->first.refresh();
 			this->out << "Set-Cookie: SESSIONID=" << encoding(URL) << this->session->first << encoding(NONE) << 
-				"; expires=" << sessions.getExpiry(session) << '\n';
+				"; expires=" << this->sessions.getExpiry(this->session) << '\n';
 			this->handleSession();
 		}
 	}
 	else {
-		if (command == "login") {
-			this->session = sessions.generate(environment().findPost("data").value);
+		if (command == L"login") {
+			this->session = this->sessions.generate(environment().findPost(L"data").value);
 			this->out << "Set-Cookie: SESSIONID=" << encoding(URL) << this->session->first << encoding(NONE) <<
-				"; expires=" << sessions.getExpiry(session) << '\n';
+				"; expires=" << this->sessions.getExpiry(this->session) << '\n';
 			this->handleSession();
 		}
 		else {
@@ -43,7 +43,7 @@ bool AdminPage::response() {
 		}
 	}
 
-	this->out << "<p>There are " << sessions.size() << "sessions open</p>\n"
+	this->out << "<p>There are " << this->sessions.size() << " sessions open</p>\n"
 		"	</body>\n"
 		"</html>";
 
@@ -64,7 +64,7 @@ void AdminPage::handleSession() {
 		"	<body>\n"
 		"		<p>We are currently in a session. The session id is " << this->session->first << " and the session data"
 		" is \"" << encoding(HTML) << this->session->second << encoding(NONE) << "\". It will expire at "
-		<< sessions.getExpiry(session) << ".</p>\n"
+		<< this->sessions.getExpiry(this->session) << ".</p>\n"
 		"		<p>Click <a href='?command=logout'>here</a> to logout</p>\n";
 }
 
@@ -82,9 +82,11 @@ void AdminPage::handleNoSession() {
 		"	<body>\n"
 		"		<p>We are currently not in a session.</p>\n"
 		"		<form action='?command=login' method='post' enctype='application/x-www-form-urlencoded' "
-		"accept-charset='ISO-8859-1'>\n"
+		"accept-charset='utf-8'>\n"
 		"			<div>\n"
-		"				Text: <input type='text' name='data' value='Hola señor, usted me almacenó en una sesión' />\n"
+		"				Text: <input type='text' name='data' value='Hola se" << static_cast<wchar_t>(0x00f1)
+		<< "or, usted me almacen" << static_cast<wchar_t>(0x00f3) << " en una sesi" << static_cast<wchar_t>(0x00f3)
+		<< "n' />\n"
 		"				<input type='submit' name='submit' value='submit' />\n"
 		"			</div>\n"
 		"		</form>\n";
