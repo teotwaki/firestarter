@@ -19,6 +19,14 @@ AC_CHECK_HEADERS([stdlib.h ltdl.h Wt/WApplication Wt/WServer])
 # Checks for library functions.
 AC_SEARCH_LIBS([lt_dlinit], [ltdl])
 
+AX_CHECK_COMPILE_FLAG([-std=gnu++11], [CXXFLAGS="$CXXFLAGS -std=gnu++11"], [
+	AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="CXXFLAGS -std=c++11"], [
+		AX_CHECK_COMPILE_FLAG([-std=gnu++0x], [CXXFLAGS="$CXXFLAGS -std=gnu++0x"], [
+			AX_CHECK_COMPILE_FLAG([-std=c++0x], [CXXFLAGS="CXXFLAGS -std=c++0x"])
+		])
+	])
+])
+
 # We need to check some advanced stuff, as there are no pkg-config definition files for Wt
 #AC_CACHE_CHECK([for the Wt library], [firestarter_cv_Wt_lib],
 #	[firestarter_cv_Wt_lib=no
