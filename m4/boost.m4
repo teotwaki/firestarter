@@ -480,6 +480,33 @@ BOOST_DEFUN([Bind],
 [BOOST_FIND_HEADER([boost/bind.hpp])])
 
 
+# BOOST_CHRONO()
+# ------------------
+# Look for Boost.Chrono
+BOOST_DEFUN([Chrono],
+[# Do we have to check for Boost.System?  This link-time dependency was
+# added as of 1.35.0.  If we have a version <1.35, we must not attempt to
+# find Boost.System as it didn't exist by then.
+if test $boost_major_version -ge 135; then
+BOOST_SYSTEM([$1])
+fi # end of the Boost.System check.
+boost_filesystem_save_LIBS=$LIBS
+boost_filesystem_save_LDFLAGS=$LDFLAGS
+m4_pattern_allow([^BOOST_SYSTEM_(LIBS|LDFLAGS)$])dnl
+LIBS="$LIBS $BOOST_SYSTEM_LIBS"
+LDFLAGS="$LDFLAGS $BOOST_SYSTEM_LDFLAGS"
+BOOST_FIND_LIB([chrono], [$1],
+                [boost/chrono.hpp],
+                [boost::chrono::thread_clock d;])
+if test $enable_static_boost = yes && test $boost_major_version -ge 135; then
+    AC_SUBST([BOOST_FILESYSTEM_LIBS], ["$BOOST_FILESYSTEM_LIBS $BOOST_SYSTEM_LIBS"])
+fi
+LIBS=$boost_filesystem_save_LIBS
+LDFLAGS=$boost_filesystem_save_LDFLAGS
+
+])# BOOST_CHRONO
+
+
 # BOOST_CONVERSION()
 # ------------------
 # Look for Boost.Conversion (cast / lexical_cast)
@@ -824,8 +851,23 @@ LDFLAGS="$LDFLAGS $BOOST_SYSTEM_LDFLAGS"
 #   is not turned on. Please set the correct command line options for
 #   threading: -pthread (Linux), -pthreads (Solaris) or -mthreads (Mingw32)"
 CPPFLAGS="$CPPFLAGS $boost_cv_pthread_flag"
-BOOST_FIND_LIB([thread], [$1],
-               [boost/thread.hpp], [boost::thread t; boost::mutex m;])
+
+# When compiling for the Windows platform, the threads library is named
+# differently.
+case $host_os in
+  (*mingw*)
+    BOOST_FIND_LIB([thread_win32], [$1],
+                   [boost/thread.hpp], [boost::thread t; boost::mutex m;])
+    BOOST_THREAD_LDFLAGS=$BOOST_THREAD_WIN32_LDFLAGS
+    BOOST_THREAD_LDPATH=$BOOST_THREAD_WIN32_LDPATH
+    BOOST_THREAD_LIBS=$BOOST_THREAD_WIN32_LIBS
+  ;;
+  (*)
+    BOOST_FIND_LIB([thread], [$1],
+                   [boost/thread.hpp], [boost::thread t; boost::mutex m;])
+  ;;
+esac
+
 BOOST_THREAD_LIBS="$BOOST_THREAD_LIBS $BOOST_SYSTEM_LIBS $boost_cv_pthread_flag"
 BOOST_THREAD_LDFLAGS="$BOOST_SYSTEM_LDFLAGS"
 BOOST_CPPFLAGS="$BOOST_CPPFLAGS $boost_cv_pthread_flag"
@@ -1015,6 +1057,8 @@ if test x$boost_cv_inc_path != xno; then
   # I'm not sure about my test for `il' (be careful: Intel's ICC pre-defines
   # the same defines as GCC's).
   for i in \
+    _BOOST_gcc_test(4, 8) \
+    _BOOST_gcc_test(4, 7) \
     _BOOST_gcc_test(4, 6) \
     _BOOST_gcc_test(4, 5) \
     _BOOST_gcc_test(4, 4) \
