@@ -1,8 +1,6 @@
 #ifndef __HELPER_H
 #define __HELPER_H
 
-#include "foreach.h"
-
 #include <string>
 #include <sys/stat.h>
 

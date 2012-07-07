@@ -90,7 +90,7 @@ ModuleManager::~ModuleManager() {
 	LOG_INFO(logger, "Destructing ModuleManager object (" << this << ").");
 
 	LOG_DEBUG(logger, "Unloading modules.");
-	foreach(ModuleMap::value_type module, this->modules) {
+	for (ModuleMap::value_type module : this->modules) {
 		LOG_DEBUG(logger, "Closing module `" << module.first <<"'.");
 		if (lt_dlclose(module.second->getHandle()) != 0) {
 			LOG_ERROR(logger, "An error occured while closing module `" << module.first << "': " << lt_dlerror());
@@ -268,7 +268,7 @@ void ModuleManager::loadModules() {
 	LOG_INFO(logger, "Attempting to open all modules.");
 	std::list<std::string> * module_list = this->graph.getModules();
 
-	foreach(std::string module_name, *module_list) {
+	for (std::string module_name : *module_list) {
 		this->loadModule(module_name);
 	}
 }

@@ -67,7 +67,7 @@ void InstanceManager::runAll(bool autostart) {
 	LOG_INFO(logger, "Attempting to run all modules.");
 	std::list<std::string> * module_list = this->modulemanager.getModuleList();
 
-	foreach(std::string module_name, *module_list) {
+	for (std::string module_name : *module_list) {
 		this->run(module_name, autostart);
 	}
 

@@ -5,7 +5,6 @@
 #include "zmq/zmqhelper.h"
 #include "protobuf/module.pb.h"
 #include "log.h"
-#include "foreach.h"
 
 #include <list>
 #include <string>
@@ -104,7 +103,7 @@ class ZMQReceivingSocket : virtual public ZMQSocket {
 	  * \param uris A reference to a list of strings containing the endpoints to which the socket should connect.
 	  */
 	inline void connect(/** [in] */ const std::list<std::string> & uris) {
-		foreach (const std::string & uri, uris) {
+		for (const std::string & uri : uris) {
 			this->connect(uri);
 		}
 	};
@@ -166,7 +165,7 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 	  * \param uris A reference to a list of strings containing the endpoints to which the socket should bind.
 	  */
 	inline void bind(/** [in] */ const std::list<std::string> & uris) {
-		foreach (const std::string & uri, uris) {
+		for (const std::string & uri : uris) {
 			this->bind(uri);
 		}
 	};
