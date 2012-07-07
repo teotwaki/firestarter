@@ -28,11 +28,11 @@ AX_CHECK_COMPILE_FLAG([-std=gnu++11], [CXXFLAGS="$CXXFLAGS -std=gnu++11"], [
 ])
 
 # Check if the boost libraries are available
-BOOST_REQUIRE([1.42])
+# Boost 1.48 is required as we're trying to compile with -std=gnu++11
+BOOST_REQUIRE([1.48])
 # you can check for specific parts of the boost library with:
 # BOOST_ARRAY
 BOOST_TEST
-BOOST_FOREACH
 BOOST_TUPLE
 BOOST_GRAPH
 BOOST_STRING_ALGO
