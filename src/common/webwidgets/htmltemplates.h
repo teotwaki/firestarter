@@ -7,53 +7,177 @@
 #include <ctemplate/template.h>
 #include <string>
 #include <list>
+#include <boost/function.hpp>
 
 namespace firestarter {
-	namespace module {
-		namespace core {
-			namespace WebInterface {
-				namespace Templates {
+	namespace common {
+		namespace WebWidgets {
+			namespace Templates {
 
-	class Template {
+	class CoreAttr {
+		private:
+		std::string _class;
+		std::string title;
+		std::string id;
+		std::string style;
+
+		public:
+		void populate(ctemplate::TemplateDictionary & dict) {
+			ctemplate::TemplateDictionary * core_dict = dict.AddIncludeDictionary("CORETAG");
+			core_dict->SetFilename("CORETAG");
+			StringToTemplateCache("CORETAG", "{{#STYLE_S}} style=\"{{STYLE}}\"{{/STYLE_S}}"
+				"{{#CLASS_S}} class=\"{{CLASS}}\"{{/CLASS_S}}"
+				"{{#ID_S}} id=\"{{ID}}\"{{/ID_S}}"
+				"{{#TITLE_S}} title=\"{{TITLE}}\"{{/TITLE_S}}", ctemplate::DO_NOT_STRIP);
+			if (not this->style.empty()) core_dict->SetValueAndShowSection("STYLE", this->style, "STYLE_S");
+			if (not this->_class.empty()) core_dict->SetValueAndShowSection("CLASS", this->_class, "CLASS_S");
+			if (not this->id.empty()) core_dict->SetValueAndShowSection("ID", this->id, "ID_S");
+			if (not this->title.empty()) core_dict->SetValueAndShowSection("TITLE", this->title, "TITLE_S");
+		};
+
+		inline void setClass(std::string _class) { this->_class = _class; };
+		inline void setTitle(std::string title) { this->title = title; };
+		inline void setId(std::string id) { this->id = id; };
+		inline void setStyle(std::string style) { this->style = style; };
+	};
+
+	class LangAttr {
+		private:
+		std::string dir;
+		std::string lang;
+		std::string xmllang;
+
+		public:
+		void populate(ctemplate::TemplateDictionary & dict) {
+			ctemplate::TemplateDictionary * lang_dict = dict.AddIncludeDictionary("LANGTAG");
+			lang_dict->SetFilename("LANGTAG");
+			StringToTemplateCache("LANGTAG", "{{#DIR_S}} dir=\"{{DIR}}\"{{/DIR_S}}"
+				"{{#LANG_S}} lang=\"{{LANG}}\"{{/LANG_S}}"
+				"{{#XMLLANG_S}} xml:lang=\"{{XMLLANG}}\"{{/XMLLANG_S}}", ctemplate::DO_NOT_STRIP);
+			if (not this->dir.empty() && (this->dir == "rtl" || this->dir == "ltr"))
+				lang_dict->SetValueAndShowSection("DIR", this->dir, "DIR_S");
+			if (not this->lang.empty()) lang_dict->SetValueAndShowSection("LANG", this->lang, "LANG_S");
+			if (not this->xmllang.empty()) lang_dict->SetValueAndShowSection("XMLLANG", this->xmllang, "XMLLANG_S");
+		};
+
+		inline void setDir(std::string dir) { this->dir = dir; };
+		inline void setLang(std::string lang) { this->lang = lang; };
+		inline void setXmllang(std::string xmllang) { this->xmllang = xmllang; };
+	};
+
+	class StandardAttr : public CoreAttr, public LangAttr {
+		public:
+		void populate(ctemplate::TemplateDictionary dict) {
+			static_cast<CoreAttr *>(this)->populate(dict);
+			static_cast<LangAttr *>(this)->populate(dict);
+		};
+	};
+
+	class NoAttr {
+		public:
+		inline void populate(ctemplate::TemplateDictionary & dict) { };
+	};
+
+	template <class Type, class Attributes>
+	class Tag {
 		protected:
-		std::string out;
 		ctemplate::TemplateDictionary dict;
-		virtual void expand() = 0;
-		Template(std::string dict_name) : dict(dict_name) { };
+		std::string template_name;
+		void cacheTemplate(std::string template_name, std::string template_contents) {
+			this->template_name = template_name;
+			StringToTemplateCache(template_name, template_contents, ctemplate::DO_NOT_STRIP);
+		};
+		Tag() : dict("HTMLTAG") { };
 
 		public:
+		Attributes attributes;
+
+		void setContents(std::string contents) { this->dict["CONTENTS"] = contents; };
 		std::string render() {
-			this->expand();
-			return this->out;
+			std::string out;
+			this->attributes.populate(this->dict);
+			static_cast<Type *>(this)->populate();
+			ExpandTemplate(this->template_name, ctemplate::DO_NOT_STRIP, &this->dict, &out);
+			return out;
 		};
 	};
 
-	class FileTemplate : public Template {
+	template <class Type, class Attributes>
+	class ContainerTag : public Tag<ContainerTag<Type, Attributes>, Attributes> {
+		typedef std::list<boost::function<std::string & ()> > Children;
 		protected:
-		std::string tpl_path;
-		virtual void expand() { ExpandTemplate(this->tpl_path, ctemplate::DO_NOT_STRIP, &(this->dict), &(this->out)); };
-		FileTemplate(std::string dict_name) : Template(dict_name) { };
+		Children children;
 
 		public:
-		inline void setTemplatePath(std::string path) { this->tpl_path = path; };
+		void createTemplate() { static_cast<Type *>(this)->createTemplate(); };
+		template <class Child>
+		void registerChild(Child & child) { this->children.push_back(&child.render); };
+		void populate() {
+			std::string children_output;
+			for (boost::function<std::string & ()> renderChild : this->children)
+				children_output += renderChild();
+			this->setContents(children_output);
+		};
 	};
 
-	class StringTemplate : public Template {
-		protected:
-		std::string cache_name;
-		virtual void expand() {
-			ExpandTemplate(this->cache_name, ctemplate::DO_NOT_STRIP, &(this->dict), &(this->out));
+	class Headers : public Tag<Headers, NoAttr> {
+		private:
+		std::string contenttype;
+		std::string charset;
+
+		public:
+		Headers() : contenttype("text/html"), charset("utf-8") { };
+		void populate() {
+			this->cacheTemplate("headers", "Content-Type: {{CONTENT_TYPE}}; charset={{CHARSET}}\r\n\r\n");
+			this->dict["CONTENT_TYPE"] = this->contenttype;
+			this->dict["CHARSET"] = this->charset;
 		};
-		StringTemplate(std::string dict_name) : Template(dict_name) { };
+		void setContenttype(std::string contenttype) { this->contenttype = contenttype; };
+		void setCharset(std::string charset) { this->charset = charset; };
+	};
+
+	namespace Tags {
+
+	class Html : public ContainerTag<Html, LangAttr> {
+		private:
+		std::string xmlns;
+
+		public:
+		void populate() {
+			this->cacheTemplate("html", "<html{{#XMLNS_S}} xmlns=\"{{XMLNS}}\"{{/XMLNS_S}}{{>LANGTAG}}>\n"
+				"{{CONTENTS}}"
+				"</html>\n");
+			if (not this->xmlns.empty()) this->dict.SetValueAndShowSection("XMLNS", this->xmlns, "XMLNS_S");
+		};
+		void setXmlns(std::string xmlns) { this->xmlns = xmlns; };
+	};
+
+	}
+
+/*
+
+
+
+
+
+	template <class TagType>
+	class StringTemplate {
+		protected:
+		TagType tag;
+		std::string out;
+		std::string cache_name;
+		ctemplate::TemplateDictionary dict;
+		StringTemplate(std::string dict_name) : dict(dict_name) { };
 
 		public:
 		void setTemplateContents(std::string cache_name, std::string tpl_contents) {
 			this->cache_name = cache_name;
 			StringToTemplateCache(cache_name, tpl_contents, ctemplate::DO_NOT_STRIP);
-		}
+		};
+		inline std::string render();
 	};
 
-	class Headers : public StringTemplate {
+	class Headers {
 		public:
 		Headers(std::string content = "text/html", std::string encoding = "utf-8") : StringTemplate("Headers") {
 			this->setTemplateContents("headers", "Content-Type: {{CONTENT_TYPE}}; charset={{ENCODING}}\r\n\r\n");
@@ -64,7 +188,7 @@ namespace firestarter {
 		inline void setEncoding(std::string & encoding) { this->dict["ENCODING"] = encoding; };
 	};
 
-	class DocType : public StringTemplate {
+	class DocType {
 		public:
 		DocType() : StringTemplate("DocType") {
 			this->setTemplateContents("doctype", "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'"
@@ -72,7 +196,7 @@ namespace firestarter {
 		};
 	};
 
-	class CoreTag : virtual public StringTemplate {
+	class CoreTag {
 		protected:
 		ctemplate::TemplateDictionary * core_dict;
 
@@ -142,23 +266,17 @@ namespace firestarter {
 
 	class ParentTag : virtual public StringTemplate {
 		protected:
-		void expand() {
-			std::string children_content;
-			for (std::list<Template *>::iterator it = this->children.begin(); it != this->children.end(); it++)
-				children_content += (*it)->render();
-			this->setContents(children_content);
-			StringTemplate::expand();
-		 };
+		void expand();
 		ParentTag() : StringTemplate("ParentTag") { };
 
 		public:
-		std::list<Template *> children;
+		std::list<StringTemplate *> children;
 		inline void setContents(std::string contents) {
 			if (not contents.empty()) this->dict["CONTENTS"] = contents;
 		};
-		inline void addChild(Template * child) { if (child != NULL) this->children.push_back(child); };
-		inline void addChildren(std::list<Template *> children) {
-			for (std::list<Template *>::iterator it = children.begin(); it != children.end(); it++)
+		inline void addChild(StringTemplate * child) { if (child != NULL) this->children.push_back(child); };
+		inline void addChildren(std::list<StringTemplate *> children) {
+			for (std::list<StringTemplate *>::iterator it = children.begin(); it != children.end(); it++)
 				if (*it != NULL) this->children.push_back(*it);
 		};
 	};
@@ -430,10 +548,9 @@ namespace firestarter {
 
 		};
 
-	}
+	}*/
 
 /* Close namespaces */
-				}
 			}
 		}
 	}
