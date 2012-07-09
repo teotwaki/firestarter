@@ -3,24 +3,16 @@
 #define __MAINPAGE_H
 
 #include "log.h"
-#include "htmltemplates.h"
-
-#include <fastcgi++/request.hpp>
-#include <fastcgi++/manager.hpp>
+#include "webwidgets/basepage.h"
+#include "webwidgets/htmltemplates.h"
 
 namespace firestarter {
 	namespace module {
 		namespace core {
 			namespace WebInterface {
 
-	class AdminPage : public Fastcgipp::Request<char> {
-		typedef Fastcgipp::Http::Sessions<std::string> Sessions;
-		static Sessions sessions;
-		Sessions::iterator session;
-
+	class AdminPage : public firestarter::common::WebWidgets::Pages::WebPage {
 		bool response();
-		void handleSession();
-		void handleNoSession();
 	};
 
 /* Close namespaces */

@@ -4,39 +4,36 @@ DECLARE_EXTERN_LOG(logger);
 
 using namespace firestarter::module::core::WebInterface;
 
-AdminPage::Sessions AdminPage::sessions(3600, 3600);
-
 bool AdminPage::response() {
-	using namespace Fastcgipp;
-	using namespace Templates;
+	using namespace firestarter::common::WebWidgets::Templates;
 
-	this->sessions.cleanup();
-	this->session = sessions.find(environment().findCookie("SESSIONID").data());
+	LOG_DEBUG(logger, "AdminPage::response() called.")
 
-	using namespace Templates;
+//	this->sessions.cleanup();
+//	this->session = sessions.find(environment.findCookie("SESSIONID").data());
 
-	Headers h;
-	DocType dt;
-	this->out << h.render() << dt.render();
+//	LOG_DEBUG(logger, "Building tags.");
+//	Tags::Head head;
+//	Tags::Title title;
+//	Tags::Body body;
+//	Tags::P paragraph;
 
-	Tags::Html html;
-	Tags::Head head;
-	Tags::Title title;
-	Tags::Body body;
-	Tags::P paragraph;
+	LOG_DEBUG(logger, "Setting language.");
+	this->html.attributes.setLang("en");
+	this->html.attributes.setXmllang("en");
 
-	html.setLang("en");
-	html.setXmllang("en");
+//	LOG_DEBUG(logger, "Setting contents.");
+//	title.setContents("Firestarter starts fires.");
+//	paragraph.setContents("This is our first paragraph.");
 
-	title.setContents("Firestarter starts fires.");
-	paragraph.setContents("This is our first paragraph.");
+	LOG_DEBUG(logger, "Building tag hierarchy.");
+//	this->html.addChild(&head);
+//	head.addChild(&title);
+//	this->html.addChild(&body);
+//	body.addChild(&paragraph);
 
-	html.addChild(&head);
-	head.addChild(&title);
-	html.addChild(&body);
-	body.addChild(&paragraph);
+	LOG_DEBUG(logger, "Done.");
 
-	this->out << html.render();
 /*
 	std::wstring command = environment().findGet(L"command");
 
@@ -76,47 +73,3 @@ bool AdminPage::response() {
 	return true;
 }
 
-void AdminPage::handleSession() {
-	using namespace Fastcgipp;
-
-	using namespace Templates;
-
-/*	this->out << "Content-Type: text/html; charset=utf-8\r\n\r\n"
-		"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' "
-		" 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n"
-		"<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>\n"
-		"	<head>\n"
-		"		<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />\n"
-		"		<title>fastcgi++: Session Handling example</title>\n"
-		"	</head>\n"
-		"	<body>\n"
-		"		<p>We are currently in a session. The session id is " << this->session->first << " and the session data"
-		" is \"" << encoding(HTML) << this->session->second << encoding(NONE) << "\". It will expire at "
-		<< this->sessions.getExpiry(this->session) << ".</p>\n"
-		"		<p>Click <a href='?command=logout'>here</a> to logout</p>\n";*/
-}
-
-void AdminPage::handleNoSession() {
-	using namespace Fastcgipp;
-
-	this->out << "Content-Type: text/html; charset=utf-8\r\n\r\n"
-		"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' "
-		" 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n"
-		"<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>\n"
-		"	<head>\n"
-		"		<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />\n"
-		"		<title>fastcgi++: Session Handling example</title>\n"
-		"	</head>\n"
-		"	<body>\n"
-		"		<p>We are currently not in a session.</p>\n"
-		"		<form action='?command=login' method='post' enctype='application/x-www-form-urlencoded' "
-		"accept-charset='utf-8'>\n"
-		"			<div>\n"
-		"				Text: <input type='text' name='data' value='Hola se" << static_cast<wchar_t>(0x00f1)
-		<< "or, usted me almacen" << static_cast<wchar_t>(0x00f3) << " en una sesi" << static_cast<wchar_t>(0x00f3)
-		<< "n' />\n"
-		"				<input type='submit' name='submit' value='submit' />\n"
-		"			</div>\n"
-		"		</form>\n";
-
-}

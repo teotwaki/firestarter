@@ -4,6 +4,7 @@
 
 #include "module.h"
 #include "log.h"
+#include "router.h"
 #include "mainpage.h"
 
 #include <fastcgi++/request.hpp>
