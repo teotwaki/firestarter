@@ -10,8 +10,9 @@ bool Router::response() {
 	using namespace firestarter::common::WebWidgets::Pages;
 
 	WebPage * page = this->page_factory["main"]();
-	LOG_DEBUG(logger, "Page contents: " << this->page_factory["main"]()->render());
-	this->out << this->page_factory["main"]()->render();
+	std::string contents = this->page_factory["main"]()->render();
+	LOG_DEBUG(logger, "Page contents: " << contents);
+	this->out << contents;
 
 	return true;
 }
