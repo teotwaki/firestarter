@@ -19,8 +19,16 @@ AC_CHECK_HEADERS([stdlib.h ltdl.h])
 # Checks for library functions.
 AC_SEARCH_LIBS([lt_dlinit], [ltdl])
 
+AC_ARG_ENABLE([debugging], AS_HELP_STRING([--enable-debugging],
+	[Enable debugging compilation options (e.g. CPU profiling, -ggdb3, -O0)]))
+
+AS_IF([test "x$enable_debugging" = "xyes"], [
+	CXXFLAGS="-g -ggdb3 -O0"
+	CPPFLAGS="$CPPFLAGS -DLTDL_DEBUG"
+])
+
 AX_CHECK_COMPILE_FLAG([-std=gnu++11], [CXXFLAGS="$CXXFLAGS -std=gnu++11"], [
-	AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="CXXFLAGS -std=c++11"], [
+	AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"], [
 		AC_MSG_ERROR([Compiler needs to support either gnu++11 or c++11 (we hear clang++ works really well!)])
 	])
 ])
@@ -37,8 +45,14 @@ BOOST_STRING_ALGO
 BOOST_THREADS
 BOOST_DATE_TIME
 
-PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
-PKG_CHECK_MODULES([WEBDEPS], [fastcgi++ >= 2.0 libctemplate >= 2.2])
+AS_IF([test "x$enable_debugging" = "xyes"], [
+	PKG_CHECK_MODULES([DEPS],
+		[liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0 libprofiler >= 2.0])
+	], [
+	PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
+	]
+)
+PKG_CHECK_MODULES([WEBDEPS], [fastcgi++ >= 2.0 libctemplate_nothreads >= 2.2])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_MACRO_DIR([m4])
