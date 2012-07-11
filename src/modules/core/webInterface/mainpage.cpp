@@ -5,35 +5,86 @@ DECLARE_EXTERN_LOG(logger);
 using namespace firestarter::module::core::WebInterface;
 
 bool AdminPage::response() {
-	using namespace firestarter::common::WebWidgets::Templates;
+	using namespace firestarter::common::WebWidgets::Templates::Tags;
 
 	LOG_DEBUG(logger, "AdminPage::response() called.")
 
 //	this->sessions.cleanup();
 //	this->session = sessions.find(environment.findCookie("SESSIONID").data());
 
-//	LOG_DEBUG(logger, "Building tags.");
-//	Tags::Head head;
-//	Tags::Title title;
-//	Tags::Body body;
-//	Tags::P paragraph;
-
-	LOG_DEBUG(logger, "Setting language.");
 	this->html.attributes.setLang("en");
 	this->html.attributes.setXmllang("en");
 
-//	LOG_DEBUG(logger, "Setting contents.");
-//	title.setContents("Firestarter starts fires.");
-//	paragraph.setContents("This is our first paragraph.");
+	auto & head = this->html.addChild<Head>();
 
-	LOG_DEBUG(logger, "Building tag hierarchy.");
-//	this->html.addChild(&head);
-//	head.addChild(&title);
-//	this->html.addChild(&body);
-//	body.addChild(&paragraph);
+	head.addChild<Link>()
+			.setHref("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/pepper-grinder/jquery-ui.css")
+			.setRel("stylesheet")
+			.setType("text/css");
 
-	LOG_DEBUG(logger, "Done.");
+	head.addChild<Title>().setContents("Firestarter starts fires.");
 
+	head.addChild<Script>()
+			.setSrc("http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
+			.setType("text/javascript");
+
+	head.addChild<Script>()
+			.setSrc("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js")
+			.setType("text/javascript");
+
+	head.addChild<Script>()
+			.setType("text/javascript")
+			.setContents("$(document).ready(function() {\n"
+				"	$('#loginbox').position({\n"
+				"		my: 'center',\n"
+				"		at: 'center',\n"
+				"		of: $(window)\n"
+				"	});\n"
+				"	$('#submit').position({\n"
+				"		my: 'center',\n"
+				"		at: 'center',\n"
+				"		of: '#loginbox'\n"
+				"	});\n"
+				"	$('#submit').button();\n"
+				"});\n");
+
+	head.addChild<Style>()
+			.setContents("label { display: block; margin: 15px 0 5px; }\n");
+
+	auto & body = this->html.addChild<Body>();
+	body.attributes.setStyle("font-size: 62.5%; min-height: 90%;");
+
+	auto & loginbox = body.addChild<Div>();
+	loginbox.attributes.setId("loginbox");
+	loginbox.attributes.setStyle("width: 399px; height: 399px;");
+
+	auto & form = loginbox.addChild<Form>()
+			.setMethod("post");
+
+	form.addChild<Label>()
+			.setFor("username")
+			.setContents("Username:");
+	form.addChild<Input>()
+			.setType("text")
+			.setName("username")
+			.attributes.setId("username");
+
+	form.addChild<Br>();
+
+	form.addChild<Label>()
+			.setFor("username")
+			.setContents("Password:");
+	form.addChild<Input>()
+			.setType("password")
+			.setName("password")
+			.attributes.setId("password");
+
+	form.addChild<Br>();
+
+	form.addChild<Input>()
+			.setType("submit")
+			.setValue("Submit")
+			.attributes.setId("submit");
 /*
 	std::wstring command = environment().findGet(L"command");
 

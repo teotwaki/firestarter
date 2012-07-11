@@ -8,6 +8,8 @@
 #include <string>
 #include <list>
 #include <boost/function.hpp>
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace firestarter {
 	namespace common {
@@ -67,7 +69,7 @@ namespace firestarter {
 
 	class StandardAttr : public CoreAttr, public LangAttr {
 		public:
-		void populate(ctemplate::TemplateDictionary dict) {
+		void populate(ctemplate::TemplateDictionary & dict) {
 			static_cast<CoreAttr *>(this)->populate(dict);
 			static_cast<LangAttr *>(this)->populate(dict);
 		};
@@ -85,7 +87,7 @@ namespace firestarter {
 		std::string template_name;
 		void cacheTemplate(std::string template_name, std::string template_contents) {
 			this->template_name = template_name;
-			StringToTemplateCache(template_name, template_contents, ctemplate::DO_NOT_STRIP);
+			StringToTemplateCache(this->template_name, template_contents, ctemplate::DO_NOT_STRIP);
 		};
 		Tag() : dict("HTMLTAG") { };
 
@@ -93,7 +95,7 @@ namespace firestarter {
 		Attributes attributes;
 
 		void setContents(std::string contents) { this->dict["CONTENTS"] = contents; };
-		std::string render() {
+		std::string const render() {
 			std::string out;
 			this->attributes.populate(this->dict);
 			static_cast<Type *>(this)->populate();
@@ -104,20 +106,36 @@ namespace firestarter {
 
 	template <class Type, class Attributes>
 	class ContainerTag : public Tag<ContainerTag<Type, Attributes>, Attributes> {
-		typedef std::list<boost::function<std::string & ()> > Children;
+		std::list<boost::shared_ptr<void> > children_list;
+		typedef std::list<boost::function<std::string ()> > ChildrenRenderers;
 		protected:
-		Children children;
+		ChildrenRenderers children;
 
 		public:
-		void createTemplate() { static_cast<Type *>(this)->createTemplate(); };
 		template <class Child>
-		void registerChild(Child & child) { this->children.push_back(&child.render); };
+		void registerChild(const Child & child) {
+			this->children.push_back(boost::bind(&Child::render, boost::cref(child)));
+		};
 		void populate() {
 			std::string children_output;
-			for (boost::function<std::string & ()> renderChild : this->children)
+			for (boost::function<std::string ()> renderChild : this->children) {
 				children_output += renderChild();
+			}
 			this->setContents(children_output);
 			static_cast<Type *>(this)->populate();
+		};
+		template <class Child>
+		Child & getNew() {
+			Child * child_ptr = new Child;
+			boost::shared_ptr<void> child(child_ptr);
+			this->children_list.push_back(child);
+			return *child_ptr;
+		};
+		template <class Child>
+		Child & addChild() {
+			Child & child = this->getNew<Child>();
+			this->registerChild(child);
+			return child;
 		};
 	};
 
@@ -133,8 +151,8 @@ namespace firestarter {
 			this->dict["CONTENT_TYPE"] = this->contenttype;
 			this->dict["CHARSET"] = this->charset;
 		};
-		void setContenttype(std::string contenttype) { this->contenttype = contenttype; };
-		void setCharset(std::string charset) { this->charset = charset; };
+		Headers & setContenttype(std::string contenttype) { this->contenttype = contenttype; return *this; };
+		Headers & setCharset(std::string charset) { this->charset = charset; return *this; };
 	};
 
 	namespace Tags {
@@ -158,7 +176,53 @@ namespace firestarter {
 					"</html>\n");
 				if (not this->xmlns.empty()) this->dict.SetValueAndShowSection("XMLNS", this->xmlns, "XMLNS_S");
 			};
-			void setXmlns(std::string xmlns) { this->xmlns = xmlns; };
+			Html & setXmlns(std::string xmlns) { this->xmlns = xmlns; return *this; };
+		};
+
+		class Head : public ContainerTag<Head, LangAttr> {
+			private:
+			std::string profile;
+
+			public:
+			void populate() {
+				this->cacheTemplate("head", "<head{{#PROFILE_S}} profile=\"{{PROFILE}}\"{{/PROFILE_S}}{{>LANGTAG}}>\n"
+					"{{CONTENTS}}"
+					"</head>\n");
+				if (not this->profile.empty())
+					this->dict.SetValueAndShowSection("PROFILE", this->profile, "PROFILE_S");
+
+			};
+			Head & setProfile(std::string profile) { this->profile = profile; return *this; };
+		};
+
+		class Style : public Tag<Style, LangAttr> {
+			private:
+			std::string type;
+			std::string media;
+
+			public:
+			void populate() {
+				this->cacheTemplate("style", "<style{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}"
+					"{{#MEDIA_S}} media=\"{{MEDIA}}\"{{/MEDIA_S}}{{>LANGTAG}}>\n"
+					"{{CONTENTS}}"
+					"</style>\n");
+				if (this->type.empty()) this->dict.SetValueAndShowSection("TYPE", "text/css", "TYPE");
+				else this->dict.SetValueAndShowSection("TYPE", this->type, "TYPE_S");
+				if (not this->media.empty() && (this->media == "screen" || this->media == "tty" ||
+						this->media == "tv" || this->media == "projection" || this->media == "handheld" ||
+						this->media == "print" || this->media == "braille" || this->media == "aural" ||
+						this->media == "all"))
+					this->dict.SetValueAndShowSection("MEDIA", this->media, "MEDIA_S");
+			};
+			Style & setType(std::string type) { this->type = type; return *this; };
+			Style & setMedia(std::string media) { this->media = media; return *this; };
+		};
+
+		class Br : public Tag<Br, CoreAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("br", "<br{{>CORETAG}} />\n");
+			};
 		};
 
 		class Meta : public Tag<Meta, LangAttr> {
@@ -184,10 +248,10 @@ namespace firestarter {
 				if (not this->scheme.empty())
 					this->dict.SetValueAndShowSection("SCHEME", this->scheme, "SCHEME_S");
 			};
-			void setHttpequiv(std::string httpequiv) { this->httpequiv = httpequiv; };
-			void setContent(std::string content) { this->content = content; };
-			void setName(std::string name) { this->name = name; };
-			void setScheme(std::string scheme) { this->scheme = scheme; };
+			Meta & setHttpequiv(std::string httpequiv) { this->httpequiv = httpequiv; return *this;};
+			Meta & setContent(std::string content) { this->content = content; return *this;};
+			Meta & setName(std::string name) { this->name = name; return *this;};
+			Meta & setScheme(std::string scheme) { this->scheme = scheme; return *this; };
 		};
 
 		class Title : public Tag<Title, LangAttr> {
@@ -253,21 +317,85 @@ namespace firestarter {
 					"{{#CHARSET_S}} charset=\"{{CHARSET}}\"{{/CHARSET_S}}"
 					"{{#DEFER_S}} defer=\"defer\"{{/DEFER_S}}"
 					"{{#SRC_S}} src=\"{{SRC}}\"{{/SRC_S}}"
-					"{{#XMLSPACE_S}} xml:space=\"{{XMLSPACE}}\"{{/XMLSPACE_S}}>\n"
+					"{{#XMLSPACE_S}} xml:space=\"{{XMLSPACE}}\"{{/XMLSPACE_S}}>{{#CONTENTS_S}}//<![CDATA[\n"
 					"{{CONTENTS}}"
-					"</script>\n");
+					"//]]>{{/CONTENTS_S}}</script>\n");
 				if (not this->type.empty()) this->dict.SetValueAndShowSection("TYPE", this->type, "TYPE_S");
 				if (not this->charset.empty())
 					this->dict.SetValueAndShowSection("CHARSET", this->charset, "CHARSET_S");
 				if (this->defer) this->dict.ShowSection("DEFER_S");
 				if (not this->src.empty()) this->dict.SetValueAndShowSection("SRC", this->src, "SRC_S");
+				else this->dict.ShowSection("CONTENTS_S");
 				if (not this->xmlspace.empty())
 					this->dict.SetValueAndShowSection("XMLSPACE", this->xmlspace, "XMLSPACE_S");
 			};
-			void setType(std::string type) { this->type = type; };
-			void setCharset(std::string charset) { this->charset = charset; };
-			void setDefer(bool defer) { this->defer = defer; };
-			void setXmlspace(std::string xmlspace) { this->xmlspace = xmlspace; };
+			Script & setType(std::string type) { this->type = type; return *this; };
+			Script & setCharset(std::string charset) { this->charset = charset; return *this; };
+			Script & setDefer(bool defer) { this->defer = defer; return *this; };
+			Script & setSrc(std::string src) { this->src = src; return *this; };
+			Script & setXmlspace(std::string xmlspace) { this->xmlspace = xmlspace; return *this; };
+		};
+
+		class Link : public Tag<Link, StandardAttr> {
+			private:
+			std::string charset;
+			std::string href;
+			std::string hreflang;
+			std::string media;
+			std::string rel;
+			std::string rev;
+			std::string target;
+			std::string type;
+
+			public:
+			void populate() {
+				this->cacheTemplate("link", "<link{{>CORETAG}}{{>LANGTAG}}"
+					"{{#CHARSET_S}} charset=\"{{CHARSET}}\"{{/CHARSET_S}}"
+					"{{#HREF_S}} href=\"{{HREF}}\"{{/HREF_S}}"
+					"{{#HREFLANG_S}} hreflang=\"{{HREFLANG}}\"{{/HREFLANG_S}}"
+					"{{#MEDIA_S}} media=\"{{MEDIA}}\"{{/MEDIA_S}}"
+					"{{#REL_S}} rel=\"{{REL}}\"{{/REL_S}}"
+					"{{#REV_S}} rev=\"{{REV}}\"{{/REV_S}}"
+					"{{#TARGET_S}} target=\"{{TARGET}}\"{{/TARGET_S}}"
+					"{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}/>\n");
+				if (not this->charset.empty())
+					this->dict.SetValueAndShowSection("CHARSET", this->charset, "CHARSET_S");
+				if (not this->href.empty())
+					this->dict.SetValueAndShowSection("HREF", this->href, "HREF_S");
+				if (not this->hreflang.empty())
+					this->dict.SetValueAndShowSection("HREFLANG", this->hreflang, "HREFLANG_S");
+				if (not this->media.empty() && (this->media == "screen" || this->media == "tty" ||
+						this->media == "tv" || this->media == "projection" || this->media == "handheld" ||
+						this->media == "print" || this->media == "braille" || this->media == "aural" ||
+						this->media == "all"))
+					this->dict.SetValueAndShowSection("MEDIA", this->media, "MEDIA_S");
+				if (not this->rel.empty() && (this->rel == "alternate" || this->rel == "appendix" ||
+						this->rel == "bookmark" || this->rel == "chapter" || this->rel == "contents" ||
+						this->rel == "copyright" || this->rel == "glossary" || this->rel == "help" ||
+						this->rel == "home" || this->rel == "index" || this->rel == "next" || this->rel == "prev" ||
+						this->rel == "section" || this->rel == "start" || this->rel == "stylesheet" ||
+						this->rel == "subsection"))
+					this->dict.SetValueAndShowSection("REL", this->rel, "REL_S");
+				if (not this->rev.empty() && (this->rev == "alternate" || this->rev == "appendix" ||
+						this->rev == "bookmark" || this->rev == "chapter" || this->rev == "contents" ||
+						this->rev == "copyright" || this->rev == "glossary" || this->rev == "help" ||
+						this->rev == "home" || this->rev == "index" || this->rev == "next" || this->rev == "prev" ||
+						this->rev == "section" || this->rev == "start" || this->rev == "stylesheet" ||
+						this->rev == "subsection"))
+					this->dict.SetValueAndShowSection("REV", this->rev, "REV_S");
+				if (not this->target.empty())
+					this->dict.SetValueAndShowSection("TARGET", this->target, "TARGET_S");
+				if (not this->type.empty())
+					this->dict.SetValueAndShowSection("TYPE", this->type, "TYPE_S");
+			};
+			Link & setCharset(std::string charset) { this->charset = charset; return *this; };
+			Link & setHref(std::string href) { this->href = href; return *this; };
+			Link & setHreflang(std::string hreflang) { this->hreflang = hreflang; return *this; };
+			Link & setMedia(std::string media) { this->media = media; return *this; };
+			Link & setRel(std::string rel) { this->rel = rel; return *this; };
+			Link & setRev(std::string rev) { this->rev = rev; return *this; };
+			Link & setTarget(std::string target) { this->target = target; return *this; };
+			Link & setType(std::string type) { this->type = type; return *this; };
 		};
 
 		class Form : public ContainerTag<Form, StandardAttr> {
@@ -296,11 +424,24 @@ namespace firestarter {
 					this->dict.SetValueAndShowSection("ENCTYPE", this->enctype, "ENCTYPE_S");
 				if (not this->method.empty()) this->dict.SetValueAndShowSection("METHOD", this->method, "METHOD_S");
 			};
-			void setAction(std::string action) { this->action = action; };
-			void setAccept(std::string accept) { this->accept = accept; };
-			void setAcceptcharset(std::string acceptcharset) { this->acceptcharset = acceptcharset; };
-			void setEnctype(std::string enctype) { this->enctype = enctype; };
-			void setMethod(std::string method) { this->method = method; };
+			Form & setAction(std::string action) { this->action = action; return *this; };
+			Form & setAccept(std::string accept) { this->accept = accept; return *this; };
+			Form & setAcceptcharset(std::string acceptcharset) { this->acceptcharset = acceptcharset; return *this; };
+			Form & setEnctype(std::string enctype) { this->enctype = enctype; return *this; };
+			Form & setMethod(std::string method) { this->method = method; return *this; };
+		};
+
+		class Label : public Tag<Label, StandardAttr> {
+			private:
+			std::string _for;
+
+			public:
+			void populate() {
+				this->cacheTemplate("label", "<label{{>CORETAG}}{{>LANGTAG}}"
+					"{{#FOR_S}} for=\"{{FOR}}\"{{/FOR_S}}>{{CONTENTS}}</label>\n");
+				if (not this->_for.empty()) this->dict.SetValueAndShowSection("FOR", this->_for, "FOR_S");
+			};
+			Label & setFor(std::string _for) { this->_for = _for; return *this; };
 		};
 
 		class Input : public Tag<Input, StandardAttr> {
@@ -330,7 +471,7 @@ namespace firestarter {
 					"{{#SIZE_S}} size=\"{{SIZE}}\"{{/SIZE_S}}"
 					"{{#SRC_S}} src=\"{{SRC}}\"{{/SRC_S}}"
 					"{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}"
-					"{{#VALUE_S}} value=\"{{VALUE}}\"{{/VALUE_S}}/>");
+					"{{#VALUE_S}} value=\"{{VALUE}}\"{{/VALUE_S}}/>\n");
 				if (not this->accept.empty()) this->dict.SetValueAndShowSection("ACCEPT", this->accept, "ACCEPT_S");
 				if (not this->alt.empty()) this->dict.SetValueAndShowSection("ALT", this->alt, "ALT_S");
 				if (this->checked) this->dict.ShowSection("CHECKED_S");
@@ -353,6 +494,17 @@ namespace firestarter {
 					this->dict.SetValueAndShowSection("TYPE", this->type, "TYPE_S");
 				if (not this->value.empty()) this->dict.SetValueAndShowSection("VALUE", this->value, "VALUE_S");
 			};
+			Input & setAccept(std::string accept) { this->accept = accept; return *this; };
+			Input & setAlt(std::string alt) { this->alt = alt; return *this; };
+			Input & setChecked(bool checked) { this->checked = checked; return *this; };
+			Input & setDisabled(bool disabled) { this->disabled = disabled; return *this; };
+			Input & setMaxlength(unsigned int maxlength) { this->maxlength = maxlength; return *this; };
+			Input & setName(std::string name) { this->name = name; return *this; };
+			Input & setReadonly(bool readonly) { this->readonly = readonly; return *this; };
+			Input & setSize(unsigned int size) { this->size = size; return *this; };
+			Input & setSrc(std::string src) { this->src = src; return *this; };
+			Input & setType(std::string type) { this->type = type; return *this; };
+			Input & setValue(std::string value) { this->value = value; return *this; };
 		};
 
 	}
