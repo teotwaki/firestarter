@@ -32,7 +32,7 @@ pkglib_LTLIBRARIES = webinterface.la
 
 ## FS configuration directories and files
 fsconfdir = ${sysconfdir}/firestarter
-fsconf_DATA = configuration/fs.cfg configuration/logging.cfg configuration/httpd.cfg
+fsconf_DATA = configuration/fs.cfg configuration/logging.cfg configuration/lighttpd.conf
 
 ## Modules configuration directories and files
 modconfdir = ${localstatedir}/firestarter
