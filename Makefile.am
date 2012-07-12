@@ -38,6 +38,24 @@ fsconf_DATA = configuration/fs.cfg configuration/logging.cfg configuration/httpd
 modconfdir = ${localstatedir}/firestarter
 modconf_DATA = configuration/modules/webinterface.cfg
 
+## WebInterface data directory
+webinterfacedir = ${localstatedir}/firestarter/www
+webinterface_DATA = redist/htmlkickstart/style.css
+webinterfacecssdir = ${webinterfacedir}/css
+webinterfacecss_DATA = redist/htmlkickstart/css/*.css
+webinterfacebasefontsdir = ${webinterfacecssdir}/fonts/base
+webinterfacebasefonts_DATA = redist/htmlkickstart/css/fonts/base/*
+webinterfacesocialfontsdir = ${webinterfacecssdir}/fonts/social
+webinterfacesocialfonts_DATA = redist/htmlkickstart/css/fonts/social/*
+webinterfaceimgdir = ${webinterfacecssdir}/img
+webinterfaceimg_DATA = redist/htmlkickstart/css/img/*.png redist/htmlkickstart/css/img/*.gif
+webinterfacefancyboximgdir = ${webinterfaceimgdir}/fancybox
+webinterfacefancyboximg_DATA = redist/htmlkickstart/css/img/fancybox/*
+webinterfacerteimgdir = ${webinterfaceimgdir}/rte
+webinterfacerteimg_DATA = redist/htmlkickstart/css/img/rte/*
+webinterfacejsdir = ${webinterfacedir}/js
+webinterfacejs_DATA = redist/htmlkickstart/js/*
+
 ## Define the list of source files for the "firestarter" target. The file extension
 ## .cpp is recognized by Automake, and causes it to produce rules which invoke
 ## the C++ compiler to produce an object file (.o) from each source file. The
