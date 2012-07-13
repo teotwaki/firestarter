@@ -37,10 +37,10 @@ namespace firestarter {
 			if (not this->title.empty()) core_dict->SetValueAndShowSection("TITLE", this->title, "TITLE_S");
 		};
 
-		inline void setClass(std::string _class) { this->_class = _class; };
-		inline void setTitle(std::string title) { this->title = title; };
-		inline void setId(std::string id) { this->id = id; };
-		inline void setStyle(std::string style) { this->style = style; };
+		inline void setClass(std::string const & _class) { this->_class = _class; };
+		inline void setTitle(std::string const & title) { this->title = title; };
+		inline void setId(std::string const & id) { this->id = id; };
+		inline void setStyle(std::string const & style) { this->style = style; };
 	};
 
 	class LangAttr {
@@ -62,9 +62,9 @@ namespace firestarter {
 			if (not this->xmllang.empty()) lang_dict->SetValueAndShowSection("XMLLANG", this->xmllang, "XMLLANG_S");
 		};
 
-		inline void setDir(std::string dir) { this->dir = dir; };
-		inline void setLang(std::string lang) { this->lang = lang; };
-		inline void setXmllang(std::string xmllang) { this->xmllang = xmllang; };
+		inline void setDir(std::string const & dir) { this->dir = dir; };
+		inline void setLang(std::string const & lang) { this->lang = lang; };
+		inline void setXmllang(std::string const & xmllang) { this->xmllang = xmllang; };
 	};
 
 	class StandardAttr : public CoreAttr, public LangAttr {
@@ -85,7 +85,7 @@ namespace firestarter {
 		protected:
 		ctemplate::TemplateDictionary dict;
 		std::string template_name;
-		void cacheTemplate(std::string template_name, std::string template_contents) {
+		void cacheTemplate(std::string const & template_name, std::string template_contents) {
 			this->template_name = template_name;
 			StringToTemplateCache(this->template_name, template_contents, ctemplate::DO_NOT_STRIP);
 		};
@@ -94,7 +94,7 @@ namespace firestarter {
 		public:
 		Attributes attributes;
 
-		void setContents(std::string contents) { this->dict["CONTENTS"] = contents; };
+		inline void setContents(std::string const & contents) { this->dict["CONTENTS"] = contents; };
 		std::string const render() {
 			std::string out;
 			this->attributes.populate(this->dict);
@@ -151,8 +151,8 @@ namespace firestarter {
 			this->dict["CONTENT_TYPE"] = this->contenttype;
 			this->dict["CHARSET"] = this->charset;
 		};
-		Headers & setContenttype(std::string contenttype) { this->contenttype = contenttype; return *this; };
-		Headers & setCharset(std::string charset) { this->charset = charset; return *this; };
+		inline Headers & setContenttype(std::string const & contenttype) { this->contenttype = contenttype; return *this; };
+		inline Headers & setCharset(std::string const & charset) { this->charset = charset; return *this; };
 	};
 
 	namespace Tags {
@@ -176,7 +176,7 @@ namespace firestarter {
 					"</html>\n");
 				if (not this->xmlns.empty()) this->dict.SetValueAndShowSection("XMLNS", this->xmlns, "XMLNS_S");
 			};
-			Html & setXmlns(std::string xmlns) { this->xmlns = xmlns; return *this; };
+			inline Html & setXmlns(std::string const & xmlns) { this->xmlns = xmlns; return *this; };
 		};
 
 		class Head : public ContainerTag<Head, LangAttr> {
@@ -192,7 +192,7 @@ namespace firestarter {
 					this->dict.SetValueAndShowSection("PROFILE", this->profile, "PROFILE_S");
 
 			};
-			Head & setProfile(std::string profile) { this->profile = profile; return *this; };
+			inline Head & setProfile(std::string const & profile) { this->profile = profile; return *this; };
 		};
 
 		class Style : public Tag<Style, LangAttr> {
@@ -214,8 +214,8 @@ namespace firestarter {
 						this->media == "all"))
 					this->dict.SetValueAndShowSection("MEDIA", this->media, "MEDIA_S");
 			};
-			Style & setType(std::string type) { this->type = type; return *this; };
-			Style & setMedia(std::string media) { this->media = media; return *this; };
+			inline Style & setType(std::string const & type) { this->type = type; return *this; };
+			inline Style & setMedia(std::string const & media) { this->media = media; return *this; };
 		};
 
 		class Br : public Tag<Br, CoreAttr> {
@@ -248,10 +248,10 @@ namespace firestarter {
 				if (not this->scheme.empty())
 					this->dict.SetValueAndShowSection("SCHEME", this->scheme, "SCHEME_S");
 			};
-			Meta & setHttpequiv(std::string httpequiv) { this->httpequiv = httpequiv; return *this;};
-			Meta & setContent(std::string content) { this->content = content; return *this;};
-			Meta & setName(std::string name) { this->name = name; return *this;};
-			Meta & setScheme(std::string scheme) { this->scheme = scheme; return *this; };
+			inline Meta & setHttpequiv(std::string const & httpequiv) { this->httpequiv = httpequiv; return *this;};
+			inline Meta & setContent(std::string const & content) { this->content = content; return *this;};
+			inline Meta & setName(std::string const & name) { this->name = name; return *this;};
+			inline Meta & setScheme(std::string const & scheme) { this->scheme = scheme; return *this; };
 		};
 
 		class Title : public Tag<Title, LangAttr> {
@@ -329,11 +329,11 @@ namespace firestarter {
 				if (not this->xmlspace.empty())
 					this->dict.SetValueAndShowSection("XMLSPACE", this->xmlspace, "XMLSPACE_S");
 			};
-			Script & setType(std::string type) { this->type = type; return *this; };
-			Script & setCharset(std::string charset) { this->charset = charset; return *this; };
-			Script & setDefer(bool defer) { this->defer = defer; return *this; };
-			Script & setSrc(std::string src) { this->src = src; return *this; };
-			Script & setXmlspace(std::string xmlspace) { this->xmlspace = xmlspace; return *this; };
+			inline Script & setType(std::string const & type) { this->type = type; return *this; };
+			inline Script & setCharset(std::string const & charset) { this->charset = charset; return *this; };
+			inline Script & setDefer(bool defer) { this->defer = defer; return *this; };
+			inline Script & setSrc(std::string const & src) { this->src = src; return *this; };
+			inline Script & setXmlspace(std::string const & xmlspace) { this->xmlspace = xmlspace; return *this; };
 		};
 
 		class Link : public Tag<Link, StandardAttr> {
@@ -388,14 +388,14 @@ namespace firestarter {
 				if (not this->type.empty())
 					this->dict.SetValueAndShowSection("TYPE", this->type, "TYPE_S");
 			};
-			Link & setCharset(std::string charset) { this->charset = charset; return *this; };
-			Link & setHref(std::string href) { this->href = href; return *this; };
-			Link & setHreflang(std::string hreflang) { this->hreflang = hreflang; return *this; };
-			Link & setMedia(std::string media) { this->media = media; return *this; };
-			Link & setRel(std::string rel) { this->rel = rel; return *this; };
-			Link & setRev(std::string rev) { this->rev = rev; return *this; };
-			Link & setTarget(std::string target) { this->target = target; return *this; };
-			Link & setType(std::string type) { this->type = type; return *this; };
+			inline Link & setCharset(std::string const & charset) { this->charset = charset; return *this; };
+			inline Link & setHref(std::string const & href) { this->href = href; return *this; };
+			inline Link & setHreflang(std::string const & hreflang) { this->hreflang = hreflang; return *this; };
+			inline Link & setMedia(std::string const & media) { this->media = media; return *this; };
+			inline Link & setRel(std::string const & rel) { this->rel = rel; return *this; };
+			inline Link & setRev(std::string const & rev) { this->rev = rev; return *this; };
+			inline Link & setTarget(std::string const & target) { this->target = target; return *this; };
+			inline Link & setType(std::string const & type) { this->type = type; return *this; };
 		};
 
 		class Form : public ContainerTag<Form, StandardAttr> {
@@ -424,11 +424,11 @@ namespace firestarter {
 					this->dict.SetValueAndShowSection("ENCTYPE", this->enctype, "ENCTYPE_S");
 				if (not this->method.empty()) this->dict.SetValueAndShowSection("METHOD", this->method, "METHOD_S");
 			};
-			Form & setAction(std::string action) { this->action = action; return *this; };
-			Form & setAccept(std::string accept) { this->accept = accept; return *this; };
-			Form & setAcceptcharset(std::string acceptcharset) { this->acceptcharset = acceptcharset; return *this; };
-			Form & setEnctype(std::string enctype) { this->enctype = enctype; return *this; };
-			Form & setMethod(std::string method) { this->method = method; return *this; };
+			inline Form & setAction(std::string const & action) { this->action = action; return *this; };
+			inline Form & setAccept(std::string const & accept) { this->accept = accept; return *this; };
+			inline Form & setAcceptcharset(std::string const & acceptcharset) { this->acceptcharset = acceptcharset; return *this; };
+			inline Form & setEnctype(std::string const & enctype) { this->enctype = enctype; return *this; };
+			inline Form & setMethod(std::string const & method) { this->method = method; return *this; };
 		};
 
 		class Label : public Tag<Label, StandardAttr> {
@@ -441,7 +441,7 @@ namespace firestarter {
 					"{{#FOR_S}} for=\"{{FOR}}\"{{/FOR_S}}>{{CONTENTS}}</label>\n");
 				if (not this->_for.empty()) this->dict.SetValueAndShowSection("FOR", this->_for, "FOR_S");
 			};
-			Label & setFor(std::string _for) { this->_for = _for; return *this; };
+			inline Label & setFor(std::string const & _for) { this->_for = _for; return *this; };
 		};
 
 		class Input : public Tag<Input, StandardAttr> {
@@ -494,17 +494,17 @@ namespace firestarter {
 					this->dict.SetValueAndShowSection("TYPE", this->type, "TYPE_S");
 				if (not this->value.empty()) this->dict.SetValueAndShowSection("VALUE", this->value, "VALUE_S");
 			};
-			Input & setAccept(std::string accept) { this->accept = accept; return *this; };
-			Input & setAlt(std::string alt) { this->alt = alt; return *this; };
-			Input & setChecked(bool checked) { this->checked = checked; return *this; };
-			Input & setDisabled(bool disabled) { this->disabled = disabled; return *this; };
-			Input & setMaxlength(unsigned int maxlength) { this->maxlength = maxlength; return *this; };
-			Input & setName(std::string name) { this->name = name; return *this; };
-			Input & setReadonly(bool readonly) { this->readonly = readonly; return *this; };
-			Input & setSize(unsigned int size) { this->size = size; return *this; };
-			Input & setSrc(std::string src) { this->src = src; return *this; };
-			Input & setType(std::string type) { this->type = type; return *this; };
-			Input & setValue(std::string value) { this->value = value; return *this; };
+			inline Input & setAccept(std::string const & accept) { this->accept = accept; return *this; };
+			inline Input & setAlt(std::string const & alt) { this->alt = alt; return *this; };
+			inline Input & setChecked(bool checked) { this->checked = checked; return *this; };
+			inline Input & setDisabled(bool disabled) { this->disabled = disabled; return *this; };
+			inline Input & setMaxlength(unsigned int maxlength) { this->maxlength = maxlength; return *this; };
+			inline Input & setName(std::string const & name) { this->name = name; return *this; };
+			inline Input & setReadonly(bool readonly) { this->readonly = readonly; return *this; };
+			inline Input & setSize(unsigned int size) { this->size = size; return *this; };
+			inline Input & setSrc(std::string const & src) { this->src = src; return *this; };
+			inline Input & setType(std::string const & type) { this->type = type; return *this; };
+			inline Input & setValue(std::string const & value) { this->value = value; return *this; };
 		};
 
 	}
