@@ -121,7 +121,7 @@ namespace firestarter {
 			for (boost::function<std::string ()> renderChild : this->children) {
 				children_output += renderChild();
 			}
-			this->setContents(children_output);
+			if (not children_output.empty()) this->setContents(children_output);
 			static_cast<Type *>(this)->populate();
 		};
 		template <class Child>
