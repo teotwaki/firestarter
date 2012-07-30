@@ -9,6 +9,10 @@
 #include <list>
 #include <string>
 
+/* Most of the documentation in this file is rephrased/amended information coming from the ZMQ documentation.
+ * It can be found at http://api.zeromq.org/2-2:_start
+ */
+
 namespace firestarter {
 	namespace sockets {
 
@@ -89,7 +93,7 @@ class ZMQReceivingSocket : virtual public ZMQSocket {
 	  *
 	  * \param uri A reference to a string containing the enpoint to which the socket should connect.
 	  */
-	inline void connect(/** [in] */ const std::string & uri) { 
+	inline void connect(/** [in] */ std::string const & uri) { 
 		if (not uri.empty())
 			this->socket->connect(uri.c_str()); 
 		/** \todo Else throw exception */
@@ -102,8 +106,8 @@ class ZMQReceivingSocket : virtual public ZMQSocket {
 	  *
 	  * \param uris A reference to a list of strings containing the endpoints to which the socket should connect.
 	  */
-	inline void connect(/** [in] */ const std::list<std::string> & uris) {
-		for (const std::string & uri : uris) {
+	inline void connect(/** [in] */ std::list<std::string> const & uris) {
+		for (std::string const & uri : uris) {
 			this->connect(uri);
 		}
 	};
@@ -141,7 +145,7 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 	  * multipart one. A multipart message enables the segmentation of messages, that will all be sent and delivered at
 	  * once in an atomical manner.
 	  */
-	bool send(/** [in] */ google::protobuf::Message & pb_message, /** [in] */ bool send_more = false);
+	bool send(/** [in] */ google::protobuf::Message const & pb_message, /** [in] */ bool send_more = false);
 
 	/** \brief Bind the socket to a local endpoint for incoming connections
 	  *
@@ -150,7 +154,7 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 	  *
 	  * \param uri A reference to a string containing the endpoint to which the socket should bind.
 	  */
-	inline void bind(/** [in] */ const std::string & uri) { 
+	inline void bind(/** [in] */ std::string const & uri) { 
 		if (not uri.empty())
 			this->socket->bind(uri.c_str()); 
 		/** \todo Else throw exception */
@@ -164,8 +168,8 @@ class ZMQSendingSocket : virtual public ZMQSocket {
 	  *
 	  * \param uris A reference to a list of strings containing the endpoints to which the socket should bind.
 	  */
-	inline void bind(/** [in] */ const std::list<std::string> & uris) {
-		for (const std::string & uri : uris) {
+	inline void bind(/** [in] */ std::list<std::string> const & uris) {
+		for (std::string const & uri : uris) {
 			this->bind(uri);
 		}
 	};
@@ -196,7 +200,7 @@ class ZMQPublisherSocket : public ZMQSendingSocket {
 	  * \param context A reference to the ZMQ context in which the socket should be created.
 	  * \param uri Optional reference to a string on which the socket should bind.
 	  **/
-	ZMQPublisherSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::string & uri = std::string()) { 
+	ZMQPublisherSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string const & uri = std::string()) { 
 		this->socket = new zmq::socket_t(context, ZMQ_PUB); 
 		this->bind(uri); 
 	};
@@ -209,7 +213,7 @@ class ZMQPublisherSocket : public ZMQSendingSocket {
 	  * \param context A reference to the ZMQ context in which the socket should be created.
 	  * \param uris A reference to a list of strings on which the socket should bind.
 	  */
-	ZMQPublisherSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::list<std::string> & uris) {
+	ZMQPublisherSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::list<std::string> const & uris) {
 		this->socket = new zmq::socket_t(context, ZMQ_PUB);
 		this->bind(uris);
 	};
@@ -245,7 +249,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	  * \param subscribe If set to true, the socket will automatically subscribe to any kind of messages. If set to
 	  * false, no subscription will be done.
 	  */
-	ZMQSubscriberSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::string & uri = std::string(), 
+	ZMQSubscriberSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string const & uri = std::string(), 
 						/** [in] */ bool subscribe = true) { 
 		this->socket = new zmq::socket_t(context, ZMQ_SUB); 
 		this->connect(uri);
@@ -263,7 +267,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	  * \param subscribe If set to true, the socket will automatically subscribe to any kind of messages. If set to
 	  * false, no subscription will be done.
 	  */
-	ZMQSubscriberSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::list<std::string> & uris,
+	ZMQSubscriberSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::list<std::string> const & uris,
 						/** [in] */ bool subscribe = true) {
 		this->socket = new zmq::socket_t(context, ZMQ_SUB);
 		this->connect(uris);
@@ -279,7 +283,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	  *
 	  * \param filter A reference to a string containing the filter data that should be added.
 	  */ 
-	inline void subscribe(/** [in] */ const std::string & filter = std::string()) { 
+	inline void subscribe(/** [in] */ std::string const & filter = std::string()) { 
 		this->socket->setsockopt(ZMQ_SUBSCRIBE, filter.c_str(), filter.size()); 
 	};
 
@@ -290,7 +294,7 @@ class ZMQSubscriberSocket : public ZMQReceivingSocket {
 	  *
 	  * \param filter A reference to a string containing the filter data that should be removed
 	  */
-	inline void unsubscribe(/** [in] */ const std::string & filter = std::string()) {
+	inline void unsubscribe(/** [in] */ std::string const & filter = std::string()) {
 		this->socket->setsockopt(ZMQ_UNSUBSCRIBE, filter.c_str(), filter.size());
 	};
 };
@@ -328,7 +332,7 @@ class ZMQRequestSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 	  * \param context A reference to the ZMQ context in which the socket should be created.
 	  * \param uri Optional reference to a string to which the socket should connect.
 	  */
-	ZMQRequestSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::string & uri = std::string()) { 
+	ZMQRequestSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string const & uri = std::string()) { 
 		this->socket = new zmq::socket_t(context, ZMQ_REQ); 
 		this->connect(uri); 
 	};
@@ -341,7 +345,7 @@ class ZMQRequestSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 	  * \param context A reference to the ZMQ context in which the socket should be created.
 	  * \param uris A reference to a list of strings to which the socket should connect.
 	  */
-	ZMQRequestSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::list<std::string> & uris) {
+	ZMQRequestSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::list<std::string> const & uris) {
 		this->socket = new zmq::socket_t(context, ZMQ_REQ);
 		this->connect(uris);
 	};
@@ -380,7 +384,7 @@ class ZMQResponseSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 	  * \param context A reference to the ZMQ context in which the socket should be created.
 	  * \param uri Optional reference to a string on which the socket should bind.
 	  */
-	ZMQResponseSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::string & uri = std::string()) { 
+	ZMQResponseSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::string const & uri = std::string()) { 
 		this->socket = new zmq::socket_t(context, ZMQ_REP); 
 		this->bind(uri); 
 	};
@@ -393,7 +397,7 @@ class ZMQResponseSocket : public ZMQSendingSocket, public ZMQReceivingSocket {
 	  * \param context A reference to the ZMQ context in which the socket should be created.
 	  * \param uris A reference to a list of strings to which the socket should bind.
 	  */
-	ZMQResponseSocket(/** [in] */ zmq::context_t & context, /** [in] */ const std::list<std::string> & uris) {
+	ZMQResponseSocket(/** [in] */ zmq::context_t & context, /** [in] */ std::list<std::string> const & uris) {
 		this->socket = new zmq::socket_t(context, ZMQ_REP);
 		this->bind(uris);
 	};

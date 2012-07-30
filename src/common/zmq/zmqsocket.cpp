@@ -19,7 +19,7 @@ bool ZMQSendingSocket::send() {
 	return sent;
 }
 
-bool ZMQSendingSocket::send(google::protobuf::Message & pb_message, bool send_more) {
+bool ZMQSendingSocket::send(google::protobuf::Message const & pb_message, bool send_more) {
 	LOG_INFO(logger, "Sending message (" << pb_message.GetTypeName() << ") on socket (" << &(this->socket) << ").");
 
 	LOG_DEBUG(logger, "Serialising message.");
