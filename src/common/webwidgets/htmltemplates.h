@@ -187,7 +187,9 @@ namespace firestarter {
 
 			public:
 			void populate() {
-				this->cacheTemplate("comment", "<!--{{#CONDITION_S}}[if {{CONDITION}}]>{{CONTENTS}}<![endif]-->{{/CONDITION_S}}"
+				this->cacheTemplate("comment", "<!--{{#CONDITION_S}}[if {{CONDITION}}]>\n"
+					"{{CONTENTS}}"
+					"<![endif]-->{{/CONDITION_S}}"
 					"{{#NOCONDITION_S}} {{CONTENTS}} -->{{/NOCONDITION_S}}\n");
 				if (not this->condition.empty()) this->dict.SetValueAndShowSection("CONDITION", this->condition, "CONDITION_S");
 				else this->dict.ShowSection("NOCONDITION_S");
