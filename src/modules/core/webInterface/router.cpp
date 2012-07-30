@@ -9,8 +9,8 @@ std::map<std::string, Router::PageFactory> Router::page_factory;
 bool Router::response() {
 	using namespace firestarter::common::WebWidgets::Pages;
 
-	WebPage * page = this->page_factory["main"]();
-	std::string contents = this->page_factory["main"]()->render();
+	auto page = this->instantiate("main");
+	std::string contents = page->render();
 	LOG_DEBUG(logger, "Page contents: " << contents);
 	this->out << contents;
 
