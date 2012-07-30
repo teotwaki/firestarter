@@ -393,6 +393,7 @@ namespace firestarter {
 			std::string xmlspace;
 
 			public:
+			Script() : defer(false) { };
 			void populate() {
 				this->cacheTemplate("script", "<script"
 					"{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}"
@@ -542,6 +543,7 @@ namespace firestarter {
 			std::string value;
 
 			public:
+			Input() : checked(false), disabled(false), maxlength(-1), readonly(false), size(-1) { };
 			void populate() {
 				this->cacheTemplate("input", "<input{{>LANGTAG}}{{>CORETAG}}"
 					"{{#ACCEPT_S}} accept=\"{{ACCEPT}}\"{{/ACCEPT_S}}"
