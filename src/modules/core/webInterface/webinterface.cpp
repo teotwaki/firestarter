@@ -15,6 +15,7 @@ void WebInterface::run() {
 
 	try {
 		Router::registerPage<AdminPage>("main");
+		Router::registerPage<BlankPage>("blank");
 		LOG_DEBUG(logger, "Creating fcgi object.");
 		Fastcgipp::Manager<Router> fcgi(this->socket_fd);
 		LOG_DEBUG(logger, "Calling fcgi.handler().");
