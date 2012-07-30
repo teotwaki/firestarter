@@ -177,8 +177,22 @@ namespace firestarter {
 			public:
 			void populate() {
 				this->cacheTemplate("doctype", "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'"
-				" 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n");
+					" 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n");
 			};
+		};
+
+		class Comment : public ContainerTag<Comment, NoAttr> {
+			private:
+			std::string condition;
+
+			public:
+			void populate() {
+				this->cacheTemplate("comment", "<!--{{#CONDITION_S}}[if {{CONDITION}}]>{{CONTENTS}}<![endif]-->{{/CONDITION_S}}"
+					"{{#NOCONDITION_S}} {{CONTENTS}} -->{{/NOCONDITION_S}}\n");
+				if (not this->condition.empty()) this->dict.SetValueAndShowSection("CONDITION", this->condition, "CONDITION_S");
+				else this->dict.ShowSection("NOCONDITION_S");
+			};
+			inline Comment & setCondition(std::string const & condition) { this->condition = condition; return *this; };
 		};
 
 		class Html : public ContainerTag<Html, LangAttr> {
@@ -239,6 +253,58 @@ namespace firestarter {
 			void populate() {
 				this->cacheTemplate("br", "<br{{>CORETAG}} />\n");
 			};
+		};
+
+		class A : public ContainerTag<A, StandardAttr> {
+			private:
+			std::string charset;
+			std::string coords;
+			std::string href;
+			std::string hreflang;
+			std::string name;
+			std::string rel;
+			std::string rev;
+			std::string shape;
+
+			public:
+			void populate() {
+				this->cacheTemplate("a", "<a{{>CORETAG}}{{>LANGTAG}}"
+					"{{#CHARSET_S}} charset=\"{{CHARSET}}\"{{/CHARSET_S}}"
+					"{{#COORDS_S}} coords=\"{{COORDS}}\"{{/COORDS_S}}"
+					"{{#HREF_S}} href=\"{{HREF}}\"{{/HREF_S}}"
+					"{{#HREFLANG_S}} hreflang=\"{{HREFLANG}}\"{{/HREFLANG_S}}"
+					"{{#NAME_S}} name=\"{{NAME}}\"{{/NAME_S}}"
+					"{{#REL_S}} rel=\"{{REL}}\"{{/REL_S}}"
+					"{{#REV_S}} rev=\"{{REV}}\"{{/REV_S}}"
+					"{{#SHAPE_S}} shape=\"{{SHAPE}}\"{{/SHAPE_S}}{{EXTRA_ATTRS}}>"
+					"{{CONTENTS}}"
+					"</a>\n");
+				if (not this->charset.empty())
+					this->dict.SetValueAndShowSection("CHARSET", this->charset, "CHARSET_S");
+				if (not this->coords.empty())
+					this->dict.SetValueAndShowSection("COORDS", this->coords, "COORDS_S");
+				if (not this->href.empty())
+					this->dict.SetValueAndShowSection("HREF", this->href, "HREF_S");
+				if (not this->hreflang.empty())
+					this->dict.SetValueAndShowSection("HREFLANG", this->hreflang, "HREFLANG_S");
+				if (not this->name.empty())
+					this->dict.SetValueAndShowSection("NAME", this->name, "NAME_S");
+				if (not this->rel.empty())
+					this->dict.SetValueAndShowSection("REL", this->rel, "REL_S");
+				if (not this->rev.empty())
+					this->dict.SetValueAndShowSection("REV", this->rev, "REV_S");
+				if (not this->shape.empty() && (this->shape == "default" || this->shape == "rect" ||
+						this->shape == "circle" || this->shape == "poly"))
+					this->dict.SetValueAndShowSection("SHAPE", this->shape, "SHAPE_S");
+			};
+			inline A & setCharset(std::string const & charset) { this->charset = charset; return *this; };
+			inline A & setCoords(std::string const & coords) { this->coords = coords; return *this; };
+			inline A & setHref(std::string const & href) { this->href = href; return *this; };
+			inline A & setHreflang(std::string const & hreflang) { this->hreflang = hreflang; return *this; };
+			inline A & setName(std::string const & name) { this->name = name; return *this; };
+			inline A & setRel(std::string const & rel) { this->rel = rel; return *this; };
+			inline A & setRev(std::string const & rev) { this->rev = rev; return *this; };
+			inline A & setShape(std::string const & shape) { this->shape = shape; return *this; };
 		};
 
 		class Meta : public Tag<Meta, LangAttr> {
@@ -522,6 +588,60 @@ namespace firestarter {
 			inline Input & setSrc(std::string const & src) { this->src = src; return *this; };
 			inline Input & setType(std::string const & type) { this->type = type; return *this; };
 			inline Input & setValue(std::string const & value) { this->value = value; return *this; };
+		};
+
+		class H1 : public ContainerTag<H1, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h1", "<h1{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h1>\n");
+			};
+		};
+
+		class H2 : public ContainerTag<H2, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h2", "<h2{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h2>\n");
+			};
+		};
+
+		class H3 : public ContainerTag<H3, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h3", "<h3{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h3>\n");
+			};
+		};
+
+		class H4 : public ContainerTag<H4, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h4", "<h4{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h4>\n");
+			};
+		};
+
+		class H5 : public ContainerTag<H5, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h5", "<h5{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h5>\n");
+			};
+		};
+
+		class H6 : public ContainerTag<H6, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h6", "<h6{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h6>\n");
+			};
 		};
 
 	}
