@@ -92,6 +92,8 @@ webinterface_la_SOURCES = src/modules/core/webInterface/webinterface.cpp \
                           src/modules/core/webInterface/router.cpp \
                           src/modules/core/webInterface/mainpage.h \
                           src/modules/core/webInterface/mainpage.cpp \
+                          src/modules/core/webInterface/blankpage.h \
+                          src/modules/core/webInterface/blankpage.cpp \
                           src/common/webwidgets/htmltemplates.h \
                           src/common/webwidgets/basepage.h \
                           src/common/webwidgets/basepage.cpp \

@@ -6,6 +6,7 @@
 #include "log.h"
 #include "router.h"
 #include "mainpage.h"
+#include "blankpage.h"
 
 #include <fastcgi++/request.hpp>
 #include <fastcgi++/manager.hpp>

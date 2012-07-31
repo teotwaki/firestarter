@@ -52,7 +52,7 @@ AS_IF([test "x$enable_debugging" = "xyes"], [
 	PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
 	]
 )
-PKG_CHECK_MODULES([WEBDEPS], [fastcgi++ >= 2.0 libctemplate_nothreads >= 2.2])
+PKG_CHECK_MODULES([WEBDEPS], [fastcgi++ >= 2.0 libctemplate >= 2.2])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_MACRO_DIR([m4])

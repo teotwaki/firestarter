@@ -7,9 +7,11 @@
 #include <ctemplate/template.h>
 #include <string>
 #include <list>
+#include <utility>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <sstream>
 
 namespace firestarter {
 	namespace common {
@@ -89,15 +91,29 @@ namespace firestarter {
 			this->template_name = template_name;
 			StringToTemplateCache(this->template_name, template_contents, ctemplate::DO_NOT_STRIP);
 		};
+		typedef std::pair<std::string const, std::string const> ExtraAttribute;
+		std::list<ExtraAttribute> extra_attributes;
 		Tag() : dict("HTMLTAG") { };
 
 		public:
 		Attributes attributes;
 
+		Type & setExtraAttribute(std::string const & attr_name, std::string const & attr_value) {
+			this->extra_attributes.push_back(std::make_pair(attr_name, attr_value));
+			return static_cast<Type &>(*this);
+		};
 		inline void setContents(std::string const & contents) { this->dict["CONTENTS"] = contents; };
 		std::string const render() {
 			std::string out;
 			this->attributes.populate(this->dict);
+
+			for (ExtraAttribute attr : this->extra_attributes)
+				if (not attr.first.empty()) {
+					std::stringstream ss;
+					ss << " " << attr.first << "=\"" << attr.second << "\"";
+					this->dict["EXTRA_ATTRS"] = ss.str();
+				}
+
 			static_cast<Type *>(this)->populate();
 			ExpandTemplate(this->template_name, ctemplate::DO_NOT_STRIP, &this->dict, &out);
 			return out;
@@ -121,7 +137,7 @@ namespace firestarter {
 			for (boost::function<std::string ()> renderChild : this->children) {
 				children_output += renderChild();
 			}
-			this->setContents(children_output);
+			if (not children_output.empty()) this->setContents(children_output);
 			static_cast<Type *>(this)->populate();
 		};
 		template <class Child>
@@ -161,8 +177,24 @@ namespace firestarter {
 			public:
 			void populate() {
 				this->cacheTemplate("doctype", "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'"
-				" 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n");
+					" 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n");
 			};
+		};
+
+		class Comment : public ContainerTag<Comment, NoAttr> {
+			private:
+			std::string condition;
+
+			public:
+			void populate() {
+				this->cacheTemplate("comment", "<!--{{#CONDITION_S}}[if {{CONDITION}}]>\n"
+					"{{CONTENTS}}"
+					"<![endif]-->{{/CONDITION_S}}"
+					"{{#NOCONDITION_S}} {{CONTENTS}} -->{{/NOCONDITION_S}}\n");
+				if (not this->condition.empty()) this->dict.SetValueAndShowSection("CONDITION", this->condition, "CONDITION_S");
+				else this->dict.ShowSection("NOCONDITION_S");
+			};
+			inline Comment & setCondition(std::string const & condition) { this->condition = condition; return *this; };
 		};
 
 		class Html : public ContainerTag<Html, LangAttr> {
@@ -171,7 +203,7 @@ namespace firestarter {
 
 			public:
 			void populate() {
-				this->cacheTemplate("html", "<html{{#XMLNS_S}} xmlns=\"{{XMLNS}}\"{{/XMLNS_S}}{{>LANGTAG}}>\n"
+				this->cacheTemplate("html", "<html{{#XMLNS_S}} xmlns=\"{{XMLNS}}\"{{/XMLNS_S}}{{>LANGTAG}}{{EXTRA_ATTRS}}>\n"
 					"{{CONTENTS}}"
 					"</html>\n");
 				if (not this->xmlns.empty()) this->dict.SetValueAndShowSection("XMLNS", this->xmlns, "XMLNS_S");
@@ -185,7 +217,7 @@ namespace firestarter {
 
 			public:
 			void populate() {
-				this->cacheTemplate("head", "<head{{#PROFILE_S}} profile=\"{{PROFILE}}\"{{/PROFILE_S}}{{>LANGTAG}}>\n"
+				this->cacheTemplate("head", "<head{{#PROFILE_S}} profile=\"{{PROFILE}}\"{{/PROFILE_S}}{{>LANGTAG}}{{EXTRA_ATTRS}}>\n"
 					"{{CONTENTS}}"
 					"</head>\n");
 				if (not this->profile.empty())
@@ -203,7 +235,7 @@ namespace firestarter {
 			public:
 			void populate() {
 				this->cacheTemplate("style", "<style{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}"
-					"{{#MEDIA_S}} media=\"{{MEDIA}}\"{{/MEDIA_S}}{{>LANGTAG}}>\n"
+					"{{#MEDIA_S}} media=\"{{MEDIA}}\"{{/MEDIA_S}}{{>LANGTAG}}{{EXTRA_ATTRS}}>\n"
 					"{{CONTENTS}}"
 					"</style>\n");
 				if (this->type.empty()) this->dict.SetValueAndShowSection("TYPE", "text/css", "TYPE");
@@ -225,6 +257,58 @@ namespace firestarter {
 			};
 		};
 
+		class A : public ContainerTag<A, StandardAttr> {
+			private:
+			std::string charset;
+			std::string coords;
+			std::string href;
+			std::string hreflang;
+			std::string name;
+			std::string rel;
+			std::string rev;
+			std::string shape;
+
+			public:
+			void populate() {
+				this->cacheTemplate("a", "<a{{>CORETAG}}{{>LANGTAG}}"
+					"{{#CHARSET_S}} charset=\"{{CHARSET}}\"{{/CHARSET_S}}"
+					"{{#COORDS_S}} coords=\"{{COORDS}}\"{{/COORDS_S}}"
+					"{{#HREF_S}} href=\"{{HREF}}\"{{/HREF_S}}"
+					"{{#HREFLANG_S}} hreflang=\"{{HREFLANG}}\"{{/HREFLANG_S}}"
+					"{{#NAME_S}} name=\"{{NAME}}\"{{/NAME_S}}"
+					"{{#REL_S}} rel=\"{{REL}}\"{{/REL_S}}"
+					"{{#REV_S}} rev=\"{{REV}}\"{{/REV_S}}"
+					"{{#SHAPE_S}} shape=\"{{SHAPE}}\"{{/SHAPE_S}}{{EXTRA_ATTRS}}>"
+					"{{CONTENTS}}"
+					"</a>\n");
+				if (not this->charset.empty())
+					this->dict.SetValueAndShowSection("CHARSET", this->charset, "CHARSET_S");
+				if (not this->coords.empty())
+					this->dict.SetValueAndShowSection("COORDS", this->coords, "COORDS_S");
+				if (not this->href.empty())
+					this->dict.SetValueAndShowSection("HREF", this->href, "HREF_S");
+				if (not this->hreflang.empty())
+					this->dict.SetValueAndShowSection("HREFLANG", this->hreflang, "HREFLANG_S");
+				if (not this->name.empty())
+					this->dict.SetValueAndShowSection("NAME", this->name, "NAME_S");
+				if (not this->rel.empty())
+					this->dict.SetValueAndShowSection("REL", this->rel, "REL_S");
+				if (not this->rev.empty())
+					this->dict.SetValueAndShowSection("REV", this->rev, "REV_S");
+				if (not this->shape.empty() && (this->shape == "default" || this->shape == "rect" ||
+						this->shape == "circle" || this->shape == "poly"))
+					this->dict.SetValueAndShowSection("SHAPE", this->shape, "SHAPE_S");
+			};
+			inline A & setCharset(std::string const & charset) { this->charset = charset; return *this; };
+			inline A & setCoords(std::string const & coords) { this->coords = coords; return *this; };
+			inline A & setHref(std::string const & href) { this->href = href; return *this; };
+			inline A & setHreflang(std::string const & hreflang) { this->hreflang = hreflang; return *this; };
+			inline A & setName(std::string const & name) { this->name = name; return *this; };
+			inline A & setRel(std::string const & rel) { this->rel = rel; return *this; };
+			inline A & setRev(std::string const & rev) { this->rev = rev; return *this; };
+			inline A & setShape(std::string const & shape) { this->shape = shape; return *this; };
+		};
+
 		class Meta : public Tag<Meta, LangAttr> {
 			private:
 			std::string httpequiv;
@@ -238,7 +322,7 @@ namespace firestarter {
 					"<meta{{>LANGTAG}}{{#HTTPEQUIV_S}} http-equiv=\"{{HTTPEQUIV}}\"{{/HTTPEQUIV_S}}"
 					"{{#CONTENT_S}} content=\"{{CONTENT}}\"{{/CONTENT_S}}"
 					"{{#NAME_S}} name=\"{{NAME}}\"{{/NAME_S}}"
-					"{{#SCHEME_S}} scheme=\"{{SCHEME}}\"{{/SCHEME_S}}/>\n");
+					"{{#SCHEME_S}} scheme=\"{{SCHEME}}\"{{/SCHEME_S}}{{EXTRA_ATTRS}}/>\n");
 				if (not this->httpequiv.empty())
 					this->dict.SetValueAndShowSection("HTTPEQUIV", this->httpequiv, "HTTPEQUIV_S");
 				if (not this->content.empty())
@@ -257,14 +341,14 @@ namespace firestarter {
 		class Title : public Tag<Title, LangAttr> {
 			public:
 			void populate() {
-				this->cacheTemplate("title", "<title{{>LANGTAG}}>{{CONTENTS}}</title>\n");
+				this->cacheTemplate("title", "<title{{>LANGTAG}}{{EXTRA_ATTRS}}>{{CONTENTS}}</title>\n");
 			};
 		};
 
 		class Body : public ContainerTag<Body, StandardAttr> {
 			public:
 			void populate() {
-				this->cacheTemplate("body", "<body{{>LANGTAG}}{{>CORETAG}}>\n"
+				this->cacheTemplate("body", "<body{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
 					"{{CONTENTS}}"
 					"</body>\n");
 			};
@@ -273,14 +357,14 @@ namespace firestarter {
 		class P : public Tag<P, StandardAttr> {
 			public:
 			void populate() {
-				this->cacheTemplate("p", "<p{{>LANGTAG}}{{>CORETAG}}>{{CONTENTS}}</p>\n");
+				this->cacheTemplate("p", "<p{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>{{CONTENTS}}</p>\n");
 			};
 		};
 
 		class Div : public ContainerTag<Div, StandardAttr> {
 			public:
 			void populate() {
-				this->cacheTemplate("div", "<div{{>LANGTAG}}{{>CORETAG}}>\n"
+				this->cacheTemplate("div", "<div{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
 					"{{CONTENTS}}"
 					"</div>\n");
 			};
@@ -289,7 +373,7 @@ namespace firestarter {
 		class Pre : public Tag<Pre, StandardAttr> {
 			public:
 			void populate() {
-				this->cacheTemplate("pre", "<pre{{>LANGTAG}}{{>CORETAG}}>\n"
+				this->cacheTemplate("pre", "<pre{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
 					"{{CONTENTS}}"
 					"</pre>\n");
 			};
@@ -298,7 +382,7 @@ namespace firestarter {
 		class Span : public Tag<Span, StandardAttr> {
 			public:
 			void populate() {
-				this->cacheTemplate("span", "<span{{>LANGTAG}}{{>CORETAG}}>{{CONTENTS}}</span>\n");
+				this->cacheTemplate("span", "<span{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>{{CONTENTS}}</span>\n");
 			};
 		};
 
@@ -311,13 +395,15 @@ namespace firestarter {
 			std::string xmlspace;
 
 			public:
+			Script() : defer(false) { };
 			void populate() {
 				this->cacheTemplate("script", "<script"
 					"{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}"
 					"{{#CHARSET_S}} charset=\"{{CHARSET}}\"{{/CHARSET_S}}"
 					"{{#DEFER_S}} defer=\"defer\"{{/DEFER_S}}"
 					"{{#SRC_S}} src=\"{{SRC}}\"{{/SRC_S}}"
-					"{{#XMLSPACE_S}} xml:space=\"{{XMLSPACE}}\"{{/XMLSPACE_S}}>{{#CONTENTS_S}}//<![CDATA[\n"
+					"{{#XMLSPACE_S}} xml:space=\"{{XMLSPACE}}\"{{/XMLSPACE_S}}{{EXTRA_ATTRS}}>"
+					"{{#CONTENTS_S}}//<![CDATA[\n"
 					"{{CONTENTS}}"
 					"//]]>{{/CONTENTS_S}}</script>\n");
 				if (not this->type.empty()) this->dict.SetValueAndShowSection("TYPE", this->type, "TYPE_S");
@@ -357,7 +443,7 @@ namespace firestarter {
 					"{{#REL_S}} rel=\"{{REL}}\"{{/REL_S}}"
 					"{{#REV_S}} rev=\"{{REV}}\"{{/REV_S}}"
 					"{{#TARGET_S}} target=\"{{TARGET}}\"{{/TARGET_S}}"
-					"{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}/>\n");
+					"{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}{{EXTRA_ATTRS}}/>\n");
 				if (not this->charset.empty())
 					this->dict.SetValueAndShowSection("CHARSET", this->charset, "CHARSET_S");
 				if (not this->href.empty())
@@ -413,7 +499,7 @@ namespace firestarter {
 					"{{#ACCEPT_S}} accept=\"{{ACCEPT}}\"{{/ACCEPT_S}}"
 					"{{#ACCEPTCHARSET_S}} accept-charset=\"{{ACCEPTCHARSET}}\"{{/ACCEPTCHARSET_S}}"
 					"{{#ENCTYPE_S}} enctype=\"{{ENCTYPE}}\"{{/ENCTYPE_S}}"
-					"{{#METHOD_S}} method=\"{{METHOD}}\"{{/METHOD_S}}>\n"
+					"{{#METHOD_S}} method=\"{{METHOD}}\"{{/METHOD_S}}{{EXTRA_ATTRS}}>\n"
 					"{{CONTENTS}}"
 					"</form>\n");
 				if (not this->action.empty()) this->dict.SetValueAndShowSection("ACTION", this->action, "ACTION_S");
@@ -438,7 +524,7 @@ namespace firestarter {
 			public:
 			void populate() {
 				this->cacheTemplate("label", "<label{{>CORETAG}}{{>LANGTAG}}"
-					"{{#FOR_S}} for=\"{{FOR}}\"{{/FOR_S}}>{{CONTENTS}}</label>\n");
+					"{{#FOR_S}} for=\"{{FOR}}\"{{/FOR_S}}{{EXTRA_ATTRS}}>{{CONTENTS}}</label>\n");
 				if (not this->_for.empty()) this->dict.SetValueAndShowSection("FOR", this->_for, "FOR_S");
 			};
 			inline Label & setFor(std::string const & _for) { this->_for = _for; return *this; };
@@ -459,6 +545,7 @@ namespace firestarter {
 			std::string value;
 
 			public:
+			Input() : checked(false), disabled(false), maxlength(-1), readonly(false), size(-1) { };
 			void populate() {
 				this->cacheTemplate("input", "<input{{>LANGTAG}}{{>CORETAG}}"
 					"{{#ACCEPT_S}} accept=\"{{ACCEPT}}\"{{/ACCEPT_S}}"
@@ -471,7 +558,7 @@ namespace firestarter {
 					"{{#SIZE_S}} size=\"{{SIZE}}\"{{/SIZE_S}}"
 					"{{#SRC_S}} src=\"{{SRC}}\"{{/SRC_S}}"
 					"{{#TYPE_S}} type=\"{{TYPE}}\"{{/TYPE_S}}"
-					"{{#VALUE_S}} value=\"{{VALUE}}\"{{/VALUE_S}}/>\n");
+					"{{#VALUE_S}} value=\"{{VALUE}}\"{{/VALUE_S}}{{EXTRA_ATTRS}}/>\n");
 				if (not this->accept.empty()) this->dict.SetValueAndShowSection("ACCEPT", this->accept, "ACCEPT_S");
 				if (not this->alt.empty()) this->dict.SetValueAndShowSection("ALT", this->alt, "ALT_S");
 				if (this->checked) this->dict.ShowSection("CHECKED_S");
@@ -505,6 +592,60 @@ namespace firestarter {
 			inline Input & setSrc(std::string const & src) { this->src = src; return *this; };
 			inline Input & setType(std::string const & type) { this->type = type; return *this; };
 			inline Input & setValue(std::string const & value) { this->value = value; return *this; };
+		};
+
+		class H1 : public ContainerTag<H1, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h1", "<h1{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h1>\n");
+			};
+		};
+
+		class H2 : public ContainerTag<H2, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h2", "<h2{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h2>\n");
+			};
+		};
+
+		class H3 : public ContainerTag<H3, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h3", "<h3{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h3>\n");
+			};
+		};
+
+		class H4 : public ContainerTag<H4, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h4", "<h4{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h4>\n");
+			};
+		};
+
+		class H5 : public ContainerTag<H5, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h5", "<h5{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h5>\n");
+			};
+		};
+
+		class H6 : public ContainerTag<H6, StandardAttr> {
+			public:
+			void populate() {
+				this->cacheTemplate("h6", "<h6{{>LANGTAG}}{{>CORETAG}}{{EXTRA_ATTRS}}>\n"
+					"{{CONTENTS}}"
+					"</h6>\n");
+			};
 		};
 
 	}

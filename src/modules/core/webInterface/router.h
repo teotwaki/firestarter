@@ -10,6 +10,7 @@
 #include <boost/functional/factory.hpp>
 #include <boost/function.hpp>
 #include <map>
+#include <memory>
 
 namespace firestarter {
 	namespace module {
@@ -21,6 +22,9 @@ namespace firestarter {
 		typedef boost::function<firestarter::common::WebWidgets::Pages::WebPage * 
 									(/*const Fastcgipp::Http::Environment<char> & environment*/)> PageFactory;
 		static std::map<std::string, PageFactory> page_factory;
+		std::unique_ptr<firestarter::common::WebWidgets::Pages::WebPage> instantiate(std::string const & name) {
+			return std::unique_ptr<firestarter::common::WebWidgets::Pages::WebPage>(this->page_factory[name]());
+		}
 
 		bool response();
 
