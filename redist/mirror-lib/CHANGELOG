@@ -1,0 +1,202 @@
+Version 0.5.13
+
+- Fixed a problem in the implementation of mp::is_a<>
+- Added assertion macros checking the results of expressions
+- Added the before<> template meta-function to Mirror's meta-programming
+  utilities
+- Added the can_be_called meta-programming utility
+- Added the flatten meta-programming utility
+- Added new examples
+- Documentation update
+
+
+Version 0.5.12
+
+- Added the apply_modifier meta-function to Mirror's MetaTypes
+- Added the mp::protect<> meta-function protecting placeholder expression
+  from immediate expansion
+- Updates to the Puddle's compile-time integer to make it more static
+- The specifier wrappers in Puddle now use compile-time booleans as operator result
+- Added the first version of the Rubber type-erasure utility
+
+Version 0.5.11
+
+- Added the element_done() member function to the element_traversal_info type
+- Changed the traverse_elements friend function of MetaType to accept two functors
+- Updated the MetaMetaObject concept
+- Added compile-time string names for some types and namespace (experimental)
+- Refactored and reimplemented some of the internal code
+- Added new interfaces to Lagoon to better match Mirror's concepts
+- Added new examples
+- Documentation updates
+
+Version 0.5.10
+
+- Updates and bug fixes of container reflection-related code
+- Pre-registered boost::optional as optional-value container
+- Pre-registered boost::variant as variant-value container
+- Added support for optional-value containers to the JSON and XML stream writers
+- Added support for variant-value containers to the JSON and XML stream writers
+- Added new examples
+
+Version 0.5.9
+
+- Renamed the MIRROR_REG_TEMPLATE macro to MIRROR_REG_TYPE_TEMPLATE and added
+  MIRROR_REG_CLASS_TEMPLATE
+- Several bugs and pedantic warnings were fixed
+- Added the meta_object_kind meta-function template
+- Added meta-meta-objects for container-related meta-object
+- Added operators !, &, |, && and || to Puddles integer wrapper
+- Added support for container reflection to Mirror and Puddle
+- Documentation updates
+
+Version 0.5.8
+
+- Added the free_variables intrinsic metafunction returning the free variables
+  of a namespace to Mirror
+- Added the free_variables_by_name metafunction to Mirror
+- Added wrappers for free_variables and free_variables_by_name to Puddle
+- Added meta-free-variables to Lagoon
+- Added several new examples
+- Added the first version of meta-instance to Puddle
+- Some optimizations in the implementation of Lagoon
+- Major documentation re-organization and udate
+
+Version 0.5.7
+
+- Added the class generator utility
+- Added support for init-list constructors to the Lagoon's
+  polymorphics factories
+- Fixed header dependencies
+- Fixed a bug in the Mirror specifier's keyword function
+- Fixed a problem int the factory generator and the script parsing
+  factory generator plugin
+- Renamed the is_specialized_manufacturer trait template to
+  is_specialized_factory_src
+- Minor changes in the Mirror's concepts
+- The string returning functions now return std::string instead of
+  const std::string
+- Updated the specifier tags in Mirror and specifiers enumeration in Lagoon
+- Added the spec__tag for 'non-specifiers' (non-const, non-virtual,
+  auto-storage-class, etc.)
+- Added the MIRROR_FOR_EACH_META_OBJECT_MACRO
+- Added the accumulate algorithm to Mirror
+- Minor changes in the Mirror's meta-object categorization implementation
+- Added the first version of the Puddle compile-time layer for Mirror
+- Added the unspecified_scope category
+- Added the MIRRORED_UNSPECIFIED_SCOPE macro
+- Added the MIRRORED_SIMPLE_VARIABLE macro
+- Renamed the MetaPODMemberVariable concept to MetaPlainMemberVariable
+- Renamed the MetaGlobalVariable concept to MetaFreeVariable
+- Added support for registering and reflecting free variables
+- Added quick registering macros for free variables
+- Added several new examples showing the new features
+
+Version 0.5.6
+
+- Added the MetaClassOrEnumMember concept
+- Added the meta_class_member interface to Lagoon
+- Added several new intrinsic meta-function templates: derived_class<>,
+  result_type<>, enum_size<>, type_template<>, member_position<>
+  and parameter_position<>
+- Renamed the MIRROR_REG_\(.*\)_GLOBAL_SCOPE registering macros to
+  MIRROR_REG_GLOBAL_SCOPE_\1
+- Renamed the MIRROR_REG_\(.*\)_NESTED registering macros to
+  MIRROR_REG_NESTED_\1
+- Added the MIRROR_REG_NESTED_CLASS_BEGIN and MIRROR_REG_NESTED_ENUM_BEGIN
+  macros which allow to register classes and enums nested in a class
+- Added the MIRROR_QREG_NESTED_POD_CLASS, MIRROR_QREG_GLOBAL_SCOPE_POD_CLASS,
+  MIRROR_QREG_ENUM, MIRROR_QREG_NESTED_ENUM and MIRROR_QREG_GLOBAL_SCOPE_ENUM
+  quick registering macros
+- Refactored the SQL factory generator plugin framework
+- Refactored the script factory generator plugin
+- Added several new examples
+- Major refactoring and optimization of the Lagoon's implementation
+- Documentation update
+
+Version 0.5.5
+
+- Update in the output stream adaptors. Renamed the '_' member function
+  of the stream writer classes to 'from'.
+- Added a new output stream writer
+- Minor update of the wxWidgets-based factory generator plugin
+- Renamed the reflected_type member typedef and intrinsic meta-function
+  of MetaType to original_type
+- Added a new reflected_type<T> and reflected<T> template class that
+  can be used to reflect types instead of the MIRRORED_TYPE macro
+- Added the MetaClassMember concept to both Mirror and Lagoon
+- Added a few new intrinsic meta-function templates that can be used
+  in complex expressions, namely (inheritance_type<>, base_class<>,
+  constness<>, linkage<>, storage_class<>, base_class_access_type<>,
+  class_member_access_type<>)
+- Added the mp::is_one_of<> meta-programming utility
+- Added several new examples
+- Documentation update
+
+Version 0.5.4
+
+- Fixed a resource leak-causing bug in the Lagoon's
+  make_factory member function of meta_type
+- Added support for initializer-list constructors to the factory
+  generator utility
+- Added support for initializer-list constructors to the script-
+  parsing factory generator plugin
+- Added support for initializer-list constructors to the SDN
+  factory generator plugin
+- Added support for initializer-list constructors to the wxWidgets
+  factory generator plugin
+- Added new examples showing the construction of containers via
+  automatically generated factories
+
+Version 0.5.3
+
+- Added full support for reflection of enums to both Mirror and Lagoon
+  - Also supported by the factory generator utility and the provided
+    factory generator plug-ins
+  - Also supported by the stream-writers
+  - Extended the MetaEnum's interface
+- Added the Boost.Filesystem-based structured data notation factory
+  generator plugin
+- Added several new examples
+- Update of the class member and function/constructor parameter reflection
+  - Types of member variables and parameters are now reflected as they
+    were registered (by MetaType, MetaClass or MetaEnum)
+- Documentation update
+- Several bugfixes and minor optimizations
+
+Version 0.5.2
+
+- Added partial support for reflection of enums to Mirror
+  - Fully supported by the basic reflection tools
+  - No support yet by the factory generator utility
+- Added the type_of intrinsic meta-function template for MetaVariable(s)
+- Added pre-registered meta-class for boost::optional
+- Added pre-registered meta-class for std::tuple
+- Update of the build system. GNU make and Boost.Build now both use
+  pg_config to find the location of the libpq headers
+
+Version 0.5.1
+
+- Added a Jamfile for building of the examples with Boost.Build
+- Added the boostification tools
+- Reorganized the pre-registering headers
+- Updated the pre-registering code
+- Added the by_name intrinsic meta-function for getting meta-objects reflecting
+  class member variables by the identifier of those member variables
+- Added support for "POD" member variables, i.e. member variables whose
+  address and class member pointer can be queried.
+- Added examples showing the mijson-parser-based factory generator plugin
+  to both Mirror and Lagoon
+- Added a simple in-place nonmodifying JSON parser to Mirror's utils
+- Added a factory generator plugin using the mijson parser to create instances
+  from Javascript Object Notation input
+- Fixed a bug in both Mirror's and Lagoon's examples showing the script-parsing
+  factory generator plugin.
+- Added support for escaped characters including unicode code points
+  to the script parsing factory generator plugin.
+- Fixed problems with string / wxString conversion in wxxml_factory with
+  Unicode builds of wxWidgets
+
+Version 0.5.0
+
+- The first version with a changelog entry

@@ -1,0 +1,20 @@
+The files in this directory (except for redist.txt) were imported from the
+mirror-lib git repository. The documentation, unit tests, tools or examples
+have not been imported for the sake of efficiency.
+
+All the imported files should remain under the license they were published
+as (see LICENSE_1_0.txt for more details).
+
+This being said, even though the Boost license does not require this, if
+any of the files in this redistribution are modified during the development
+of the firestarter project, we kindly ask that you publish the changes
+upstream.
+
+mirror-lib website:
+http://kifri.fri.uniza.sk/~chochlik/mirror-lib/html/
+
+Git repository (web):
+http://mirror-lib.git.sourceforge.net/git/gitweb.cgi?p=mirror-lib/mirror-lib;a=summary
+
+Git repository (clone url): 
+git://mirror-lib.git.sourceforge.net/gitroot/mirror-lib/mirror-lib

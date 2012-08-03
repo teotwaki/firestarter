@@ -1,0 +1,19 @@
+Copyright © 2006-2011 Matúš Chochlík, Žilina, Slovakia
+
+Distributed under the Boost Software License, Version 1.0.
+(See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+IMPORTANT NOTE:
+Mirror is being developed with the intention to be submitted for review
+for inclusion to the Boost C++ libraries.
+
+NOTE:
+The Mirror library is currently in development and so is its documentation
+(available online at http://kifri.fri.uniza.sk/~chochlik/mirror-lib/html/).
+
+The aim of the Mirror library is to provide both compile-time and run-time
+meta-data describing common C++ constructs like namespaces,
+types, classes, class templates and their base classes and member variables,
+constructors, member functions, etc. and to provide uniform and generic
+interfaces for their introspection. Furthermore it provides several high-level
+tools based on the reflected meta-data.

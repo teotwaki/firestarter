@@ -1,0 +1,49 @@
+Mirror is a header-only library and therfore you do not have to link against
+it when using it in applications. There are however many examples showing
+the usage of Mirror and those can be built with either GNU Make or Boost.Build.
+Support for other build systems may be added in the future.
+
+ *** GNU Make ***
+
+For the impatient: Just run make in the project root dir to build everything.
+Influential environment variables are CXXFLAGS and LDFLAGS.
+
+On platforms where GNU Make is available it can be used to build Mirror's
+and Lagoon's examples. Internally make is also used to build the documentation,
+the development / testing sources make release packages and other things.
+
+Several of the examples use external libraries like Boost, RapidXML, SOCI,
+PostgreSQL's client C library, wxWidgets, etc. If you have them installed
+in non-standard locations set the CXXFLAGS and LDFLAGS environment variables
+accordingly, i.e. add the -I options for additional directory paths to search
+for header files and -L options with paths to directories containing additional
+libraries to link to. If wxWidgets are installed on your system, the wx-config
+tool should be in the executable search path. i.e. in one of the dirs listed
+in PATH.
+
+The external dependencies are optional, so if some of them are not available
+an error message will be printed out during the compilation / linking
+of an example source file, but it will not stop the building of other sources.
+
+Since building of Lagoon's examples can be quite time-consuming you can use
+`make mirror-examples' to build only Mirror's examples. To build just Lagoon's
+examples run `make lagoon-examples'.
+
+Official build targets for make are `all', `mirror-examples', `lagoon-examples',
+`clean' and `docs'.
+
+ *** Boost.Build ***
+
+Boost.Build can be used to build the Mirror's and Lagoon's examples, by invoking
+bjam in the root directory. The BOOST_BUILD_PATH environment variable must be
+set accordingly.
+
+Several of the examples use external libraries like Boost, RapidXML, SOCI,
+PostgreSQL's client C library, wxWidgets, etc. If you have them installed
+in non-standard locations set the CXXFLAGS and LDFLAGS environment variables
+accordingly, i.e. add the -I options for additional directory paths to search
+for header files and -L options with paths to directories containing additional
+libraries to link to. If wxWidgets are installed on your system, the wx-config
+tool should be in the executable search path. i.e. in one of the dirs listed
+in PATH.
+
