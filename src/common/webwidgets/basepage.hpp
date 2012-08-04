@@ -1,6 +1,6 @@
 
-#ifndef __BASEPAGE_H
-#define __BASEPAGE_H
+#ifndef FIRESTARTER_BASEPAGE_HPP
+#define FIRESTARTER_BASEPAGE_HPP
 
 #include "htmltemplates.hpp"
 

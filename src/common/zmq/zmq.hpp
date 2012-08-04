@@ -22,8 +22,8 @@
     IN THE SOFTWARE.
 */
 
-#ifndef __ZMQ_HPP_INCLUDED__
-#define __ZMQ_HPP_INCLUDED__
+#ifndef FIRESTARTER_ZMQ_HPPPP_INCLUDED__
+#define FIRESTARTER_ZMQ_HPPPP_INCLUDED__
 
 #include <zmq.h>
 

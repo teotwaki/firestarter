@@ -1,5 +1,5 @@
-#ifndef __CLIENT_INSTANCEMANAGER_H
-#define __CLIENT_INSTANCEMANAGER_H
+#ifndef FIRESTARTER_CLIENT_INSTANCEMANAGER_HPP
+#define FIRESTARTER_CLIENT_INSTANCEMANAGER_HPP
 
 #include "zmq/zmqsocket.hpp"
 #include "protobuf/module.pb.h"

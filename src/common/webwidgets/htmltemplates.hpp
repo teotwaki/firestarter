@@ -1,6 +1,6 @@
 
-#ifndef __HTMLTEMPLATES_H
-#define __HTMLTEMPLATES_H
+#ifndef FIRESTARTER_HTMLTEMPLATES_HPP
+#define FIRESTARTER_HTMLTEMPLATES_HPP
 
 #include "log.hpp"
 

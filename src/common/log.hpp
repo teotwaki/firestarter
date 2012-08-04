@@ -1,5 +1,5 @@
-#ifndef __LOGGER_H
-#define __LOGGER_H
+#ifndef FIRESTARTER_LOGGER_HPP
+#define FIRESTARTER_LOGGER_HPP
 
 #include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>

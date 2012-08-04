@@ -1,6 +1,6 @@
 
-#ifndef __ROUTER_H
-#define __ROUTER_H
+#ifndef FIRESTARTER_ROUTER_HPP
+#define FIRESTARTER_ROUTER_HPP
 
 #include "log.hpp"
 #include "webwidgets/basepage.hpp"

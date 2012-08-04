@@ -1,6 +1,6 @@
 
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef FIRESTARTER_MAIN_HPP
+#define FIRESTARTER_MAIN_HPP
 
 #if HAVE_CONFIG_H
 	#include <config.h>

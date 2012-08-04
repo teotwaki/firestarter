@@ -1,6 +1,6 @@
 
-#ifndef __ZMQSOCKET_H
-#define __ZMQSOCKET_H
+#ifndef FIRESTARTER_ZMQSOCKET_HPP
+#define FIRESTARTER_ZMQSOCKET_HPP
 
 #include "zmq/zmqhelper.hpp"
 #include "protobuf/module.pb.h"

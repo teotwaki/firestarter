@@ -1,6 +1,6 @@
 
-#ifndef __MAINPAGE_H
-#define __MAINPAGE_H
+#ifndef FIRESTARTER_MAINPAGE_HPP
+#define FIRESTARTER_MAINPAGE_HPP
 
 #include "log.hpp"
 #include "webwidgets/basepage.hpp"

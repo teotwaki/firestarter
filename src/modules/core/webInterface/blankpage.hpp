@@ -1,6 +1,6 @@
 
-#ifndef __BLANKPAGE_H
-#define __BLANKPAGE_H
+#ifndef FIRESTARTER_BLANKPAGE_HPP
+#define FIRESTARTER_BLANKPAGE_HPP
 
 #include "log.hpp"
 #include "webwidgets/basepage.hpp"

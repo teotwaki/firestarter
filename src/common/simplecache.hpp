@@ -1,5 +1,5 @@
-#ifndef __SIMPLECACHE_H
-#define __SIMPLECACHE_H
+#ifndef FIRESTARTER_SIMPLECACHE_HPP
+#define FIRESTARTER_SIMPLECACHE_HPP
 
 /** \brief Simple caching base class
   *

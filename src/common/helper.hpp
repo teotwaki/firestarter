@@ -1,5 +1,5 @@
-#ifndef __HELPER_H
-#define __HELPER_H
+#ifndef FIRESTARTER_HELPER_HPP
+#define FIRESTARTER_HELPER_HPP
 
 #include <string>
 #include <sys/stat.h>

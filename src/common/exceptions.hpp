@@ -1,5 +1,5 @@
-#ifndef __EXCEPTIONS_H
-#define __EXCEPTIONS_H
+#ifndef FIRESTARTER_EXCEPTIONS_HPP
+#define FIRESTARTER_EXCEPTIONS_HPP
 
 #include <exception>
 

@@ -1,6 +1,6 @@
 
-#ifndef __MODULE_H
-#define __MODULE_H
+#ifndef FIRESTARTER_MODULE_HPP
+#define FIRESTARTER_MODULE_HPP
 
 #include <string>
 #include <cstdlib>

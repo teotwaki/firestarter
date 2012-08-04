@@ -1,6 +1,6 @@
 
-#ifndef __WEBINTERFACE_H
-#define __WEBINTERFACE_H
+#ifndef FIRESTARTER_WEBINTERFACE_HPP
+#define FIRESTARTER_WEBINTERFACE_HPP
 
 #include "module.hpp"
 #include "log.hpp"

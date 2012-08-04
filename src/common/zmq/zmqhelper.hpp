@@ -1,6 +1,6 @@
 
-#ifndef __ZMQHELPER_H
-#define __ZMQHELPER_H
+#ifndef FIRESTARTER_ZMQHELPER_HPP
+#define FIRESTARTER_ZMQHELPER_HPP
 
 #include "zmq/zmq.hpp"
 
