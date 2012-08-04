@@ -2,7 +2,7 @@
 #ifndef __BASEPAGE_H
 #define __BASEPAGE_H
 
-#include "htmltemplates.h"
+#include "htmltemplates.hpp"
 
 #include <string>
 #include <fastcgi++/http.hpp>

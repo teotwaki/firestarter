@@ -1,4 +1,4 @@
-#include "webwidgets/basepage.h"
+#include "webwidgets/basepage.hpp"
 
 namespace firestarter { namespace common { namespace WebWidgets { namespace Pages {
 	DECLARE_LOG(logger, "firestarter.common.WebWidgets.Pages");

@@ -1,4 +1,4 @@
-#include "module.h"
+#include "module.hpp"
 
 namespace firestarter { namespace module {
 	DECLARE_EXTERN_LOG(logger);

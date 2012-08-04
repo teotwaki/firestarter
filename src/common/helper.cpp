@@ -1,4 +1,4 @@
-#include "helper.h"
+#include "helper.hpp"
 
 bool file_exists(std::string path) {
 	struct stat st;

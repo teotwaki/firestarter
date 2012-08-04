@@ -2,8 +2,8 @@
 #ifndef __ROUTER_H
 #define __ROUTER_H
 
-#include "log.h"
-#include "webwidgets/basepage.h"
+#include "log.hpp"
+#include "webwidgets/basepage.hpp"
 
 #include <boost/bind.hpp>
 #include <fastcgi++/request.hpp>

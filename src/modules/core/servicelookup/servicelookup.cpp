@@ -1,4 +1,4 @@
-#include "servicelookup.h"
+#include "servicelookup.hpp"
 
 DECLARE_MODULE_LOG(ServiceLookup);
 

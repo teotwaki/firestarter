@@ -61,15 +61,15 @@ webinterfacejs_DATA = redist/htmlkickstart/js/*
 ## the C++ compiler to produce an object file (.o) from each source file. The
 ## header files (.h) do not result in object files by themselves, but will be
 ## included in distribution archives of the project.
-firestarter_SOURCES = src/fs/main.cpp src/fs/main.h \
-                      src/fs/modulemanager.h src/fs/modulemanager.cpp \
-                      src/fs/instancemanager.h src/fs/instancemanager.cpp \
-                      src/fs/dependencygraph.h src/fs/dependencygraph.cpp \
-                      src/common/log.h src/common/log.cpp src/common/simplecache.h \
+firestarter_SOURCES = src/fs/main.cpp src/fs/main.hpp \
+                      src/fs/modulemanager.hpp src/fs/modulemanager.cpp \
+                      src/fs/instancemanager.hpp src/fs/instancemanager.cpp \
+                      src/fs/dependencygraph.hpp src/fs/dependencygraph.cpp \
+                      src/common/log.hpp src/common/log.cpp src/common/simplecache.hpp \
                       protobuf/module.pb.cc protobuf/module.pb.h \
-                      src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
-                      src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp \
-                      src/common/module.h
+                      src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.hpp \
+                      src/common/zmq/zmqsocket.hpp src/common/zmq/zmqsocket.cpp \
+                      src/common/module.hpp
 
 ## Set the library dependencies for the "firestarter" target to the value obtained
 ## from pkg-config via PKG_CHECK_MODULES in configure.ac.  These libraries are
@@ -87,28 +87,28 @@ firestarter_LDFLAGS = -export-dynamic
 ## included in distribution archives of the project
 
 webinterface_la_SOURCES = src/modules/core/webInterface/webinterface.cpp \
-                          src/modules/core/webInterface/webinterface.h \
-                          src/modules/core/webInterface/router.h \
+                          src/modules/core/webInterface/webinterface.hpp \
+                          src/modules/core/webInterface/router.hpp \
                           src/modules/core/webInterface/router.cpp \
-                          src/modules/core/webInterface/mainpage.h \
+                          src/modules/core/webInterface/mainpage.hpp \
                           src/modules/core/webInterface/mainpage.cpp \
-                          src/modules/core/webInterface/blankpage.h \
+                          src/modules/core/webInterface/blankpage.hpp \
                           src/modules/core/webInterface/blankpage.cpp \
-                          src/common/webwidgets/htmltemplates.h \
-                          src/common/webwidgets/basepage.h \
+                          src/common/webwidgets/htmltemplates.hpp \
+                          src/common/webwidgets/basepage.hpp \
                           src/common/webwidgets/basepage.cpp \
-                          src/common/module.h src/common/module.cpp \
+                          src/common/module.hpp src/common/module.cpp \
                           protobuf/module.pb.cc protobuf/module.pb.h \
-                          src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.h \
-                          src/common/zmq/zmqsocket.h src/common/zmq/zmqsocket.cpp \
-                          src/common/clients/instancemanager.h
+                          src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.hpp \
+                          src/common/zmq/zmqsocket.hpp src/common/zmq/zmqsocket.cpp \
+                          src/common/clients/instancemanager.hpp
 webinterface_la_LDFLAGS = -module -avoid-version -export-dynamic
 webinterface_la_CPPFLAGS = $(MODULES_CPPFLAGS) $(WEBDEPS_CFLAGS)
 webinterface_la_LIBADD = $(WEBDEPS_LIBS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
-                              src/fs/modulemanager.cpp src/fs/modulemanager.h \
-                              src/fs/dependencygraph.cpp src/fs/dependencygraph.h
+                              src/fs/modulemanager.cpp src/fs/modulemanager.hpp \
+                              src/fs/dependencygraph.cpp src/fs/dependencygraph.hpp
 modulemanager_tests_LDADD = $(TESTS_LIBS)
 modulemanager_tests_CPPFLAGS = $(TESTS_CPPFLAGS)
 

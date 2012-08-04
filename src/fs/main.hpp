@@ -6,9 +6,9 @@
 	#include <config.h>
 #endif
 
-#include "helper.h"
-#include "modulemanager.h"
-#include "instancemanager.h"
+#include "helper.hpp"
+#include "modulemanager.hpp"
+#include "instancemanager.hpp"
 
 #include <libconfig.h++>
 #include <iostream>

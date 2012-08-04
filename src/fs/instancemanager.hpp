@@ -5,10 +5,10 @@
 	#include <config.h>
 #endif
 
-#include "helper.h"
-#include "modulemanager.h"
-#include "zmq/zmqsocket.h"
-#include "module.h"
+#include "helper.hpp"
+#include "modulemanager.hpp"
+#include "zmq/zmqsocket.hpp"
+#include "module.hpp"
 
 #include <list>
 #include <boost/thread.hpp>

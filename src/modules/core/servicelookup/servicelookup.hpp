@@ -6,9 +6,9 @@
 	#include <config.h>
 #endif
 
-#include "helper.h"
-#include "instancemanager.h"
-#include "zmq/zmqsocket.h"
+#include "helper.hpp"
+#include "instancemanager.hpp"
+#include "zmq/zmqsocket.hpp"
 
 #include <list>
 #include <boost/thread.hpp>

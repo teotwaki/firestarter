@@ -6,10 +6,10 @@
 #include <cstdlib>
 #include <ctime>
 
-#include "helper.h"
-#include "clients/instancemanager.h"
+#include "helper.hpp"
+#include "clients/instancemanager.hpp"
 #include "protobuf/module.pb.h"
-#include "zmq/zmqhelper.h"
+#include "zmq/zmqhelper.hpp"
 
 namespace firestarter {
 	namespace module {

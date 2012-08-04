@@ -1,4 +1,4 @@
-#include "webinterface.h"
+#include "webinterface.hpp"
 
 DECLARE_MODULE_LOG(WebInterface);
 

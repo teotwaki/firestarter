@@ -6,11 +6,11 @@
 	#include <config.h>
 #endif
 
-#include "helper.h"
-#include "simplecache.h"
-#include "dependencygraph.h"
-#include "zmq/zmqhelper.h"
-#include "module.h"
+#include "helper.hpp"
+#include "simplecache.hpp"
+#include "dependencygraph.hpp"
+#include "zmq/zmqhelper.hpp"
+#include "module.hpp"
 
 #include <libconfig.h++>
 #include <list>

@@ -1,4 +1,4 @@
-#include "modulemanager.h"
+#include "modulemanager.hpp"
 
 namespace firestarter { namespace ModuleManager {
 	DECLARE_LOG(logger, "firestarter.ModuleManager");

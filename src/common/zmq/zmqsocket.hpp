@@ -2,9 +2,9 @@
 #ifndef __ZMQSOCKET_H
 #define __ZMQSOCKET_H
 
-#include "zmq/zmqhelper.h"
+#include "zmq/zmqhelper.hpp"
 #include "protobuf/module.pb.h"
-#include "log.h"
+#include "log.hpp"
 
 #include <list>
 #include <string>

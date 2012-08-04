@@ -1,4 +1,4 @@
-#include "mainpage.h"
+#include "mainpage.hpp"
 
 DECLARE_EXTERN_LOG(logger);
 

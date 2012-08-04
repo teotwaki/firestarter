@@ -2,11 +2,11 @@
 #ifndef __WEBINTERFACE_H
 #define __WEBINTERFACE_H
 
-#include "module.h"
-#include "log.h"
-#include "router.h"
-#include "mainpage.h"
-#include "blankpage.h"
+#include "module.hpp"
+#include "log.hpp"
+#include "router.hpp"
+#include "mainpage.hpp"
+#include "blankpage.hpp"
 
 #include <fastcgi++/request.hpp>
 #include <fastcgi++/manager.hpp>
