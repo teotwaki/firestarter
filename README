@@ -13,6 +13,9 @@ Libraries:
 	FastCGI++ 2.0 or above
 	Google's CTemplate (2.2 or above).
 
+Tools:
+	MAuReEn 0.1.0 or above.
+
 Optional:
 	When compiling in debug mode (./configure --enable-debugging):
 	libprofiler (part of ex-Google's perftools)
@@ -26,8 +29,8 @@ obtained from Debian Testing (wheezy):
 
 The list, however, is not complete: ctemplate does not have a -dev 
 package available in wheezy at the time of writing (only runtime).
-As for ZMQ and fastcgi++, they simply don't exist. No problem, we'll
-get them from source:
+As for ZMQ, MAuReEn and fastcgi++, they simply don't exist. No problem,
+we'll get them from source:
 
 	# CTemplate
 	wget http://ctemplate.googlecode.com/files/ctemplate-2.2.tar.gz
@@ -59,5 +62,13 @@ get them from source:
 	# If you wish to install to /usr/lib instead of /usr/local/lib
 	# use: ./configure --prefix=/usr
 	./configure && make -j4
+	# Install with root
+	make install
+
+	# MAuReEn
+	wget http://kifri.fri.uniza.sk/~chochlik/maureen/release/maureen-0.1.0.tar.gz
+	tar xvf maureen-0.1.0.tar.gz
+	cd maureen-0.1.0/
+	./bootstrap.sh
 	# Install with root
 	make install
