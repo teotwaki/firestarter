@@ -1,7 +1,7 @@
 #ifndef __CLIENT_INSTANCEMANAGER_H
 #define __CLIENT_INSTANCEMANAGER_H
 
-#include "zmq/zmqsocket.h"
+#include "zmq/zmqsocket.hpp"
 #include "protobuf/module.pb.h"
 
 namespace firestarter {

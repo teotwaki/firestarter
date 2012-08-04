@@ -2,7 +2,7 @@
 #ifndef __HTMLTEMPLATES_H
 #define __HTMLTEMPLATES_H
 
-#include "log.h"
+#include "log.hpp"
 
 #include <ctemplate/template.h>
 #include <string>

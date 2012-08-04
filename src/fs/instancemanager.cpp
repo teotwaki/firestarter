@@ -1,4 +1,4 @@
-#include "instancemanager.h"
+#include "instancemanager.hpp"
 
 #ifndef logger
 namespace firestarter { namespace InstanceManager {

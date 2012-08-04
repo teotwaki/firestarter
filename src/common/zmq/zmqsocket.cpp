@@ -1,4 +1,4 @@
-#include "zmq/zmqsocket.h"
+#include "zmq/zmqsocket.hpp"
 
 namespace firestarter { namespace sockets {
 	DECLARE_LOG(logger, "firestarter.sockets");

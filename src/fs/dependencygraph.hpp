@@ -5,9 +5,8 @@
 	#include <config.h>
 #endif
 
-#include "helper.h"
-
-#include "simplecache.h"
+#include "helper.hpp"
+#include "simplecache.hpp"
 
 #include <list>
 #include <exception>

@@ -1,4 +1,4 @@
-#include "dependencygraph.h"
+#include "dependencygraph.hpp"
 
 #ifndef logger
 namespace firestarter { namespace ModuleManager { namespace DependencyGraph {

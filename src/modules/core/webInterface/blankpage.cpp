@@ -1,4 +1,4 @@
-#include "blankpage.h"
+#include "blankpage.hpp"
 
 DECLARE_EXTERN_LOG(logger);
 

@@ -2,9 +2,9 @@
 #ifndef __MAINPAGE_H
 #define __MAINPAGE_H
 
-#include "log.h"
-#include "webwidgets/basepage.h"
-#include "webwidgets/htmltemplates.h"
+#include "log.hpp"
+#include "webwidgets/basepage.hpp"
+#include "webwidgets/htmltemplates.hpp"
 
 namespace firestarter {
 	namespace module {

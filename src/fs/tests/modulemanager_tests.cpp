@@ -3,8 +3,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <libconfig.h++>
-#include "src/fs/modulemanager.h"
-#include "src/common/exceptions.h"
+#include "src/fs/modulemanager.hpp"
+#include "src/common/exceptions.hpp"
 
 BOOST_AUTO_TEST_CASE(constructor_test) {
 	using namespace firestarter::ModuleManager;
