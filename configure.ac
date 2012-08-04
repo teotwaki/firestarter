@@ -33,6 +33,23 @@ AX_CHECK_COMPILE_FLAG([-std=gnu++11], [CXXFLAGS="$CXXFLAGS -std=gnu++11"], [
 	])
 ])
 
+# Check whether MAuReEn is correctly installed
+AC_CHECK_PROG(maureen_present, maureen, yes)
+AS_IF([test "x$maureen_present" != "xyes"], [
+	AC_MSG_ERROR([Could not locate maureen. Please see README for more details.])], [
+#else
+	# Check whether doxygen is installed
+	AC_CHECK_PROG(doxygen_present, doxygen, yes)
+	# Check whether xsltproc is installed
+	AC_CHECK_PROG(xsltproc_present, xsltproc, yes)
+	AS_IF([test "x$doxygen_present" != "xyes"], [
+		AC_MSG_ERROR([Could not locate doxygen. Doxygen is required for MAuReEn])
+	])
+	AS_IF([test "x$xsltproc_present" != "xyes"], [
+		AC_MSG_ERROR([Could not locate xsltproc. xsltproc is required for MAuReEn])
+	])
+])
+
 # Check if the boost libraries are available
 # Boost 1.48 is required as we're trying to compile with -std=gnu++11
 BOOST_REQUIRE([1.48])
