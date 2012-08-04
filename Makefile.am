@@ -121,10 +121,16 @@ modulemanager_tests_CPPFLAGS = $(TESTS_CPPFLAGS)
 
 # Protobuffer code generation rules (note the first rule has multiple targets). 
 %.pb.cc %.pb.h: %.proto 
-	protoc --cpp_out=. $< 
+	@echo "  PROTO  $<"
+	@protoc --cpp_out=. $< 
 
-%.meta.hpp: %.hpp
-	maureen
+# The dummy rule is added to suppress a warning from automake
+class-%.meta.hpp namespace-%.meta.hpp: %.hpp 
+	@basedir=`echo "$<" | awk -F/ '{ print $$1"/"$$2 }'`; \
+	kind=`basename "$@"`; kind=`echo "$$kind" | awk -F- '{ print $$1 }'`; \
+	echo "  MAURN  $@"; file=`basename $< .hpp`; \
+	maureen --input "$$basedir"'|%|'"$$file"'|hpp|'"$$kind"'|%|%' \
+		--output "$$basedir"'|$$(path)|$$(kind)-$$(file)|meta.$$(suffix)';
 
 ## remove protobuf and maureen files
 clean-local:
