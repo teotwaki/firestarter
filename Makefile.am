@@ -3,12 +3,21 @@
 ## to provide a way for the user to supply additional arguments.
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
+## FS configuration directory
+fsconfdir = ${sysconfdir}/firestarter
+
+## FS shared libraries directory
+fslibdir = ${libdir}/firestarter
+
+## Modules configuration directory
+modconfdir = ${localstatedir}/firestarter
+
 ## Set the default command-line flags for the C preprocessor to the value
 ## obtained from pkg-config via PKG_CHECK_MODULES in configure.ac.  These
 ## flags are passed to the compiler for both C and C++, in addition to the
 ## language-specific options.
-AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common -DSYSCONFDIR=\"${sysconfdir}/firestarter\" \
-              -DMODCONFDIR=\"${localstatedir}/firestarter\" -DLIBDIR=\"${libdir}/firestarter\"
+AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common -DSYSCONFDIR=\"$(fsconfdir)\" \
+              -DMODCONFDIR=\"${modconfdir}\" -DLIBDIR=\"${fslibdir}\"
 MODULES_CPPFLAGS = $(AM_CPPFLAGS) -I src/modules
 TESTS_CPPFLAGS = $(AM_CPPFLAGS) -DIN_UNIT_TESTING
 TESTS_LIBS = $(DEPS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
@@ -30,12 +39,10 @@ EXTRA_DIST = protobuf/module.proto
 ## Define the different module libraries that will be compiled and installed
 pkglib_LTLIBRARIES = webinterface.la
 
-## FS configuration directories and files
-fsconfdir = ${sysconfdir}/firestarter
+## FS configuration files
 fsconf_DATA = configuration/fs.cfg configuration/logging.cfg configuration/lighttpd.conf
 
-## Modules configuration directories and files
-modconfdir = ${localstatedir}/firestarter
+## Modules configuration files
 modconf_DATA = configuration/modules/webinterface.cfg
 
 ## WebInterface data directory
