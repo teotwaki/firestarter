@@ -116,6 +116,14 @@ modulemanager_tests_CPPFLAGS = $(TESTS_CPPFLAGS)
 %.pb.cc %.pb.h: %.proto 
 	protoc --cpp_out=. $< 
 
+%.meta.hpp: %.hpp
+	maureen
+
+## remove protobuf and maureen files
+clean-local:
+	-find src -name \*.meta.hpp -exec rm -f {} \;
+	-find . -name \*.pb.h -exec rm -f {} \; -or -name \*.pb.cc -exec rm -f {} \;
+
 ## Define an independent executable script for inclusion in the distribution
 ## archive. It will not be installed on an end user's system, however.
 dist_noinst_SCRIPTS = autogen.sh

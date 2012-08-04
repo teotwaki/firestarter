@@ -47,3 +47,6 @@ INSTALL
 # Ignore protobuf files
 *.pb.h
 *.pb.cc
+
+# Ignore maureen/mirror-lib files
+*.meta.hpp

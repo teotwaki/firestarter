@@ -1,0 +1,14 @@
+# MAREfile
+# This file is used by the maureen application to generate meta-data of the C++ namespaces, classes and structs.
+# This meta-data is used by mirror-lib to provide compile-time introspection and reflection.
+
+# See man maureen for more details regarding the syntax of this file.
+
+# Input pattern
+# Process hpp files in the src/common, src/fs and src/modules directories and their subdirectories, register everything
+# (namespaces, classes, enums, etc.), in any namespace.
+# Output pattern
+# Place the output files in the src directory, at the same paths that the input files had.
+'src/common||%|hpp|%|%|%' 'src/common|$(path)|$(file)|meta.$(suffix)'
+'src/fs||%|hpp|%|%|%' 'src/fs|$(path)|$(file)|meta.$(suffix)'
+'src/modules||%|hpp|%|%|%' 'src/modules|$(path)|$(file)|meta.$(suffix)'
