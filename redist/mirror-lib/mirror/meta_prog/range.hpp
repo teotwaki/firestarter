@@ -155,12 +155,16 @@ struct back
 	typedef typename back<typename X::type>::type type;
 };
 #endif
-
-template <typename ... P, typename T>
-struct back<range<P..., T> >
+template <typename T>
+struct back<range<T> >
 {
 	typedef T type;
 };
+
+template <typename T, typename ... P>
+struct back<range<T, P...> >
+ : back<range<P...> >
+{ };
 
 #ifdef MIRROR_DOCUMENTATION_ONLY
 /// Returns the element of the range passed as argument at the given Index
