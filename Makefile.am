@@ -147,7 +147,7 @@ class-%.meta.hpp namespace-%.meta.hpp: %.hpp
 	@basedir=`echo "$<" | awk -F/ '{ print $$1"/"$$2 }'`; \
 	kind=`basename "$@"`; kind=`echo "$$kind" | awk -F- '{ print $$1 }'`; \
 	echo "  MAURN  $@"; file=`basename $< .hpp`; \
-	maureen --input "$$basedir"'|%|'"$$file"'|hpp|'"$$kind"'|%|%' \
+	maureen --input "$$basedir"'|%|'"$$file"'|hpp|'"$$kind"'|~|%' \
 		--output "$$basedir"'|$$(path)|$$(kind)-$$(file)|meta.$$(suffix)';
 
 ## remove protobuf and maureen files
