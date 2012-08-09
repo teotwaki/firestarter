@@ -97,7 +97,14 @@ firestarter_LDFLAGS = -export-dynamic
 ## header files (.h) do not result in object files by themselves, but will be
 ## included in distribution archives of the project
 
-webinterface_la_SOURCES = src/modules/core/webInterface/webinterface.cpp \
+MODULES_DEFAULT_SRC = src/common/module.hpp src/common/module.cpp \
+                      protobuf/module.pb.cc protobuf/module.pb.h \
+                      src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.hpp \
+                      src/common/zmq/zmqsocket.hpp src/common/zmq/zmqsocket.cpp \
+                      src/common/clients/instancemanager.hpp
+
+webinterface_la_SOURCES = $(MODULES_DEFAULT_SRC) \
+                          src/modules/core/webInterface/webinterface.cpp \
                           src/modules/core/webInterface/webinterface.hpp \
                           src/modules/core/webInterface/router.hpp \
                           src/modules/core/webInterface/router.cpp \
@@ -107,21 +114,12 @@ webinterface_la_SOURCES = src/modules/core/webInterface/webinterface.cpp \
                           src/modules/core/webInterface/blankpage.cpp \
                           src/common/webwidgets/htmltemplates.hpp \
                           src/common/webwidgets/basepage.hpp \
-                          src/common/webwidgets/basepage.cpp \
-                          src/common/module.hpp src/common/module.cpp \
-                          protobuf/module.pb.cc protobuf/module.pb.h \
-                          src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.hpp \
-                          src/common/zmq/zmqsocket.hpp src/common/zmq/zmqsocket.cpp \
-                          src/common/clients/instancemanager.hpp
+                          src/common/webwidgets/basepage.cpp
 webinterface_la_LDFLAGS = -module -avoid-version -export-dynamic
 webinterface_la_CPPFLAGS = $(MODULES_CPPFLAGS) $(WEBDEPS_CFLAGS)
 webinterface_la_LIBADD = $(WEBDEPS_LIBS)
 
-persistance_la_SOURCES = src/common/module.hpp src/common/module.cpp \
-                         protobuf/module.pb.cc protobuf/module.pb.h \
-                         src/common/zmq/zmq.hpp src/common/zmq/zmqhelper.hpp \
-                         src/common/zmq/zmqsocket.hpp src/common/zmq/zmqsocket.cpp \
-                         src/common/clients/instancemanager.hpp \
+persistance_la_SOURCES = $(MODULES_DEFAULT_SRC) \
                          src/modules/examples/persistance/persistance.hpp \
                          src/modules/examples/persistance/persistance.cpp \
                          src/modules/examples/persistance/person.meta.hpp \
