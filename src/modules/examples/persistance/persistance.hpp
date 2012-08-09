@@ -7,8 +7,7 @@
 
 #include "mirror/mirror.hpp"
 
-#include "namespace-person.meta.hpp"
-#include "class-person.meta.hpp"
+#include "person.meta.hpp"
 
 namespace firestarter {
 	namespace module {

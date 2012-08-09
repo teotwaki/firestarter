@@ -8,6 +8,7 @@
 #include <mirror/pre_registered/type/native.hpp>
 
 namespace firestarter {
+	namespace module {
 		namespace examples {
 			namespace Persistance {
 
@@ -25,6 +26,7 @@ namespace firestarter {
 /* Close namespaces */
 			}
 		}
+	}
 }
 
 #endif
