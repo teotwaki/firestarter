@@ -119,7 +119,7 @@ webinterface_la_LDFLAGS = -module -avoid-version -export-dynamic
 webinterface_la_CPPFLAGS = $(MODULES_CPPFLAGS) $(WEBDEPS_CFLAGS)
 webinterface_la_LIBADD = $(WEBDEPS_LIBS)
 
-persistance_la_SOURCES = $(MODULES_DEFAULT_SRC) \
+persistance_la_SOURCES = $(MODULES_DEFAULT_SRC) src/common/persistent.hpp \
                          src/modules/examples/persistance/persistance.hpp \
                          src/modules/examples/persistance/persistance.cpp \
                          src/modules/examples/persistance/person.meta.hpp \

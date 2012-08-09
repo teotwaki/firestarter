@@ -5,8 +5,7 @@
 #include "module.hpp"
 #include "log.hpp"
 
-#include "mirror/mirror.hpp"
-
+#include "persistent.hpp"
 #include "person.meta.hpp"
 
 namespace firestarter {

@@ -12,9 +12,7 @@ namespace firestarter {
 		namespace examples {
 			namespace Persistance {
 
-	class Person {
-		MIRROR_FRIENDLY_CLASS(Person);
-		private:
+	struct Person {
 		unsigned int id;
 		std::string first_name;
 		std::string last_name;
