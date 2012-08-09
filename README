@@ -66,9 +66,10 @@ we'll get them from source:
 	make install
 
 	# MAuReEn
-	wget http://kifri.fri.uniza.sk/~chochlik/maureen/release/maureen-0.1.0.tar.gz
-	tar xvf maureen-0.1.0.tar.gz
-	cd maureen-0.1.0/
-	./bootstrap.sh
+	# The latest release of MAuReEn doesn't include some fixes we need. So we have
+	# to pull from git:
+	git clone git://gitorious.org/maureen/maureen.git
+	cd maureen
+	./configure.sh && cd _build && make
 	# Install with root
 	make install
