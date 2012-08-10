@@ -24,19 +24,17 @@
 #include <puddle/puddle.hpp>
 
 #include <iostream>
+#include <string>
 
 namespace firestarter {
 	namespace common {
 
 	struct Persistent {
 
-		template <class Object>
-		class pNameaValue {
-			private:
-			Object const & obj;
-			std::list<std::string> & list;
-			pNameaValue(Object const & obj, std::list<std::string> & list) : obj(obj), list(list) { };
-
+		template <class T>
+		struct print {
+			T const & obj;
+			print(T const & obj) : obj(obj) { }
 			template <class MetaObject>
 			inline void operator () (MetaObject meta, bool first, bool last) {
 				std::cout << meta.base_name() << ": " << meta.get(this->obj) << std::endl;
@@ -44,16 +42,12 @@ namespace firestarter {
 		};
 
 		template <class Object>
-		inline void operator () (Object obj) {
-			this->store(obj);
-		};
-
-		template <class Object>
-		void store(Object obj) {
+		void store(Object const & obj) {
 			auto meta_obj = puddle::reflected_type<Object>();
 			/** \todo Throw when !meta_obj.is_class(), !.is_type, member_variables().empty(), etc... */
-			std::cout << meta_obj.base_name() << std::endl();
-			meta_obj.member_variables().for_each(pNameaValue());
+			std::cout << meta_obj.base_name() << std::endl;
+			print<Object> p(obj);
+			meta_obj.member_variables().for_each(p);
 		};
 
 	};
