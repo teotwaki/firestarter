@@ -33,12 +33,16 @@ private:
 	static std::map<const char*, Enum, ltcstr>
 	cache_vals_by_names(mp::range<Idx ...>)
 	{
-		return {
+		const std::pair<const char*, Enum> _init[] = {
 			std::pair<const char*, Enum>(
 				mirror::_enum::_<Enum>::item_name(Idx()),
 				mirror::_enum::_<Enum>::item_val_c(Idx())
 			)...
 		};
+		return std::map<const char*, Enum, ltcstr>(
+			_init,
+			_init + sizeof ... (Idx)
+		);
 	}
 
 	static const std::map<const char*, Enum, ltcstr>&

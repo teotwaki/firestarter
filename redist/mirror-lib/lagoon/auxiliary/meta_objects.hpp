@@ -707,7 +707,7 @@ public:
 
 template <typename BaseInterface>
 class meta_templated_type_base_
- : virtual BaseInterface
+ : virtual public BaseInterface
 {
 private:
 	shared<meta_type_template>(*_get_type_template)(void);

@@ -57,7 +57,8 @@ void for_each(
 
 // Implementation of for_each for multi element ranges
 template <
-	typename T,
+	typename T1,
+	typename T2,
 	typename ... P,
 	typename Functor,
 	typename IsFirst,
@@ -65,21 +66,21 @@ template <
 >
 void for_each(
 	Functor& func,
-	range<T, P...>,
+	range<T1, T2, P...>,
 	IsFirst is_first,
 	IsLast is_last
 )
 {
 	// call the functor on the front element
 	func(iteration_info<
-		T,
+		T1,
 		IsFirst,
 		IsLast
 	>());
-	// move to the rest of the range
+	// now repeat for the rest of the range
 	for_each(
 		func,
-		range<P...>(),
+		range<T2, P...>(),
 		std::false_type(),
 		is_last
 	);

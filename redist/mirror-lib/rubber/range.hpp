@@ -160,7 +160,8 @@ private:
 		mirror::mp::range<MetaObjects...>
 	)
 	{
-		return {&wrap_shaped<MetaObjects, TypeErased>...};
+		const getter _init[]={&wrap_shaped<MetaObjects, TypeErased>...};
+		return std::vector<getter>(_init, _init + sizeof ... (MetaObjects));
 	}
 public:
 	template <template <class> class Getter, class MetaObject>

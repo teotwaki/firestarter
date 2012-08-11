@@ -522,7 +522,7 @@ protected:
 		{
 			assert(child_index < visible_child_count());
 			assert(selected() < this->child_count());
-			return child(selected());
+			return this->child(selected());
 		}
 
 		void set_next_in_navigation(base_data* next)
@@ -578,7 +578,7 @@ protected:
 		{
 			if(!first_try) return this;
 			if(has_selection())
-				return child(selected())->
+				return this->child(selected())->
 					get_next_in_navigation(false);
 			assert(this->next_in_navigation != nullptr);
 			return this->next_in_navigation->

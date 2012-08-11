@@ -163,7 +163,7 @@ private:
 				<< '"'
 				<< ": ";
 			// write the value
-			wr_val(meta_member::get(this->obj.value));
+			this->wr_val(meta_member::get(this->obj.value));
 			if(IterInfo::is_last::value)
 				this->out << std::endl;
 		}
@@ -203,7 +203,7 @@ private:
 			if(!first) this->out << ", ";
 			else indent(this->out, this->obj.depth()+1);
 			// write the value
-			wr_val(loc.get());
+			this->wr_val(loc.get());
 		}
 	};
 

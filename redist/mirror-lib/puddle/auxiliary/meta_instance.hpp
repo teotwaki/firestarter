@@ -17,6 +17,7 @@
 #include <mirror/meta_prog/is_a.hpp>
 #include <mirror/meta_meta_object.hpp>
 #include <string>
+#include <type_traits>
 
 PUDDLE_NAMESPACE_BEGIN
 namespace aux {
@@ -155,27 +156,37 @@ decltype(
 	);
 }
 
+namespace aux {
+
+template <class ParentMetaInstance>
+inline auto meta_member_var_inst_type_parent_inst(
+	const ParentMetaInstance& parent,
+	mirror::meta_variable_tag
+) -> decltype(parent.get())
+{
+	return parent.get();
+}
+
+template <class ParentMetaInstance>
+inline auto meta_member_var_inst_type_parent_inst(
+	const ParentMetaInstance& parent,
+	mirror::meta_plain_member_variable_tag
+) -> decltype(*parent.address())
+{
+	return *parent.address();
+}
+
+} // namespace aux
+
 template <class ParentMetaInstance, class MetaMemberVariable>
 struct meta_member_var_inst_type : meta_inst_base
 {
 private:
 	ParentMetaInstance parent;
 
-	static meta_member_var_inst_type& that();
-
-	auto parent_inst(mirror::meta_variable_tag) const ->
-	decltype(that().parent.get())
-	{
-		return parent.get();
-	}
-
-	auto parent_inst(mirror::meta_plain_member_variable_tag) const ->
-	decltype(*that().parent.address())
-	{
-		return *parent.address();
-	}
-
-	typedef decltype(that().parent.variable().category()) par_cat;
+	typedef decltype(
+		std::declval<ParentMetaInstance>().variable().category()
+	) _par_cat;
 public:
 	meta_member_var_inst_type(ParentMetaInstance _parent)
 	 : parent(_parent)
@@ -187,15 +198,35 @@ public:
 	}
 
 	auto get(void) const ->
-	decltype(MetaMemberVariable::get(that().parent_inst(par_cat())))
+	decltype(MetaMemberVariable::get(
+		aux::meta_member_var_inst_type_parent_inst(
+			std::declval<ParentMetaInstance>(),
+			_par_cat()
+		)
+	))
 	{
-		return MetaMemberVariable::get(parent_inst(par_cat()));
+		return MetaMemberVariable::get(
+			aux::meta_member_var_inst_type_parent_inst(
+				parent,
+				_par_cat()
+			)
+		);
 	}
 
 	auto address(void) const ->
-	decltype(MetaMemberVariable::address(that().parent_inst(par_cat())))
+	decltype(MetaMemberVariable::address(
+		aux::meta_member_var_inst_type_parent_inst(
+			std::declval<ParentMetaInstance>(),
+			_par_cat()
+		)
+	))
 	{
-		return MetaMemberVariable::address(parent_inst(par_cat()));
+		return MetaMemberVariable::address(
+			aux::meta_member_var_inst_type_parent_inst(
+				parent,
+				_par_cat()
+			)
+		);
 	}
 };
 
@@ -302,8 +333,6 @@ struct meta_attribute_range<
 private:
 	typedef mirror::mp::range<MetaMemberVariables ... > base_rng;
 
-	static meta_attribute_range& that(void);
-
 	const ParentMetaInstance& parent;
 
 	template <typename Func>
@@ -326,17 +355,17 @@ private:
 		func(inst, first, true);
 	}
 
-	template <typename Func, typename MMV, typename ... P>
+	template <typename Func, typename MMV1, typename MMV2, typename ... P>
 	void call_for_each(
-		mirror::mp::range<MMV, P...>,
+		mirror::mp::range<MMV1, MMV2, P...>,
 		Func& func,
 		bool first
 	) const
 	{
-		auto inst = meta_member_variable_instance<MMV>(parent);
+		auto inst = meta_member_variable_instance<MMV1>(parent);
 		func(inst, first, false);
-		call_for_each(
-			mirror::mp::range<P...>(),
+		this->call_for_each(
+			mirror::mp::range<MMV2, P...>(),
 			func,
 			false
 		);
@@ -367,7 +396,7 @@ public:
 	decltype(
 		meta_member_variable_instance<
 			typename mirror::mp::front<base_rng>::type
-		>(that().parent)
+		>(std::declval<ParentMetaInstance>())
 	) front(void) const
 	{
 		return meta_member_variable_instance<
@@ -402,7 +431,7 @@ public:
 	template <typename Functor>
 	void for_each(Functor func) const
 	{
-		call_for_each(base_rng(), func, true);
+		this->call_for_each(base_rng(), func, true);
 	}
 
 	template <typename ResultType, typename Functor, typename ValueType>
