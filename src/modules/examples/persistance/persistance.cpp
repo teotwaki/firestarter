@@ -11,7 +11,8 @@ Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
 	p.first_name = "Roger";
 	p.last_name = "LaBite";
 	Persistent::store(p);
-	
+	Persistent::find<Person>(Column<Person>().id() == 2 || 
+		(Column<Person>().first_name() == "Foo" && Column<Person>().last_name() == "Bar"));
 }
 
 void Persistance::run() {

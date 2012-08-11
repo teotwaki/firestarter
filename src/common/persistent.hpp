@@ -46,14 +46,14 @@ namespace firestarter {
 
 		PartialQuery operator&&(PartialQuery right) {
 			std::stringstream ss;
-			ss << this->content << " AND " << right.content;
+			ss << "(" << this->content << " AND " << right.content << ")";
 			this->content = ss.str();
 			return PartialQuery(this->content);
 		};
 
 		PartialQuery operator||(PartialQuery right) {
 			std::stringstream ss;
-			ss << this->content << " OR " << right.content;
+			ss << "(" << this->content << " OR " << right.content << ")";
 			this->content = ss.str();
 			return PartialQuery(this->content);
 		};
@@ -149,12 +149,8 @@ namespace firestarter {
 		struct print_columns {
 			template <class MetaVariable>
 			inline void operator () (MetaVariable meta_var, bool first, bool last) {
-				if (first)
-					std::cout << "(";
 				std::cout << "`" << meta_var.base_name() << "`";
-				if (last)
-					std::cout << ")";
-				else
+				if (not last)
 					std::cout << ", ";
 			};
 		};
@@ -163,12 +159,20 @@ namespace firestarter {
 		static void store(Object const & obj) {
 			auto meta_obj = puddle::reflected_type<Object>();
 			/** \todo Throw when !meta_obj.is_class(), !.is_type, member_variables().empty(), etc... */
-			std::cout << "INSERT INTO `" << meta_obj.base_name() << "` ";
+			std::cout << "INSERT INTO `" << meta_obj.base_name() << "` (";
 			meta_obj.member_variables().for_each(print_columns());
-			std::cout << " VALUES ";
+			std::cout << ") VALUES ";
 			print_values<Object> print_values_(obj);
 			meta_obj.member_variables().for_each(print_values_);
 			std::cout << ";" << std::endl;
+		};
+
+		template <class Object>
+		static void find(PartialQuery partial_query) {
+			auto meta_obj = puddle::reflected_type<Object>();
+			std::cout << "SELECT ";
+			meta_obj.member_variables().for_each(print_columns());
+			std::cout << " FROM `" << meta_obj.base_name() << "` WHERE " << partial_query << ";" << std::endl;
 		};
 
 /*		template <class Object>
