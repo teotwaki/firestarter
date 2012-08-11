@@ -10,9 +10,8 @@ Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
 	Person p;
 	p.first_name = "Roger";
 	p.last_name = "LaBite";
-	Persistent persist;
-
-	persist.store(p);
+	Persistent::store(p);
+	
 }
 
 void Persistance::run() {
