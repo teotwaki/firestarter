@@ -191,6 +191,8 @@ AC_DEFUN([AX_SOCI],
 	AC_CHECK_HEADER([postgresql/common.h],
 		[AC_DEFINE([HAVE_SOCI_PGSQL], [1], [Use SOCI PostgreSQL])],
 		[AC_MSG_WARN([Couldn't find SOCI PostgreSQL headers. Building without PostgreSQL support])])
+
+	CPPFLAGS="$CPPFLAGS_save"
 	
 	# Checking whether or not the headers are buried
 	AC_MSG_CHECKING(for Soci whether headers are buried)

@@ -40,7 +40,7 @@ BUILT_SOURCES += src/modules/examples/persistance/person.meta.hpp
 EXTRA_DIST = protobuf/module.proto
 
 ## Define the different module libraries that will be compiled and installed
-pkglib_LTLIBRARIES = webinterface.la persistance.la
+pkglib_LTLIBRARIES = webinterface.la persistance.la sqlite_backend.la mysql_backend.la postgresql_backend.la
 
 ## FS configuration files
 fsconf_DATA = configuration/fs.cfg configuration/logging.cfg configuration/lighttpd.conf
@@ -86,7 +86,8 @@ firestarter_SOURCES = src/fs/main.cpp src/fs/main.hpp \
 ## passed to the linker in addition to the other linker flags.
 firestarter_LDADD = $(DEPS_LIBS) $(BOOST_THREAD_LIBS) \
                     -dlopen webinterface.la \
-                    -dlopen persistance.la
+                    -dlopen persistance.la -dlopen sqlite_backend.la -dlopen mysql_backend.la \
+                    -dlopen postgresql_backend.la
 
 ## Set the libtool flags
 firestarter_LDFLAGS = -export-dynamic
@@ -126,6 +127,21 @@ persistance_la_SOURCES = $(MODULES_DEFAULT_SRC) src/common/persistent.hpp \
                          src/modules/examples/persistance/person.hpp
 persistance_la_LDFLAGS = -module -avoid-version -export-dynamic
 persistance_la_CPPFLAGS = $(MODULES_CPPFLAGS)
+
+sqlite_backend_la_SOURCES = src/modules/vendor/sqlite/sqlite.hpp
+sqlite_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
+sqlite_backend_la_CPPFLAGS = $(SQLITE_CFLAGS)
+sqlite_backend_la_LIBADD = $(SQLITE_LIBS)
+
+mysql_backend_la_SOURCES = src/modules/vendor/mysql/mysql.hpp
+mysql_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
+mysql_backend_la_CPPFLAGS = $(MYSQL_CFLAGS)
+mysql_backend_la_LIBADD = $(MYSQL_LIBS)
+
+postgresql_backend_la_SOURCES = src/modules/vendor/postgresql/postgresql.hpp
+postgresql_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
+postgresql_backend_la_CPPFLAGS = $(PGSQL_CFLAGS)
+postgresql_backend_la_LIBADD = $(PGSQL_LIBS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                               src/fs/modulemanager.cpp src/fs/modulemanager.hpp \
