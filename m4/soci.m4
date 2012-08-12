@@ -175,6 +175,22 @@ AC_DEFUN([AX_SOCI],
 	then
 		SOCI_LIBS="-L${SOCI_libdir}"
 	fi
+
+	CPPFLAGS_save="$CPPFLAGS"
+	CPPFLAGS="$SOCI_CFLAGS $MYSQL_CFLAGS"
+	AC_CHECK_HEADER([mysql/common.h],
+		[AC_DEFINE([HAVE_SOCI_MYSQL], [1], [Use SOCI MySQL])],
+		[AC_MSG_WARN([Couldn't find SOCI MySQL headers. Building without MySQL support])])
+
+	CPPFLAGS="$SOCI_CFLAGS $SQLITE_CFLAGS"
+	AC_CHECK_HEADER([sqlite3/common.h],
+		[AC_DEFINE([HAVE_SOCI_SQLITE], [1], [Use SOCI SQLite])],
+		[AC_MSG_WARN([Couldn't find SOCI SQLite headers. Building without SQLite support])])
+
+	CPPFLAGS="$SOCI_CFLAGS $PGSQL_CFLAGS"
+	AC_CHECK_HEADER([postgresql/common.h],
+		[AC_DEFINE([HAVE_SOCI_PGSQL], [1], [Use SOCI PostgreSQL])],
+		[AC_MSG_WARN([Couldn't find SOCI PostgreSQL headers. Building without PostgreSQL support])])
 	
 	# Checking whether or not the headers are buried
 	AC_MSG_CHECKING(for Soci whether headers are buried)
@@ -208,4 +224,6 @@ AC_DEFUN([AX_SOCI],
                 )
 	LIBS="$save_LIBS"
 	AC_SUBST(SOCI_CORE_LIB)
+
+	
 ]) dnl AX_SOCI
