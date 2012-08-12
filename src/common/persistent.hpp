@@ -28,6 +28,8 @@
 #include <sstream>
 #include <string>
 
+#include "vendor/sqlite/sqlite.hpp"
+
 namespace firestarter {
 	namespace common {
 
