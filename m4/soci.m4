@@ -179,17 +179,23 @@ AC_DEFUN([AX_SOCI],
 	CPPFLAGS_save="$CPPFLAGS"
 	CPPFLAGS="$SOCI_CFLAGS $MYSQL_CFLAGS"
 	AC_CHECK_HEADER([mysql/common.h],
-		[AC_DEFINE([HAVE_SOCI_MYSQL], [1], [Use SOCI MySQL])],
+		[AC_DEFINE([HAVE_SOCI_MYSQL], [1], [Use SOCI MySQL])
+		SOCI_MYSQL_LIBS="-lsoci_mysql"
+		AC_SUBST(SOCI_MYSQL_LIBS)],
 		[AC_MSG_WARN([Couldn't find SOCI MySQL headers. Building without MySQL support])])
 
 	CPPFLAGS="$SOCI_CFLAGS $SQLITE_CFLAGS"
 	AC_CHECK_HEADER([sqlite3/common.h],
-		[AC_DEFINE([HAVE_SOCI_SQLITE], [1], [Use SOCI SQLite])],
+		[AC_DEFINE([HAVE_SOCI_SQLITE], [1], [Use SOCI SQLite])
+		SOCI_SQLITE_LIBS="-lsoci_sqlite3"
+		AC_SUBST(SOCI_SQLITE_LIBS)],
 		[AC_MSG_WARN([Couldn't find SOCI SQLite headers. Building without SQLite support])])
 
 	CPPFLAGS="$SOCI_CFLAGS $PGSQL_CFLAGS"
 	AC_CHECK_HEADER([postgresql/common.h],
-		[AC_DEFINE([HAVE_SOCI_PGSQL], [1], [Use SOCI PostgreSQL])],
+		[AC_DEFINE([HAVE_SOCI_PGSQL], [1], [Use SOCI PostgreSQL])
+		SOCI_PGSQL_LIBS="-lsoci_postgresql"
+		AC_SUBST(SOCI_PGSQL_LIBS)],
 		[AC_MSG_WARN([Couldn't find SOCI PostgreSQL headers. Building without PostgreSQL support])])
 
 	CPPFLAGS="$CPPFLAGS_save"

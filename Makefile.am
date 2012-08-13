@@ -131,17 +131,17 @@ persistance_la_CPPFLAGS = $(MODULES_CPPFLAGS)
 sqlite_backend_la_SOURCES = src/modules/vendor/sqlite/sqlite.hpp
 sqlite_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
 sqlite_backend_la_CPPFLAGS = $(SQLITE_CFLAGS)
-sqlite_backend_la_LIBADD = $(SQLITE_LIBS)
+sqlite_backend_la_LIBADD = $(SOCI_SQLITE_LIBS)
 
 mysql_backend_la_SOURCES = src/modules/vendor/mysql/mysql.hpp
 mysql_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
 mysql_backend_la_CPPFLAGS = $(MYSQL_CFLAGS)
-mysql_backend_la_LIBADD = $(MYSQL_LIBS)
+mysql_backend_la_LIBADD = $(SOCI_MYSQL_LIBS)
 
 postgresql_backend_la_SOURCES = src/modules/vendor/postgresql/postgresql.hpp
 postgresql_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
 postgresql_backend_la_CPPFLAGS = $(PGSQL_CFLAGS)
-postgresql_backend_la_LIBADD = $(PGSQL_LIBS)
+postgresql_backend_la_LIBADD = $(SOCI_PGSQL_LIBS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
                               src/fs/modulemanager.cpp src/fs/modulemanager.hpp \
