@@ -20,11 +20,13 @@
 #ifndef FIRESTARTER_SQLITE_HPP
 #define FIRESTARTER_SQLITE_HPP
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
 
-#ifndef HAVE_SOCI_SQLITE
-	#error SQLite libraries were not found during ./configure. You can not use this backend. \
-Install the SQLite development libraries, and ensure SOCI-SQLite is properly installed.
+  #ifndef HAVE_SOCI_SQLITE
+    #error SQLite libraries were not found during ./configure. You can not use this backend. \
+    Install the SQLite development libraries, and ensure SOCI-SQLite is properly installed.
+  #endif
 #endif
 
 #include <soci/soci.h>

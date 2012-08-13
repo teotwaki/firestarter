@@ -28,7 +28,21 @@
 #include <sstream>
 #include <string>
 
-#include "vendor/sqlite/sqlite.hpp"
+#ifdef HAVE_CONFIG_H
+  #include "config.h"
+
+  #ifdef HAVE_SQLITE
+    #include "vendor/sqlite/sqlite.hpp"
+  #endif
+
+  #ifdef HAVE_MYSQL
+    #include "vendor/mysql/mysql.hpp"
+  #endif
+
+  #ifdef HAVE_PGSQL
+    #include "vender/postgresql/postgresql.hpp"
+  #endif
+#endif
 
 namespace firestarter {
 	namespace common {
