@@ -2,7 +2,7 @@
  * @file mirror/utils/some_type.hpp
  * @brief A type erasure similar to boost any
  *
- *  Copyright 2008-2011 Matus Chochlik. Distributed under the Boost
+ *  Copyright 2008-2012 Matus Chochlik. Distributed under the Boost
  *  Software License, Version 1.0. (See accompanying file
  *  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
@@ -312,19 +312,7 @@ public:
 	template <typename T>
 	friend typename std::remove_volatile<
 		typename std::remove_reference<T>::type
-	>::type& some_cast(some& s)
-	{
-		assert(!s.val_or_ptr.empty());
-		assert(s.is_sane());
-		typedef typename std::remove_volatile<
-			typename std::remove_reference<T>::type
-		>::type type;
-		typedef typename std::remove_const<type>::type type_;
-		bool const_ok = !s.const_ || std::is_const<type>::value;
-		if(s.val_or_ptr.type() == typeid(type_*) && const_ok)
-			return *boost::any_cast<type_*>(s.val_or_ptr);
-		else return boost::any_cast<type&>(s.val_or_ptr);
-	}
+	>::type& some_cast(some& s);
 #endif
 
 #ifdef MIRROR_DOCUMENTATION_ONLY
@@ -345,17 +333,7 @@ public:
 	template <typename T>
 	friend const typename std::remove_cv<
 		typename std::remove_reference<T>::type
-	>::type& some_cast(const some& s)
-	{
-		assert(!s.val_or_ptr.empty());
-		assert(s.is_sane());
-		typedef typename std::remove_cv<
-			typename std::remove_reference<T>::type
-		>::type type;
-		if(s.val_or_ptr.type() == typeid(type*))
-			return *boost::any_cast<type*>(s.val_or_ptr);
-		else return boost::any_cast<const type&>(s.val_or_ptr);
-	}
+	>::type& some_cast(const some& s);
 #endif
 
 #ifdef MIRROR_DOCUMENTATION_ONLY
@@ -376,12 +354,48 @@ public:
 	template <typename T>
 	inline const typename std::remove_cv<
 		typename std::remove_reference<T>::type
-	>::type& as(void) const
-	{
-		return some_cast<const T>(*this);
-	}
+	>::type& as(void) const;
 #endif
 };
+template <typename T>
+inline typename std::remove_volatile<
+	typename std::remove_reference<T>::type
+>::type& some_cast(some& s)
+{
+	assert(!s.val_or_ptr.empty());
+	assert(s.is_sane());
+	typedef typename std::remove_volatile<
+		typename std::remove_reference<T>::type
+	>::type type;
+	typedef typename std::remove_const<type>::type type_;
+	bool const_ok = !s.const_ || std::is_const<type>::value;
+	if(s.val_or_ptr.type() == typeid(type_*) && const_ok)
+		return *boost::any_cast<type_*>(s.val_or_ptr);
+	else return boost::any_cast<type&>(s.val_or_ptr);
+}
+
+template <typename T>
+inline const typename std::remove_cv<
+	typename std::remove_reference<T>::type
+>::type& some_cast(const some& s)
+{
+	assert(!s.val_or_ptr.empty());
+	assert(s.is_sane());
+	typedef typename std::remove_cv<
+		typename std::remove_reference<T>::type
+	>::type type;
+	if(s.val_or_ptr.type() == typeid(type*))
+		return *boost::any_cast<type*>(s.val_or_ptr);
+	else return boost::any_cast<const type&>(s.val_or_ptr);
+}
+
+template <typename T>
+inline const typename std::remove_cv<
+	typename std::remove_reference<T>::type
+>::type& some::as(void) const
+{
+	return some_cast<const T>(*this);
+}
 
 template <typename T>
 some some_ref(T& ref)

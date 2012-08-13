@@ -60,7 +60,7 @@ protected:
 	static std::string init_name(Bool1 full, Bool2 local)
 	{
 		std::string left, right, extent, arg;
-		std::string temp(_hlp_build_name(
+		std::string temp(Base::_hlp_build_name(
 			full,
 			local,
 			left,

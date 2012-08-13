@@ -179,13 +179,17 @@ private:
 	template <typename ... Idx>
 	static std::vector<Enum> cache_values(mp::range<Idx ...>)
 	{
-		return {mirror::_enum::_<Enum>::item_val_c(Idx())...};
+		Enum _init[] =
+			{mirror::_enum::_<Enum>::item_val_c(Idx())...};
+		return std::vector<Enum>(_init, _init + sizeof...(Idx));
 	}
 
 	template <typename ... Idx>
 	static std::vector<const char*> cache_names(mp::range<Idx ...>)
 	{
-		return {mirror::_enum::_<Enum>::item_name(Idx())...};
+		const char* _init[] =
+			{mirror::_enum::_<Enum>::item_name(Idx())...};
+		return std::vector<const char*>(_init, _init + sizeof...(Idx));
 	}
 
 	static const std::vector<Enum>& _value_cache(void)

@@ -187,7 +187,7 @@ private:
 				// write the separator if necessary
 				if(!first) this->out << ", ";
 				// write the value
-				wr_val(loc.get());
+				this->wr_val(loc.get());
 			}
 		}
 	};
