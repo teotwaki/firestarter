@@ -90,4 +90,6 @@ problem, we'll get them from source:
 	cmake -G "Unix Makefiles" && make -j4
 	# Install with root
 	make install
-
+	# Please note that in some cases you may have to get SOCI from the git repository
+	# as the 3.1 release is too old, and uses features incompatible with the latest
+	# releases of clang++.
