@@ -158,7 +158,7 @@ modulemanager_tests_CPPFLAGS = $(TESTS_CPPFLAGS)
 %.meta.hpp %.dummy.hpp: %.hpp 
 	@basedir=`echo "$<" | awk -F/ '{ print $$1"/"$$2 }'`; \
 	echo "  MAURN  $@"; file=`basename $< .hpp`; \
-	maureen --input "$$basedir"'|%|'"$$file"'|hpp|%|~|%' \
+	maureen --with-cts true --input "$$basedir"'|%|'"$$file"'|hpp|%|~|%' \
 		--output "$$basedir"'|$$(path)|$$(file)|meta.$$(suffix)';
 
 ## remove protobuf and maureen files
