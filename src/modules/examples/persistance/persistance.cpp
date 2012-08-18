@@ -15,6 +15,16 @@ Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
 	Person f = Persist<Person>::find(Column<Person>().id() == 1 || Column<Person>().id() == 2);
 	LOG_INFO(logger, "Seem to have found someone:");
 	LOG_INFO(logger, "f.id: " << f.id << "; f.first_name: " << f.first_name << "; f.last_name: " << f.last_name);
+
+	std::vector<Person> people;
+	people.reserve(2);
+
+	Persist<Person>::findAll(people, Column<Person>().first_name() != "");
+	LOG_INFO(logger, "findAll() found:");
+	for (Person const & person : people) {
+		LOG_INFO(logger, "person.id: " << person.id << "; person.first_name: " << 
+			person.first_name << "; person.last_name: " << person.last_name);
+	}
 }
 
 void Persistance::run() {

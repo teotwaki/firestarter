@@ -2,6 +2,8 @@
 #ifndef FIRESTARTER_PERSISTANCE_HPP
 #define FIRESTARTER_PERSISTANCE_HPP
 
+#include <vector>
+
 #include "module.hpp"
 #include "log.hpp"
 

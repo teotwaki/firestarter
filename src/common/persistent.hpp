@@ -32,6 +32,7 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/tr1/unordered_map.hpp>
 
 #ifdef HAVE_CONFIG_H
   #include "config.h"
@@ -51,6 +52,55 @@
 
 namespace firestarter {
 	namespace common {
+		namespace Persistent {
+
+			namespace keywords {
+				struct select : mirror::cts::string<
+					'S', 'E', 'L', 'E', 'C', 'T', ' '
+				> { };
+
+				struct from : mirror::cts::string<
+					' ', 'F', 'R', 'O', 'M', ' '
+				> { };
+
+				struct or_ : mirror::cts::string<
+					' ', 'O', 'R', ' '
+				> { };
+	
+				struct and_ : mirror::cts::string<
+					' ', 'A', 'N', 'D', ' '
+				> { };
+
+				struct delete_ : mirror::cts::string<
+					'D', 'E', 'L', 'E', 'T', 'E', ' '
+				> { };
+
+				struct where : mirror::cts::string<
+					' ', 'W', 'H', 'E', 'R', 'E', ' '
+				> { };
+
+				struct limit : mirror::cts::string<
+					' ', 'L', 'I', 'M', 'I', 'T', ' '
+				> { };
+
+				struct order_by : mirror::cts::string<
+					' ', 'O', 'R', 'D', 'E', 'R', ' ', 'B', 'Y', ' '
+				> { };
+
+				struct asc : mirror::cts::string<
+					' ', 'A', 'S', 'C', ' '
+				> { };
+
+				struct desc : mirror::cts::string<
+					' ', 'D', 'E', 'S', 'C', ' '
+				> { };
+
+				struct create_table : mirror::cts::string<
+					'C', 'R', 'E', 'A', 'T', 'E', ' ', 'T', 'A', 'B', 'L', 'E', ' '
+				> { };
+			}
+
+		}
 
 	static __thread soci::session sql;
 	static __thread boost::shared_ptr<soci::statement> statement;
@@ -282,27 +332,77 @@ namespace firestarter {
 		};
 
 		static Object find(PartialQuery partial_query) {
+			namespace pk = Persistent::keywords;
+
 			Object obj;
-			{
-				auto meta_obj = puddle::reflected_type<Object>();
-				populate p(obj);
-				meta_obj.member_variables().for_each(p);
-				auto const & st = Storage::getStatement();
-				sql.set_log_stream(&std::cout);
-				st.get()->alloc();
-				std::stringstream query;
-				query << 
-					"SELECT " << mirror::cts::c_str<column_list_cts>() <<
-					" FROM " << meta_obj.base_name() <<
-					" WHERE " << partial_query;
-				std::cout << query.str() << std::endl;
-				st.get()->prepare(query.str());
-				st.get()->define_and_bind();
-				st.get()->execute(true);
-				Storage::resetStatement();
-			}
+			populate p(obj);
+			auto meta_obj = puddle::reflected_type<Object>();
+			auto st = Storage::getStatement();
+
+			meta_obj.member_variables().for_each(p);
+			st.get()->alloc();
+
+			std::stringstream query;
+			query << 
+				mirror::cts::c_str<
+					mirror::cts::concat<
+						pk::select,
+						column_list_cts,
+						pk::from,
+						mirror::static_name<MIRRORED_CLASS(Object)>,
+						pk::where
+					>
+				>() << partial_query << "LIMIT 1";
+
+			st.get()->prepare(query.str());
+			st.get()->define_and_bind();
+			st.get()->execute(true);
+
+			Storage::resetStatement();
 			counter = 0;
 			return obj;
+		};
+
+		static void findAll(std::vector<Object> & objects, PartialQuery partial_query,
+				unsigned int from = 0)
+		{
+			namespace pk = Persistent::keywords;
+
+			Object obj;
+			populate p(obj);
+			auto meta_obj = puddle::reflected_type<Object>();
+			auto st = Storage::getStatement();
+			unsigned int const limit = objects.capacity();
+
+			meta_obj.member_variables().for_each(p);
+			st.get()->alloc();
+
+			std::stringstream query;
+			query << 
+				mirror::cts::c_str<
+					mirror::cts::concat<
+						pk::select,
+						column_list_cts,
+						pk::from,
+						mirror::static_name<MIRRORED_CLASS(Object)>,
+						pk::where
+					>
+				>() << partial_query << " LIMIT ";
+
+			if (from != 0)
+				query << from << ", ";
+
+			query << limit;
+
+			st.get()->prepare(query.str());
+			st.get()->define_and_bind();
+			st.get()->execute(true);
+
+			objects.push_back(obj);
+
+			while (st.get()->fetch())
+				objects.push_back(obj);
+
 		};
 
 	};
