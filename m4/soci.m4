@@ -180,21 +180,21 @@ AC_DEFUN([AX_SOCI],
 	CPPFLAGS="$SOCI_CFLAGS $MYSQL_CFLAGS"
 	AC_CHECK_HEADER([mysql/common.h],
 		[AC_DEFINE([HAVE_SOCI_MYSQL], [1], [Use SOCI MySQL])
-		SOCI_MYSQL_LIBS="-lsoci_mysql"
+		SOCI_MYSQL_LIBS="-lsoci_core -lsoci_mysql"
 		AC_SUBST(SOCI_MYSQL_LIBS)],
 		[AC_MSG_WARN([Couldn't find SOCI MySQL headers. Building without MySQL support])])
 
 	CPPFLAGS="$SOCI_CFLAGS $SQLITE_CFLAGS"
 	AC_CHECK_HEADER([sqlite3/common.h],
 		[AC_DEFINE([HAVE_SOCI_SQLITE], [1], [Use SOCI SQLite])
-		SOCI_SQLITE_LIBS="-lsoci_sqlite3"
+		SOCI_SQLITE_LIBS="-lsoci_core -lsoci_sqlite3"
 		AC_SUBST(SOCI_SQLITE_LIBS)],
 		[AC_MSG_WARN([Couldn't find SOCI SQLite headers. Building without SQLite support])])
 
 	CPPFLAGS="$SOCI_CFLAGS $PGSQL_CFLAGS"
 	AC_CHECK_HEADER([postgresql/common.h],
 		[AC_DEFINE([HAVE_SOCI_PGSQL], [1], [Use SOCI PostgreSQL])
-		SOCI_PGSQL_LIBS="-lsoci_postgresql"
+		SOCI_PGSQL_LIBS="-lsoci_core -lsoci_postgresql"
 		AC_SUBST(SOCI_PGSQL_LIBS)],
 		[AC_MSG_WARN([Couldn't find SOCI PostgreSQL headers. Building without PostgreSQL support])])
 
@@ -210,28 +210,8 @@ AC_DEFUN([AX_SOCI],
 		AC_MSG_RESULT(they are not.)
 	fi
 
-        SOCI_CFLAGS="${MYSQL_CFLAGS} ${SOCI_CFLAGS}"
-
-	SOCI_LIBS="${MYSQL_LIBS} ${SOCI_LIBS} -l${SOCI_CORE_LIB} -l${SOCI_MYSQL_LIB} -ldl"
-
 	AC_SUBST(SOCI_VERSION)
 	AC_SUBST(SOCI_CFLAGS)
 	AC_SUBST(SOCI_LIBS)
 
-	# Test linking with soci (note that it needs MySQL client to have
-	# been defined before)
-	save_LIBS="$LIBS"
-	if test -z "$MYSQL_LIBS"
-	then
-		MYSQL_LIBS="-L/usr/lib64/mysql -L/usr/lib/mysql -lmysqlclient"
-	fi
-	LIBS="$LIBS $MYSQL_LIBS $SOCI_LIBS"
-	AC_CHECK_LIB($SOCI_CORE_LIB, soci_begin,
-                 [], 
-                 [AC_MSG_ERROR([Could not find working Soci client library!])]
-                )
-	LIBS="$save_LIBS"
-	AC_SUBST(SOCI_CORE_LIB)
-
-	
 ]) dnl AX_SOCI

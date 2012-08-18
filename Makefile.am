@@ -21,6 +21,7 @@ AM_CPPFLAGS = $(DEPS_CFLAGS) -I src/common -I redist/mirror-lib -DSYSCONFDIR=\"$
 MODULES_CPPFLAGS = $(AM_CPPFLAGS) -I src/modules
 TESTS_CPPFLAGS = $(AM_CPPFLAGS) -DIN_UNIT_TESTING
 TESTS_LIBS = $(DEPS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)
+PERSISTENT_CFLAGS = $(SOCI_CFLAGS) $(MYSQL_CFLAGS) $(PGSQL_CFLAGS) $(SQLITE_CFLAGS)
 
 ## Define an executable target "firestarter", which will be installed into the
 ## directory named by the predefined variable $(bindir).
@@ -126,21 +127,22 @@ persistance_la_SOURCES = $(MODULES_DEFAULT_SRC) src/common/persistent.hpp \
                          src/modules/examples/persistance/person.meta.hpp \
                          src/modules/examples/persistance/person.hpp
 persistance_la_LDFLAGS = -module -avoid-version -export-dynamic
-persistance_la_CPPFLAGS = $(MODULES_CPPFLAGS)
+persistance_la_CPPFLAGS = $(MODULES_CPPFLAGS) $(PERSISTENT_CFLAGS)
+persistance_la_LIBADD = $(SOCI_LIBS)
 
 sqlite_backend_la_SOURCES = src/modules/vendor/sqlite/sqlite.hpp
 sqlite_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
-sqlite_backend_la_CPPFLAGS = $(SQLITE_CFLAGS)
+sqlite_backend_la_CPPFLAGS = $(SQLITE_CFLAGS) $(SOCI_CFLAGS)
 sqlite_backend_la_LIBADD = $(SOCI_SQLITE_LIBS)
 
 mysql_backend_la_SOURCES = src/modules/vendor/mysql/mysql.hpp
 mysql_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
-mysql_backend_la_CPPFLAGS = $(MYSQL_CFLAGS)
+mysql_backend_la_CPPFLAGS = $(MYSQL_CFLAGS) $(SOCI_CFLAGS)
 mysql_backend_la_LIBADD = $(SOCI_MYSQL_LIBS)
 
 postgresql_backend_la_SOURCES = src/modules/vendor/postgresql/postgresql.hpp
 postgresql_backend_la_LDFLAGS = -module -avoid-version -export-dynamic
-postgresql_backend_la_CPPFLAGS = $(PGSQL_CFLAGS)
+postgresql_backend_la_CPPFLAGS = $(PGSQL_CFLAGS) $(SOCI_CFLAGS)
 postgresql_backend_la_LIBADD = $(SOCI_PGSQL_LIBS)
 
 modulemanager_tests_SOURCES = src/fs/tests/modulemanager_tests.cpp \
