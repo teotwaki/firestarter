@@ -10,9 +10,11 @@ Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
 	Person p;
 	p.first_name = "Roger";
 	p.last_name = "LaBite";
-	Persistent::store(p);
-	Persistent::find<Person>(Column<Person>().id() == 2 || 
-		(Column<Person>().first_name() == "Foo" && Column<Person>().last_name() == "Bar"));
+	Persist<Person>::connect("sqlite3://dbname=/tmp/foobar.db");
+	Persist<Person>::store(p);
+	Person f = Persist<Person>::find(Column<Person>().id() == 1 || Column<Person>().id() == 2);
+	LOG_INFO(logger, "Seem to have found someone:");
+	LOG_INFO(logger, "f.id: " << f.id << "; f.first_name: " << f.first_name << "; f.last_name: " << f.last_name);
 }
 
 void Persistance::run() {

@@ -20,32 +20,60 @@
 #ifndef FIRESTARTER_PERSISTENT_HPP
 #define FIRESTARTER_PERSISTENT_HPP
 
+#include "log.hpp"
+
 #include <mirror/mirror.hpp>
 #include <puddle/puddle.hpp>
 #include <puddle/auxiliary/wrap.hpp>
+#include <mirror/ct_string/concat.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
 
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 
-  #ifdef HAVE_SQLITE
+  #ifdef HAVE_SOCI_SQLITE
     #include "vendor/sqlite/sqlite.hpp"
   #endif
 
-  #ifdef HAVE_MYSQL
+  #ifdef HAVE_SOCI_MYSQL
     #include "vendor/mysql/mysql.hpp"
   #endif
 
-  #ifdef HAVE_PGSQL
-    #include "vender/postgresql/postgresql.hpp"
+  #ifdef HAVE_SOCI_PGSQL
+    #include "vendor/postgresql/postgresql.hpp"
   #endif
 #endif
 
 namespace firestarter {
 	namespace common {
+
+	static __thread soci::session sql;
+	static __thread boost::shared_ptr<soci::statement> statement;
+	static __thread unsigned int counter;
+	static __thread std::vector<boost::shared_ptr<soci::indicator>> indicators;
+
+	class Storage {
+		public:
+		static boost::shared_ptr<soci::statement> getStatement() {
+			if (!statement)
+				statement = boost::shared_ptr<soci::statement>(new soci::statement(sql));
+				
+			return statement;
+		};
+
+		static inline void connect(std::string const & connection_string) {
+			sql.open(connection_string);
+		};
+
+		static inline void resetStatement() {
+			statement.reset();
+		};
+	};
 
 	struct PartialQuery {
 		std::string content;
@@ -79,55 +107,49 @@ namespace firestarter {
 	template <typename T>
 	struct QueryLexer {	
 		std::string content;
-		QueryLexer(std::string name) : content(name) { };
+		std::string column_name;
+		boost::shared_ptr<soci::statement> statement;
 
-		PartialQuery operator==(T right) {
-			std::stringstream ss;
-			ss << this->content << " = '" << right << "'";
-			this->content = ss.str();
+		QueryLexer(std::string const & table_name, std::string const & column_name) :
+			content(table_name + "." + column_name), 
+			column_name(column_name) {
+			this->statement = Storage::getStatement();
+		};
+
+		inline PartialQuery handle(T const & right, std::string const & op) {
+			this->statement.get()->exchange(
+				soci::use(right, this->column_name + boost::lexical_cast<std::string>(counter))
+			);
+			this->content += op + " :" + this->column_name + boost::lexical_cast<std::string>(counter++);
 			return PartialQuery(this->content);
 		};
 
-		PartialQuery operator!=(T right) {
-			std::stringstream ss;
-			ss << this->content << " <> '" << right << "'";
-			this->content = ss.str();
-			return PartialQuery(this->content);
+		inline PartialQuery operator==(T const & right) {
+			return handle(right, " =");
 		};
 
-		PartialQuery operator<(T right) {
-			std::stringstream ss;
-			ss << this->content << " < '" << right << "'";
-			this->content = ss.str();
-			return PartialQuery(this->content);
+		inline PartialQuery operator!=(T const & right) {
+			return handle(right, " !=");
 		};
 
-		PartialQuery operator>(T right) {
-			std::stringstream ss;
-			ss << this->content << " > '" << right << "'";
-			this->content = ss.str();
-			return PartialQuery(this->content);
+		inline PartialQuery operator<(T const & right) {
+			return handle(right, " <");
 		};
 
-		PartialQuery operator<=(T right) {
-			std::stringstream ss;
-			ss << this->content << " <= '" << right << "'";
-			this->content = ss.str();
-			return PartialQuery(this->content);
+		inline PartialQuery operator>(T const & right) {
+			return handle(right, " >");
 		};
 
-		PartialQuery operator>=(T right) {
-			std::stringstream ss;
-			ss << this->content << " >= '" << right << "'";
-			this->content = ss.str();
-			return PartialQuery(this->content);
+		inline PartialQuery operator<=(T const & right) {
+			return handle(right, " <=");
 		};
 
-		PartialQuery operator%=(T right) {
-			std::stringstream ss;
-			ss << this->content << " LIKE '" << right << "'";
-			this->content = ss.str();
-			return PartialQuery(this->content);
+		inline PartialQuery operator>=(T const & right) {
+			return handle(right, " >=");
+		};
+
+		inline PartialQuery operator%=(T const & right) {
+			return handle(right, " LIKE");
 		};
 
 	};
@@ -136,7 +158,7 @@ namespace firestarter {
 	struct ClassTransf {
 		struct type {
 			template <typename Param>
-			type(const Param &) { };
+			type(Param const &) { };
 		};
 	};
 
@@ -147,9 +169,10 @@ namespace firestarter {
 			type(ClassTranf &, int) : puddle::aux::wrap<MetaMemberVariable>::type() { };
 
 			QueryLexer<typename MetaMemberVariable::type::original_type> operator()(void) const {
-				std::stringstream ss;
-				ss << this->scope().base_name() << "." << this->base_name();
-				return QueryLexer<typename MetaMemberVariable::type::original_type>(ss.str());
+				return QueryLexer<typename MetaMemberVariable::type::original_type>(
+					mirror::cts::c_str<typename MetaMemberVariable::scope::static_name>(),
+					mirror::cts::c_str<typename MetaMemberVariable::static_name>()
+				);
 			};
 		};
 	};
@@ -169,14 +192,19 @@ namespace firestarter {
 	};
 
 	template <class Object>
-	struct Persistent {
+	struct Persist {
+
+		inline static void connect(std::string const & connection_string) {
+			Storage::connect(connection_string);
+		}
+
 		// Create a structure that will contain ...
 		struct column_list_cts :
 			// ... a string from which we remove the first two characters ...
 			mirror::cts::skip_front<
 				// ... created by recursively concatenating 
 				mirror::mp::fold<
-					// ... the name of a member variable of class 'Object', ...
+					// ... the names of the member variables of class 'Object', ...
 					mirror::mp::transform<
 						mirror::mp::only_if<
 							mirror::members<MIRRORED_CLASS(Object)>,
@@ -203,15 +231,42 @@ namespace firestarter {
 			>
 		{ };
 
-		template <class T>
 		struct print_values {
-			T const & obj;
-			print_values(T const & obj) : obj(obj) { }
+			Object const & obj;
+			print_values(Object const & obj) : obj(obj) { };
 			template <class MetaVariable>
 			inline void operator () (MetaVariable meta_var, bool first, bool last) {
 				std::cout << "'" << meta_var.get(this->obj) << "'";
 				if (not last)
 					std::cout << ", ";
+			};
+		};
+
+		struct populate {
+			Object & obj;
+			boost::shared_ptr<soci::statement> st;
+
+			populate(Object & obj) : obj(obj) {
+				this->st = Storage::getStatement();
+				indicators.clear();
+				indicators.reserve(
+					mirror::mp::size<
+						mirror::mp::only_if<
+							mirror::members<MIRRORED_CLASS(Object)>,
+							mirror::mp::is_a<
+								mirror::mp::arg<1>,
+								mirror::meta_member_variable_tag
+							>
+						>
+					>::value
+				);
+			};
+
+			template <class MetaVariable>
+			inline void operator () (MetaVariable meta_var, bool first, bool last) {
+				indicators.push_back(boost::shared_ptr<soci::indicator>(new soci::indicator));
+				auto & var = *meta_var.address(this->obj);
+				this->st.get()->exchange(soci::into(var, *(indicators.back().get())));
 			};
 		};
 
@@ -221,16 +276,33 @@ namespace firestarter {
 			std::cout << "INSERT INTO " << meta_obj.base_name() << " (";
 			std::cout << mirror::cts::c_str<column_list_cts>();
 			std::cout << ") VALUES (";
-			print_values<Object> print_values_(obj);
+			print_values print_values_(obj);
 			meta_obj.member_variables().for_each(print_values_);
 			std::cout << ");" << std::endl;
 		};
 
-		static void find(PartialQuery partial_query) {
-			auto meta_obj = puddle::reflected_type<Object>();
-			std::cout << "SELECT ";
-			std::cout << mirror::cts::c_str<column_list_cts>();
-			std::cout << " FROM " << meta_obj.base_name() << " WHERE " << partial_query << ";" << std::endl;
+		static Object find(PartialQuery partial_query) {
+			Object obj;
+			{
+				auto meta_obj = puddle::reflected_type<Object>();
+				populate p(obj);
+				meta_obj.member_variables().for_each(p);
+				auto const & st = Storage::getStatement();
+				sql.set_log_stream(&std::cout);
+				st.get()->alloc();
+				std::stringstream query;
+				query << 
+					"SELECT " << mirror::cts::c_str<column_list_cts>() <<
+					" FROM " << meta_obj.base_name() <<
+					" WHERE " << partial_query;
+				std::cout << query.str() << std::endl;
+				st.get()->prepare(query.str());
+				st.get()->define_and_bind();
+				st.get()->execute(true);
+				Storage::resetStatement();
+			}
+			counter = 0;
+			return obj;
 		};
 
 	};
