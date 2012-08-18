@@ -168,7 +168,40 @@ namespace firestarter {
 		{ };
 	};
 
+	template <class Object>
 	struct Persistent {
+		// Create a structure that will contain ...
+		struct column_list_cts :
+			// ... a string from which we remove the first two characters ...
+			mirror::cts::skip_front<
+				// ... created by recursively concatenating 
+				mirror::mp::fold<
+					// ... the name of a member variable of class 'Object', ...
+					mirror::mp::transform<
+						mirror::mp::only_if<
+							mirror::members<MIRRORED_CLASS(Object)>,
+							mirror::mp::is_a<
+								mirror::mp::arg<1>,
+								mirror::meta_member_variable_tag
+							>
+						>,
+						// ... prepended with ", ", ...
+						mirror::cts::concat<
+							mirror::cts::string<',', ' '>,
+							mirror::static_name<
+								mirror::mp::arg<1>
+							>
+						>
+					>, // ... and an empty string
+					mirror::cts::string<>,
+					mirror::cts::concat<
+						mirror::mp::arg<1>,
+						mirror::mp::arg<2>
+					>
+				>,
+				std::integral_constant<int, 2>
+			>
+		{ };
 
 		template <class T>
 		struct print_values {
@@ -182,32 +215,21 @@ namespace firestarter {
 			};
 		};
 
-		struct print_columns {
-			template <class MetaVariable>
-			inline void operator () (MetaVariable meta_var, bool first, bool last) {
-				std::cout << meta_var.base_name();
-				if (not last)
-					std::cout << ", ";
-			};
-		};
-
-		template <class Object>
 		static void store(Object const & obj) {
 			auto meta_obj = puddle::reflected_type<Object>();
 			/** \todo Throw when !meta_obj.is_class(), !.is_type, member_variables().empty(), etc... */
 			std::cout << "INSERT INTO " << meta_obj.base_name() << " (";
-			meta_obj.member_variables().for_each(print_columns());
+			std::cout << mirror::cts::c_str<column_list_cts>();
 			std::cout << ") VALUES (";
 			print_values<Object> print_values_(obj);
 			meta_obj.member_variables().for_each(print_values_);
 			std::cout << ");" << std::endl;
 		};
 
-		template <class Object>
 		static void find(PartialQuery partial_query) {
 			auto meta_obj = puddle::reflected_type<Object>();
 			std::cout << "SELECT ";
-			meta_obj.member_variables().for_each(print_columns());
+			std::cout << mirror::cts::c_str<column_list_cts>();
 			std::cout << " FROM " << meta_obj.base_name() << " WHERE " << partial_query << ";" << std::endl;
 		};
 
