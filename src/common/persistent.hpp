@@ -363,7 +363,7 @@ namespace firestarter {
 			return obj;
 		};
 
-		static void findAll(std::vector<Object> & objects, PartialQuery partial_query,
+		static void find(std::vector<Object> & objects, PartialQuery partial_query,
 				unsigned int from = 0)
 		{
 			namespace pk = Persistent::keywords;
