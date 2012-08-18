@@ -98,6 +98,14 @@ namespace firestarter {
 				struct create_table : mirror::cts::string<
 					'C', 'R', 'E', 'A', 'T', 'E', ' ', 'T', 'A', 'B', 'L', 'E', ' '
 				> { };
+
+				struct insert_into : mirror::cts::string<
+					'I', 'N', 'S', 'E', 'R', 'T', ' ', 'I', 'N', 'T', 'O', ' '
+				> { };
+
+				struct values : mirror::cts::string<
+					' ', 'V', 'A', 'L', 'U', 'E', 'S', ' '
+				> { };
 			}
 
 		}
@@ -281,17 +289,6 @@ namespace firestarter {
 			>
 		{ };
 
-		struct print_values {
-			Object const & obj;
-			print_values(Object const & obj) : obj(obj) { };
-			template <class MetaVariable>
-			inline void operator () (MetaVariable meta_var, bool first, bool last) {
-				std::cout << "'" << meta_var.get(this->obj) << "'";
-				if (not last)
-					std::cout << ", ";
-			};
-		};
-
 		struct populate {
 			Object & obj;
 			boost::shared_ptr<soci::statement> st;
@@ -320,21 +317,59 @@ namespace firestarter {
 			};
 		};
 
-		static void store(Object const & obj) {
-			auto meta_obj = puddle::reflected_type<Object>();
-			/** \todo Throw when !meta_obj.is_class(), !.is_type, member_variables().empty(), etc... */
-			std::cout << "INSERT INTO " << meta_obj.base_name() << " (";
-			std::cout << mirror::cts::c_str<column_list_cts>();
-			std::cout << ") VALUES (";
-			print_values print_values_(obj);
-			meta_obj.member_variables().for_each(print_values_);
-			std::cout << ");" << std::endl;
+		struct grab_values {
+			Object const & obj;
+			boost::shared_ptr<soci::statement> st;
+			std::stringstream & query;
+
+			grab_values(Object const & obj, std::stringstream & query) : obj(obj), query(query) {
+				this->st = Storage::getStatement();
+			};
+
+			template <class MetaVariable>
+			inline void operator () (MetaVariable meta_var, bool first, bool last) {
+				auto & var = *meta_var.address(this->obj);
+				this->st.get()->exchange(soci::use(var, meta_var.base_name()));
+
+				if (first) query << "(";
+				query << ":" << meta_var.base_name();
+				if (not last) query << ", ";
+				else query << ")";
+			};
 		};
 
-		static Object find(PartialQuery partial_query) {
+		static void store(Object const & obj) {
 			namespace pk = Persistent::keywords;
 
-			Object obj;
+			std::stringstream query;
+			grab_values gv(obj, query);
+			auto meta_obj = puddle::reflected_type<Object>();
+			auto st = Storage::getStatement();
+
+			query <<
+				mirror::cts::c_str<
+					mirror::cts::concat<
+						pk::insert_into,
+						mirror::static_name<MIRRORED_CLASS(Object)>,
+						mirror::cts::string<' ', '('>,
+						column_list_cts,
+						mirror::cts::string<')', ' '>,
+						pk::values
+					>
+				>();
+			meta_obj.member_variables().for_each(gv);
+			query << ";";
+
+			st.get()->prepare(query.str());
+			st.get()->define_and_bind();
+			st.get()->execute(true);
+
+			Storage::resetStatement();
+		};
+
+		static void find(Object & obj, PartialQuery partial_query) {
+			namespace pk = Persistent::keywords;
+
 			populate p(obj);
 			auto meta_obj = puddle::reflected_type<Object>();
 			auto st = Storage::getStatement();
@@ -360,7 +395,6 @@ namespace firestarter {
 
 			Storage::resetStatement();
 			counter = 0;
-			return obj;
 		};
 
 		static void find(std::vector<Object> & objects, PartialQuery partial_query,
@@ -403,6 +437,8 @@ namespace firestarter {
 			while (st.get()->fetch())
 				objects.push_back(obj);
 
+			Storage::resetStatement();
+			counter = 0;
 		};
 
 	};
