@@ -228,8 +228,21 @@ namespace firestarter {
 
 			QueryLexer<typename MetaMemberVariable::type::original_type> operator()(void) const {
 				return QueryLexer<typename MetaMemberVariable::type::original_type>(
-					mirror::cts::c_str<typename MetaMemberVariable::scope::static_name>(),
-					mirror::cts::c_str<typename MetaMemberVariable::static_name>()
+					// Create a c-style string ...
+					mirror::cts::c_str<
+						// ... of the name ...
+						mirror::static_name<
+							// ... of MetaMemberVariable's class
+							mirror::scope<MetaMemberVariable>
+						>
+					>(),
+					// Create a c-style string ...
+					mirror::cts::c_str<
+						// ... of MetaMemberVariable
+						mirror::static_name<
+							MetaMemberVariable
+						>
+					>()
 				);
 			};
 		};
@@ -265,7 +278,7 @@ namespace firestarter {
 					// ... the names of the member variables of class 'Object', ...
 					mirror::mp::transform<
 						mirror::mp::only_if<
-							mirror::members<MIRRORED_CLASS(Object)>,
+							mirror::members<mirror::reflected<Object>>,
 							mirror::mp::is_a<
 								mirror::mp::arg<1>,
 								mirror::meta_member_variable_tag
@@ -299,7 +312,7 @@ namespace firestarter {
 				indicators.reserve(
 					mirror::mp::size<
 						mirror::mp::only_if<
-							mirror::members<MIRRORED_CLASS(Object)>,
+							mirror::members<mirror::reflected<Object>>,
 							mirror::mp::is_a<
 								mirror::mp::arg<1>,
 								mirror::meta_member_variable_tag
@@ -350,7 +363,7 @@ namespace firestarter {
 				mirror::cts::c_str<
 					mirror::cts::concat<
 						pk::insert_into,
-						mirror::static_name<MIRRORED_CLASS(Object)>,
+						mirror::static_name<mirror::reflected<Object>>,
 						mirror::cts::string<' ', '('>,
 						column_list_cts,
 						mirror::cts::string<')', ' '>,
@@ -384,7 +397,7 @@ namespace firestarter {
 						pk::select,
 						column_list_cts,
 						pk::from,
-						mirror::static_name<MIRRORED_CLASS(Object)>,
+						mirror::static_name<mirror::reflected<Object>>,
 						pk::where
 					>
 				>() << partial_query << "LIMIT 1";
@@ -418,7 +431,7 @@ namespace firestarter {
 						pk::select,
 						column_list_cts,
 						pk::from,
-						mirror::static_name<MIRRORED_CLASS(Object)>,
+						mirror::static_name<mirror::reflected<Object>>,
 						pk::where
 					>
 				>() << partial_query << " LIMIT ";
