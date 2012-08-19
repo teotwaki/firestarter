@@ -106,6 +106,10 @@ namespace firestarter {
 				struct values : mirror::cts::string<
 					' ', 'V', 'A', 'L', 'U', 'E', 'S', ' '
 				> { };
+
+				struct count : mirror::cts::string<
+					' ', 'C', 'O', 'U', 'N', 'T', '(', '*', ')', ' '
+				> { };
 			}
 
 		}
@@ -135,7 +139,7 @@ namespace firestarter {
 
 	struct PartialQuery {
 		std::string content;
-		PartialQuery(std::string content) : content(content) { };
+		PartialQuery(std::string const & content) : content(content) { };
 
 		operator std::string () {
 			return this->content;
@@ -146,14 +150,14 @@ namespace firestarter {
 			return os;
 		};
 
-		PartialQuery operator&&(PartialQuery right) {
+		PartialQuery operator&&(PartialQuery const & right) {
 			std::stringstream ss;
 			ss << "(" << this->content << " AND " << right.content << ")";
 			this->content = ss.str();
 			return PartialQuery(this->content);
 		};
 
-		PartialQuery operator||(PartialQuery right) {
+		PartialQuery operator||(PartialQuery const & right) {
 			std::stringstream ss;
 			ss << "(" << this->content << " OR " << right.content << ")";
 			this->content = ss.str();
@@ -392,15 +396,55 @@ namespace firestarter {
 			Storage::resetStatement();
 		};
 
-		static void find(Object & obj, PartialQuery partial_query) {
+		static unsigned int count(PartialQuery const & partial_query = PartialQuery(std::string())) {
+			namespace pk = Persistent::keywords;
+
+			auto st_ptr = Storage::getStatement();
+			auto & st = *st_ptr.get();
+			unsigned int count;
+
+			st.exchange(soci::into(count));
+			st.alloc();
+
+			std::stringstream query;
+			query <<
+				// Create a c-style string ...
+				mirror::cts::c_str<
+					// ... from the concatenation ...
+					mirror::cts::concat<
+						// ... of the select statement, and ...
+						pk::select,
+						// ... the count statement, and ...
+						pk::count,
+						// ... the from statement, and ...
+						pk::from,
+						// ... the class name of Object, and ...
+						mirror::static_name<mirror::reflected<Object>>,
+						// ... the where statement
+						pk::where
+					>
+				>() << partial_query;
+
+			st.prepare(query.str());
+			st.define_and_bind();
+			st.execute(true);
+
+			Storage::resetStatement();
+			counter = 0;
+
+			return count;
+		};
+
+		static void find(Object & obj, PartialQuery const & partial_query = PartialQuery(std::string())) {
 			namespace pk = Persistent::keywords;
 
 			populate p(obj);
 			auto meta_obj = puddle::reflected_type<Object>();
-			auto st = Storage::getStatement();
+			auto st_ptr = Storage::getStatement();
+			auto & st = *st_ptr.get();
 
 			meta_obj.member_variables().for_each(p);
-			st.get()->alloc();
+			st.alloc();
 
 			std::stringstream query;
 			query << 
@@ -421,15 +465,15 @@ namespace firestarter {
 					>
 				>() << partial_query << "LIMIT 1";
 
-			st.get()->prepare(query.str());
-			st.get()->define_and_bind();
-			st.get()->execute(true);
+			st.prepare(query.str());
+			st.define_and_bind();
+			st.execute(true);
 
 			Storage::resetStatement();
 			counter = 0;
 		};
 
-		static void find(std::vector<Object> & objects, PartialQuery partial_query,
+		static void find(std::vector<Object> & objects, PartialQuery partial_query = PartialQuery(std::string()),
 				unsigned int from = 0)
 		{
 			namespace pk = Persistent::keywords;
@@ -437,11 +481,12 @@ namespace firestarter {
 			Object obj;
 			populate p(obj);
 			auto meta_obj = puddle::reflected_type<Object>();
-			auto st = Storage::getStatement();
+			auto st_ptr = Storage::getStatement();
+			auto & st = *st_ptr.get();
 			unsigned int const limit = objects.capacity();
 
 			meta_obj.member_variables().for_each(p);
-			st.get()->alloc();
+			st.alloc();
 
 			std::stringstream query;
 			query << 
@@ -467,13 +512,13 @@ namespace firestarter {
 
 			query << limit;
 
-			st.get()->prepare(query.str());
-			st.get()->define_and_bind();
-			st.get()->execute(true);
+			st.prepare(query.str());
+			st.define_and_bind();
+			st.execute(true);
 
 			objects.push_back(obj);
 
-			while (st.get()->fetch())
+			while (st.fetch())
 				objects.push_back(obj);
 
 			Storage::resetStatement();
