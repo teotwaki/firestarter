@@ -309,10 +309,14 @@ namespace firestarter {
 			populate(Object & obj) : obj(obj) {
 				this->st = Storage::getStatement();
 				indicators.clear();
+				// Allocate enough space ...
 				indicators.reserve(
+					// ... to store the count ...
 					mirror::mp::size<
+						// ... of any Object member ...
 						mirror::mp::only_if<
 							mirror::members<mirror::reflected<Object>>,
+							// ... which is a member variable
 							mirror::mp::is_a<
 								mirror::mp::arg<1>,
 								mirror::meta_member_variable_tag
@@ -360,13 +364,21 @@ namespace firestarter {
 			auto st = Storage::getStatement();
 
 			query <<
+				// Create a c-style string ...
 				mirror::cts::c_str<
+					// ... from the concatatenation ...
 					mirror::cts::concat<
+						// ... of the insert statement, and ...
 						pk::insert_into,
+						// ... the class name of Object, and ...
 						mirror::static_name<mirror::reflected<Object>>,
+						// ... and an opening parenthesis, and ...
 						mirror::cts::string<' ', '('>,
+						// ... the list of columns (member variables), and ...
 						column_list_cts,
+						// ... a closing parenthesis, and ...
 						mirror::cts::string<')', ' '>,
+						// ... the values satement
 						pk::values
 					>
 				>();
@@ -392,12 +404,19 @@ namespace firestarter {
 
 			std::stringstream query;
 			query << 
+				// Create a c-style string ...
 				mirror::cts::c_str<
+					// ... from the concatenation ...
 					mirror::cts::concat<
+						// ... of the select statement, and ...
 						pk::select,
+						// ... the list of columns (member variables), and ...
 						column_list_cts,
+						// ... the from statement, and ...
 						pk::from,
+						// ... the class name of Object, and ...
 						mirror::static_name<mirror::reflected<Object>>,
+						// ... the where statement
 						pk::where
 					>
 				>() << partial_query << "LIMIT 1";
@@ -426,12 +445,19 @@ namespace firestarter {
 
 			std::stringstream query;
 			query << 
+				// Create a c-style string ...
 				mirror::cts::c_str<
+					// ... from the concatenation ...
 					mirror::cts::concat<
+						// ... of the select statement, and ...
 						pk::select,
+						// ... the list of columns (member variables), and ...
 						column_list_cts,
+						// ... the from statement, and ...
 						pk::from,
+						// ... the class name of Object, and ...
 						mirror::static_name<mirror::reflected<Object>>,
+						// ... the where statement
 						pk::where
 					>
 				>() << partial_query << " LIMIT ";
