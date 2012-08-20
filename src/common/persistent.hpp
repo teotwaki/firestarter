@@ -205,7 +205,7 @@ namespace firestarter {
 		};
 
 		inline PartialQuery operator!=(T const & right) {
-			return handle(right, " !=");
+			return handle(right, " <>");
 		};
 
 		inline PartialQuery operator<(T const & right) {
