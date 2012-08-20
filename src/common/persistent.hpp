@@ -33,6 +33,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tr1/unordered_map.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #ifdef HAVE_CONFIG_H
   #include "config.h"
@@ -97,6 +98,10 @@ namespace firestarter {
 
 				struct create_table : mirror::cts::string<
 					'C', 'R', 'E', 'A', 'T', 'E', ' ', 'T', 'A', 'B', 'L', 'E', ' '
+				> { };
+
+				struct if_not_exists : mirror::cts::string<
+					' ', 'I', 'F', ' ', 'N', 'O', 'T', ' ', 'E', 'X', 'I', 'S', 'T', 'S', ' '
 				> { };
 
 				struct insert_into : mirror::cts::string<
@@ -463,7 +468,7 @@ namespace firestarter {
 						// ... the where statement
 						pk::where
 					>
-				>() << partial_query << "LIMIT 1";
+				>() << partial_query << " LIMIT 1";
 
 			st.prepare(query.str());
 			st.define_and_bind();
@@ -473,8 +478,8 @@ namespace firestarter {
 			counter = 0;
 		};
 
-		static void find(std::vector<Object> & objects, PartialQuery partial_query = PartialQuery(std::string()),
-				unsigned int from = 0)
+		static void find(std::vector<Object> & objects, 
+				PartialQuery const & partial_query = PartialQuery(std::string()), unsigned int from = 0)
 		{
 			namespace pk = Persistent::keywords;
 
@@ -523,6 +528,110 @@ namespace firestarter {
 
 			Storage::resetStatement();
 			counter = 0;
+		};
+
+		template <typename BaseType, typename MetaVariable>
+		struct convertType {
+			std::string value;
+
+			convertType (BaseType const &) {
+				this->value = mirror::cts::c_str<
+					mirror::static_name<
+						typename MetaVariable::type
+					>
+				>();
+				boost::to_upper(this->value);
+			};
+		};
+
+		template <typename MetaVariable>
+		struct convertType<std::string, MetaVariable> {
+			std::string value;
+
+			convertType(std::string const & value) {
+				if (value.capacity() < 256)
+					this->value = "VARCHAR(" + boost::lexical_cast<std::string>(value.capacity()) + ")";
+				else
+					this->value = "TEXT";
+			};
+		};
+
+		template <typename MetaVariable>
+		struct convertType<float, MetaVariable> {
+			std::string value;
+
+			convertType(float const &) : value("REAL") { };
+		};
+
+		template <typename MetaVariable>
+		struct convertType<bool, MetaVariable> {
+			std::string value;
+
+			convertType(bool const &) : value("BIT") { };
+		};
+
+		struct get_column_types {
+			Object const & obj;
+			std::stringstream & query;
+
+			get_column_types(Object const & obj, std::stringstream & query) : obj(obj), query(query) { };
+			template <class IterationInfo>
+			inline void operator () (IterationInfo) {
+				if (IterationInfo::is_first::value) query << "(";
+
+				query <<
+					mirror::cts::c_str<
+						mirror::cts::concat<
+							mirror::static_name<
+								typename IterationInfo::type
+							>,
+							mirror::cts::string<' '>
+						>
+					>() <<
+					convertType<
+						typename IterationInfo::type::type::original_type,
+						typename IterationInfo::type
+					>(IterationInfo::type::get(this->obj)).value;
+						
+				if (not IterationInfo::is_last::value) query << ", ";
+				else query << ")";
+			};
+
+		};
+
+		static void setup(Object const & obj) {
+			namespace pk = Persistent::keywords;
+
+			auto meta_obj = puddle::reflected_type<Object>();
+			auto st_ptr = Storage::getStatement();
+			auto & st = *st_ptr.get();
+			std::stringstream query;
+			get_column_types get_col_types(obj, query);
+
+			query <<
+				mirror::cts::c_str<
+					mirror::cts::concat<
+						pk::create_table,
+						pk::if_not_exists,
+						mirror::static_name<mirror::reflected<Object>>
+					>
+				>();
+
+			mirror::mp::for_each_ii<
+				mirror::mp::only_if<
+					mirror::member_variables<mirror::reflected<Object>>,
+					mirror::mp::is_a<
+						mirror::mp::arg<1>,
+						mirror::meta_member_variable_tag
+					>
+				>
+			>(get_col_types);
+
+			st.prepare(query.str());
+			st.define_and_bind();
+			st.execute(true);
+
+			Storage::resetStatement();
 		};
 
 	};
