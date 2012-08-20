@@ -458,11 +458,14 @@ namespace firestarter {
 						// ... the from statement, and ...
 						pk::from,
 						// ... the class name of Object, and ...
-						mirror::static_name<mirror::reflected<Object>>,
-						// ... the where statement
-						pk::where
+						mirror::static_name<mirror::reflected<Object>>
 					>
-				>() << partial_query;
+				>();
+
+			if (not partial_query.content.empty())
+			query << mirror::cts::c_str<pk::where>() << partial_query;
+
+			std::cout << query.str() << std::endl;
 
 			st.prepare(query.str());
 			st.define_and_bind();

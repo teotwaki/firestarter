@@ -80,7 +80,7 @@ Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
 	people.reserve(100);
 
 	Persist<Person>::find(people, Column<Person>().first_name() != "");
-	LOG_INFO(logger, "findAll() found:");
+	LOG_INFO(logger, "findAll() found " << people.size() << " entries (" << Persist<Person>::count() << " in db)");
 	for (Person const & person : people) {
 		LOG_INFO(logger, "person.id: " << person.id << "; person.first_name: " << 
 			person.first_name << "; person.last_name: " << person.last_name);
