@@ -45,6 +45,11 @@ Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
 	LOG_DEBUG(logger, "Storing Roger Rabite.");
 	Persist<Person>::store(p);
 
+	// Update it in memory
+	p.city = "Saleilles";
+	// Then commit the changes
+	Persist<Person>::commit(p);
+
 	// This example shows that values are overwritten, even if the database contained NULL.
 	{
 		Person f;

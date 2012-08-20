@@ -115,6 +115,14 @@ namespace firestarter {
 				struct count : mirror::cts::string<
 					' ', 'C', 'O', 'U', 'N', 'T', '(', '*', ')', ' '
 				> { };
+
+				struct update : mirror::cts::string<
+					'U', 'P', 'D', 'A', 'T', 'E', ' '
+				> { };
+
+				struct set : mirror::cts::string<
+					' ', 'S', 'E', 'T', ' '
+				> { };
 			}
 
 		}
@@ -356,12 +364,36 @@ namespace firestarter {
 			template <class MetaVariable>
 			inline void operator () (MetaVariable meta_var, bool first, bool last) {
 				auto & var = *meta_var.address(this->obj);
-				this->st.get()->exchange(soci::use(var, meta_var.base_name()));
+				this->st.get()->exchange(
+					soci::use(var, meta_var.base_name() + boost::lexical_cast<std::string>(counter))
+				);
 
 				if (first) query << "(";
-				query << ":" << meta_var.base_name();
+				query << ":" << meta_var.base_name() << boost::lexical_cast<std::string>(counter++);
 				if (not last) query << ", ";
 				else query << ")";
+			};
+		};
+
+		struct grab_names_and_values {
+			Object const & obj;
+			boost::shared_ptr<soci::statement> st;
+			std::stringstream & query;
+
+			grab_names_and_values(Object const & obj, std::stringstream & query) : obj(obj), query(query) {
+				this->st = Storage::getStatement();
+			};
+
+			template <class MetaVariable>
+			inline void operator () (MetaVariable meta_var, bool first, bool last) {
+				auto & var = *meta_var.address(this->obj);
+				this->st.get()->exchange(
+					soci::use(var, meta_var.base_name() + boost::lexical_cast<std::string>(counter))
+				);
+
+				query << meta_var.base_name() << " = :" << 
+					meta_var.base_name() << boost::lexical_cast<std::string>(counter++);
+				if (not last) query << ", ";
 			};
 		};
 
@@ -650,6 +682,48 @@ namespace firestarter {
 			// execute the provided functor
 			>(get_col_types);
 
+			st.prepare(query.str());
+			st.define_and_bind();
+			st.execute(true);
+
+			Storage::resetStatement();
+		};
+
+		static void commit(Object const & obj) {
+			namespace pk = Persistent::keywords;
+
+			auto meta_obj = puddle::reflected_type<Object>();
+			auto st_ptr = Storage::getStatement();
+			auto & st = *st_ptr.get();
+			std::stringstream query;
+			grab_names_and_values grab_names_and_values_(obj, query);
+	
+			query <<
+				// Create a c-style string ...
+				mirror::cts::c_str<
+					// ... from the concatenation of ...
+					mirror::cts::concat<
+						// ... the update statement, and ...
+						pk::update,
+						// ... the object's name, and ...
+						mirror::static_name<mirror::reflected<Object>>,
+						// ... the set statement
+						pk::set
+					>
+				>();
+
+			meta_obj.member_variables().for_each(grab_names_and_values_);
+
+			query <<
+				// create a c-style string from ...
+				mirror::cts::c_str<
+					// ... the where statement
+					pk::where
+				>() << "id = :id" << boost::lexical_cast<std::string>(counter);
+
+			st.exchange(soci::use(obj.id, "id" + boost::lexical_cast<std::string>(counter++)));
+
+			st.alloc();
 			st.prepare(query.str());
 			st.define_and_bind();
 			st.execute(true);
