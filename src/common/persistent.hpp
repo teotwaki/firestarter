@@ -139,6 +139,7 @@ namespace firestarter {
 
 		static inline void resetStatement() {
 			statement.reset();
+			counter = 0;
 		};
 	};
 
@@ -435,7 +436,6 @@ namespace firestarter {
 			st.execute(true);
 
 			Storage::resetStatement();
-			counter = 0;
 
 			return count;
 		};
@@ -475,7 +475,6 @@ namespace firestarter {
 			st.execute(true);
 
 			Storage::resetStatement();
-			counter = 0;
 		};
 
 		static void find(std::vector<Object> & objects, 
@@ -527,7 +526,6 @@ namespace firestarter {
 				objects.push_back(obj);
 
 			Storage::resetStatement();
-			counter = 0;
 		};
 
 		template <typename BaseType, typename MetaVariable>
