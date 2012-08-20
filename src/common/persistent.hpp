@@ -534,27 +534,34 @@ namespace firestarter {
 			std::string value;
 
 			convertType (BaseType const &) {
+				// Store the static representation of the MetaVariable's type (unsigned int, float, etc)
 				this->value = mirror::cts::c_str<
 					mirror::static_name<
 						typename MetaVariable::type
 					>
 				>();
+				// And transform it to be uppercase.
 				boost::to_upper(this->value);
 			};
 		};
 
+		// Template specialisation when the member variable is a std::string
 		template <typename MetaVariable>
 		struct convertType<std::string, MetaVariable> {
 			std::string value;
 
 			convertType(std::string const & value) {
+				// If the string's capacity is less than 256, we can store it in a varchar
 				if (value.capacity() < 256)
 					this->value = "VARCHAR(" + boost::lexical_cast<std::string>(value.capacity()) + ")";
+				// If it is over 255 characters, we have to store it in a TEXT blob.
+				/// \todo Detect whether a LONGTEXT is required.
 				else
 					this->value = "TEXT";
 			};
 		};
 
+		// Template specialisation when the member variable is a float
 		template <typename MetaVariable>
 		struct convertType<float, MetaVariable> {
 			std::string value;
@@ -562,6 +569,7 @@ namespace firestarter {
 			convertType(float const &) : value("REAL") { };
 		};
 
+		// Template specialisation when the member variable is a bool
 		template <typename MetaVariable>
 		struct convertType<bool, MetaVariable> {
 			std::string value;
@@ -579,17 +587,25 @@ namespace firestarter {
 				if (IterationInfo::is_first::value) query << "(";
 
 				query <<
+					// Create a c-style string ...
 					mirror::cts::c_str<
+						// ... from the concatenation of ...
 						mirror::cts::concat<
+							// ... the member variable's static name ...
 							mirror::static_name<
 								typename IterationInfo::type
 							>,
+							// ... and a space
 							mirror::cts::string<' '>
 						>
 					>() <<
 					convertType<
+						// Pass the member variable's base/original type (std::string, unsigned int, etc)
 						typename IterationInfo::type::type::original_type,
+						// And the MetaObject 
 						typename IterationInfo::type
+					// And the actual value as argument, then access the "value" property of the object
+					// that was constructed.
 					>(IterationInfo::type::get(this->obj)).value;
 						
 				if (not IterationInfo::is_last::value) query << ", ";
@@ -601,29 +617,37 @@ namespace firestarter {
 		static void setup(Object const & obj) {
 			namespace pk = Persistent::keywords;
 
-			auto meta_obj = puddle::reflected_type<Object>();
 			auto st_ptr = Storage::getStatement();
 			auto & st = *st_ptr.get();
 			std::stringstream query;
 			get_column_types get_col_types(obj, query);
 
 			query <<
+				// Create a c-style string ...
 				mirror::cts::c_str<
+					// ... from the concatenation of ...
 					mirror::cts::concat<
+						// ... the create table statement, and ...
 						pk::create_table,
+						// ... the if not exists statement, and ...
 						pk::if_not_exists,
+						// ... the object's name
 						mirror::static_name<mirror::reflected<Object>>
 					>
 				>();
 
+			// For every object in the range ...
 			mirror::mp::for_each_ii<
+				// ... filtered, so that only ...
 				mirror::mp::only_if<
+					// ... member variables of the class Object are looped on ...
 					mirror::member_variables<mirror::reflected<Object>>,
 					mirror::mp::is_a<
 						mirror::mp::arg<1>,
 						mirror::meta_member_variable_tag
 					>
 				>
+			// execute the provided functor
 			>(get_col_types);
 
 			st.prepare(query.str());
