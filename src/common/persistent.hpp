@@ -369,9 +369,10 @@ namespace firestarter {
 			namespace pk = Persistent::keywords;
 
 			std::stringstream query;
-			grab_values gv(obj, query);
+			grab_values grab_values_(obj, query);
 			auto meta_obj = puddle::reflected_type<Object>();
-			auto st = Storage::getStatement();
+			auto st_ptr = Storage::getStatement();
+			auto & st = *st_ptr.get();
 
 			query <<
 				// Create a c-style string ...
@@ -392,12 +393,12 @@ namespace firestarter {
 						pk::values
 					>
 				>();
-			meta_obj.member_variables().for_each(gv);
+			meta_obj.member_variables().for_each(grab_values_);
 			query << ";";
 
-			st.get()->prepare(query.str());
-			st.get()->define_and_bind();
-			st.get()->execute(true);
+			st.prepare(query.str());
+			st.define_and_bind();
+			st.execute(true);
 
 			Storage::resetStatement();
 		};
