@@ -463,7 +463,7 @@ namespace firestarter {
 				>();
 
 			if (not partial_query.content.empty())
-			query << mirror::cts::c_str<pk::where>() << partial_query;
+				query << mirror::cts::c_str<pk::where>() << partial_query;
 
 			std::cout << query.str() << std::endl;
 
@@ -501,10 +501,13 @@ namespace firestarter {
 						pk::from,
 						// ... the class name of Object, and ...
 						mirror::static_name<mirror::reflected<Object>>,
-						// ... the where statement
-						pk::where
 					>
-				>() << partial_query << " LIMIT 1";
+				>();
+
+			if (not partial_query.content.empty())
+				query << mirror::cts::c_str<pk::where>() << partial_query;
+
+			query << " LIMIT 1;";
 
 			st.prepare(query.str());
 			st.define_and_bind();
@@ -542,15 +545,17 @@ namespace firestarter {
 						pk::from,
 						// ... the class name of Object, and ...
 						mirror::static_name<mirror::reflected<Object>>,
-						// ... the where statement
-						pk::where
 					>
-				>() << partial_query << " LIMIT ";
+				>();
 
-			if (from != 0)
-				query << from << ", ";
+			if (not partial_query.content.empty())
+				query << mirror::cts::c_str<pk::where>() << partial_query;
 
-			query << limit;
+			if (from != 0 && limit != 0)
+				query << " LIMIT " << from << ", " << limit << ";";
+
+			else if (limit != 0)
+				query << " LIMIT " << limit << ";";
 
 			st.prepare(query.str());
 			st.define_and_bind();
