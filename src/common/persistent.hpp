@@ -500,7 +500,7 @@ namespace firestarter {
 						// ... the from statement, and ...
 						pk::from,
 						// ... the class name of Object, and ...
-						mirror::static_name<mirror::reflected<Object>>,
+						mirror::static_name<mirror::reflected<Object>>
 					>
 				>();
 
@@ -544,7 +544,7 @@ namespace firestarter {
 						// ... the from statement, and ...
 						pk::from,
 						// ... the class name of Object, and ...
-						mirror::static_name<mirror::reflected<Object>>,
+						mirror::static_name<mirror::reflected<Object>>
 					>
 				>();
 
