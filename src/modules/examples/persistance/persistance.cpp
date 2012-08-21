@@ -65,7 +65,7 @@ Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
 		f.first_name = "Not my real name";
 		f.city = "This will be overwritten.";
 		LOG_DEBUG(logger, "Looking for a person with id == 2");
-		Persist<Person>::find(f, Column<Person>().id() == 2);
+		Persist<Person>::find(f, Column<Person>().id == 2);
 		if (f.id == 2) {
 			LOG_DEBUG(logger, "We found a person: " << f.first_name);	
 		}
@@ -79,7 +79,7 @@ Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
 	// Simply reserve the maximum amount of results you wish to get:
 	people.reserve(100);
 
-	Persist<Person>::find(people, Column<Person>().first_name() != "");
+	Persist<Person>::find(people, Column<Person>().first_name != "");
 	LOG_INFO(logger, "findAll() found " << people.size() << " entries (" << Persist<Person>::count() << " in db)");
 	for (Person const & person : people) {
 		LOG_INFO(logger, "person.id: " << person.id << "; person.first_name: " << 

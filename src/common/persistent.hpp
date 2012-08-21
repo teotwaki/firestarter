@@ -180,19 +180,34 @@ namespace firestarter {
 
 	};
 
-	template <typename T>
+	template <typename MetaMemberVariable>
 	struct QueryLexer {	
+		typedef typename MetaMemberVariable::type::original_type OriginalType;
 		std::string content;
 		std::string column_name;
 		boost::shared_ptr<soci::statement> statement;
 
-		QueryLexer(std::string const & table_name, std::string const & column_name) :
-			content(table_name + "." + column_name), 
-			column_name(column_name) {
+		QueryLexer() {
+			this->column_name = // Create a c-style string ...
+					mirror::cts::c_str<
+						// ... of MetaMemberVariable
+						mirror::static_name<
+							MetaMemberVariable
+						>
+					>();
+
+			this->content = mirror::cts::c_str<
+						// ... of the name ...
+						mirror::static_name<
+							// ... of MetaMemberVariable's class
+							mirror::scope<MetaMemberVariable>
+						>
+					>() + std::string(".") + this->column_name;
+
 			this->statement = Storage::getStatement();
 		};
 
-		inline PartialQuery handle(T const & right, std::string const & op) {
+		inline PartialQuery handle(OriginalType const & right, std::string const & op) {
 			this->statement.get()->exchange(
 				soci::use(right, this->column_name + boost::lexical_cast<std::string>(counter))
 			);
@@ -200,31 +215,31 @@ namespace firestarter {
 			return PartialQuery(this->content);
 		};
 
-		inline PartialQuery operator==(T const & right) {
+		inline PartialQuery operator==(OriginalType const & right) {
 			return handle(right, " =");
 		};
 
-		inline PartialQuery operator!=(T const & right) {
+		inline PartialQuery operator!=(OriginalType const & right) {
 			return handle(right, " <>");
 		};
 
-		inline PartialQuery operator<(T const & right) {
+		inline PartialQuery operator<(OriginalType const & right) {
 			return handle(right, " <");
 		};
 
-		inline PartialQuery operator>(T const & right) {
+		inline PartialQuery operator>(OriginalType const & right) {
 			return handle(right, " >");
 		};
 
-		inline PartialQuery operator<=(T const & right) {
+		inline PartialQuery operator<=(OriginalType const & right) {
 			return handle(right, " <=");
 		};
 
-		inline PartialQuery operator>=(T const & right) {
+		inline PartialQuery operator>=(OriginalType const & right) {
 			return handle(right, " >=");
 		};
 
-		inline PartialQuery operator%=(T const & right) {
+		inline PartialQuery operator%=(OriginalType const & right) {
 			return handle(right, " LIKE");
 		};
 
@@ -240,29 +255,10 @@ namespace firestarter {
 
 	template <class MetaMemberVariable>
 	struct MemVarTransf {
-		struct type : puddle::aux::wrap<MetaMemberVariable>::type {
+		struct type : QueryLexer<MetaMemberVariable> {
 			template <class ClassTranf>
-			type(ClassTranf &, int) : puddle::aux::wrap<MetaMemberVariable>::type() { };
+			type(ClassTranf &, int) { };
 
-			QueryLexer<typename MetaMemberVariable::type::original_type> operator()(void) const {
-				return QueryLexer<typename MetaMemberVariable::type::original_type>(
-					// Create a c-style string ...
-					mirror::cts::c_str<
-						// ... of the name ...
-						mirror::static_name<
-							// ... of MetaMemberVariable's class
-							mirror::scope<MetaMemberVariable>
-						>
-					>(),
-					// Create a c-style string ...
-					mirror::cts::c_str<
-						// ... of MetaMemberVariable
-						mirror::static_name<
-							MetaMemberVariable
-						>
-					>()
-				);
-			};
 		};
 	};
 
@@ -465,7 +461,6 @@ namespace firestarter {
 			if (not partial_query.content.empty())
 				query << mirror::cts::c_str<pk::where>() << partial_query;
 
-			std::cout << query.str() << std::endl;
 
 			st.prepare(query.str());
 			st.define_and_bind();
