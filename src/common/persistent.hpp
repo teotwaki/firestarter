@@ -649,7 +649,7 @@ namespace firestarter {
 
 		};
 
-		static void setup(Object const & obj) {
+		static void setup(Object const & obj, std::string const & create_table_query = std::string()) {
 			namespace pk = Persistent::keywords;
 
 			auto st_ptr = Storage::getStatement();
@@ -657,34 +657,41 @@ namespace firestarter {
 			std::stringstream query;
 			get_column_types get_col_types(obj, query);
 
-			query <<
-				// Create a c-style string ...
-				mirror::cts::c_str<
-					// ... from the concatenation of ...
-					mirror::cts::concat<
-						// ... the create table statement, and ...
-						pk::create_table,
-						// ... the if not exists statement, and ...
-						pk::if_not_exists,
-						// ... the object's name
-						mirror::static_name<mirror::reflected<Object>>
+			if (create_table_query.empty()) {
+				query <<
+					// Create a c-style string ...
+					mirror::cts::c_str<
+						// ... from the concatenation of ...
+						mirror::cts::concat<
+							// ... the create table statement, and ...
+							pk::create_table,
+							// ... the if not exists statement, and ...
+							pk::if_not_exists,
+							// ... the object's name
+							mirror::static_name<mirror::reflected<Object>>
+						>
+					>();
+	
+				// For every object in the range ...
+				mirror::mp::for_each_ii<
+					// ... filtered, so that only ...
+					mirror::mp::only_if<
+						// ... member variables of the class Object are looped on ...
+						mirror::member_variables<mirror::reflected<Object>>,
+						mirror::mp::is_a<
+							mirror::mp::arg<1>,
+							mirror::meta_member_variable_tag
+						>
 					>
-				>();
+				// execute the provided functor
+				>(get_col_types);
 
-			// For every object in the range ...
-			mirror::mp::for_each_ii<
-				// ... filtered, so that only ...
-				mirror::mp::only_if<
-					// ... member variables of the class Object are looped on ...
-					mirror::member_variables<mirror::reflected<Object>>,
-					mirror::mp::is_a<
-						mirror::mp::arg<1>,
-						mirror::meta_member_variable_tag
-					>
-				>
-			// execute the provided functor
-			>(get_col_types);
+			}
 
+			else {
+				query << create_table_query;
+			}
+	
 			st.prepare(query.str());
 			st.define_and_bind();
 			st.execute(true);
