@@ -31,25 +31,15 @@ Optional:
 Some of these are too recent for Debian Stable (squeeze), but can be
 obtained from Debian Testing (wheezy):
 	# Pull from Testing (wheezy)
-	aptitude install -t testing clang libboost1.49-all-dev
+	aptitude install -t testing clang libboost1.49-all-dev \
+	libctemplate-dev
 	# Pull from Stable (squeeze)
 	aptitude install liblog4cxx10-dev libprotobuf-dev libconfig++8-dev \
 	libsqlite3-dev libpqxx3-dev libmysqlclient-dev
 
-The list, however, is not complete: ctemplate does not have a -dev 
-package available in wheezy at the time of writing (only runtime).
-As for ZMQ, MAuReEn, SOCI and fastcgi++, they simply don't exist. No 
-problem, we'll get them from source:
-
-	# CTemplate
-	wget http://ctemplate.googlecode.com/files/ctemplate-2.2.tar.gz
-	tar xvf ctemplate-2.2.tar.gz
-	cd ctemplate-2.2/
-	# If you wish to install to /usr/lib instead of /usr/local/lib
-	# use: ./configure --prefix=/usr
-	./configure && make -j4
-	# Install with root
-	make install
+The list, however, is not complete: Regarding ZMQ, MAuReEn, SOCI and
+fastcgi++, they simply don't exist. No problem, we'll get them from
+source:
 
 	# ZMQ
 	wget http://download.zeromq.org/zeromq-3.2.0-rc1.tar.gz
