@@ -22,6 +22,9 @@ AC_SEARCH_LIBS([lt_dlinit], [ltdl])
 AC_ARG_ENABLE([debugging], AS_HELP_STRING([--enable-debugging],
 	[Enable debugging compilation options (e.g. CPU profiling, -ggdb3, -O0)]))
 
+AC_ARG_ENABLE([profiling], AS_HELP_STRING([--with-profiling],
+	[Enable linking against gperftools libprofiler]))
+
 # Check whether debugging mode is enabled or not
 AS_IF([test "x$enable_debugging" = "xyes"], [
 	CXXFLAGS="-g -ggdb3 -O0"
@@ -53,7 +56,7 @@ AS_IF([test "x$maureen_present" != "xyes"], [
 ])
 
 # If debugging is enabled, add libprofiler to the list of libraries
-AS_IF([test "x$enable_debugging" = "xyes"], [
+AS_IF([test "x$with_profiling" = "xyes"], [
 	PKG_CHECK_MODULES([DEPS],
 		[liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0 libprofiler >= 2.0])
 	], [
