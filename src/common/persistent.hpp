@@ -20,230 +20,25 @@
 #ifndef FIRESTARTER_PERSISTENT_HPP
 #define FIRESTARTER_PERSISTENT_HPP
 
-#include "log.hpp"
+#include "persistent/keywords.hpp"
+#include "persistent/storage.hpp"
+#include "persistent/lexer.hpp"
 
 #include <mirror/mirror.hpp>
 #include <puddle/puddle.hpp>
-#include <puddle/auxiliary/wrap.hpp>
-#include <mirror/ct_string/concat.hpp>
 
-#include <iostream>
-#include <sstream>
 #include <string>
+#include <sstream>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
-#ifdef HAVE_CONFIG_H
-  #include "config.h"
-
-  #ifdef HAVE_SOCI_SQLITE
-    #include "vendor/sqlite/sqlite.hpp"
-  #endif
-
-  #ifdef HAVE_SOCI_MYSQL
-    #include "vendor/mysql/mysql.hpp"
-  #endif
-
-  #ifdef HAVE_SOCI_PGSQL
-    #include "vendor/postgresql/postgresql.hpp"
-  #endif
-#endif
-
 namespace firestarter {
 	namespace common {
 		namespace Persistent {
 
-			namespace keywords {
-				struct select : mirror::cts::string<
-					'S', 'E', 'L', 'E', 'C', 'T', ' '
-				> { };
-
-				struct from : mirror::cts::string<
-					' ', 'F', 'R', 'O', 'M', ' '
-				> { };
-
-				struct or_ : mirror::cts::string<
-					' ', 'O', 'R', ' '
-				> { };
-	
-				struct and_ : mirror::cts::string<
-					' ', 'A', 'N', 'D', ' '
-				> { };
-
-				struct delete_ : mirror::cts::string<
-					'D', 'E', 'L', 'E', 'T', 'E', ' '
-				> { };
-
-				struct where : mirror::cts::string<
-					' ', 'W', 'H', 'E', 'R', 'E', ' '
-				> { };
-
-				struct limit : mirror::cts::string<
-					' ', 'L', 'I', 'M', 'I', 'T', ' '
-				> { };
-
-				struct order_by : mirror::cts::string<
-					' ', 'O', 'R', 'D', 'E', 'R', ' ', 'B', 'Y', ' '
-				> { };
-
-				struct asc : mirror::cts::string<
-					' ', 'A', 'S', 'C', ' '
-				> { };
-
-				struct desc : mirror::cts::string<
-					' ', 'D', 'E', 'S', 'C', ' '
-				> { };
-
-				struct create_table : mirror::cts::string<
-					'C', 'R', 'E', 'A', 'T', 'E', ' ', 'T', 'A', 'B', 'L', 'E', ' '
-				> { };
-
-				struct if_not_exists : mirror::cts::string<
-					' ', 'I', 'F', ' ', 'N', 'O', 'T', ' ', 'E', 'X', 'I', 'S', 'T', 'S', ' '
-				> { };
-
-				struct insert_into : mirror::cts::string<
-					'I', 'N', 'S', 'E', 'R', 'T', ' ', 'I', 'N', 'T', 'O', ' '
-				> { };
-
-				struct values : mirror::cts::string<
-					' ', 'V', 'A', 'L', 'U', 'E', 'S', ' '
-				> { };
-
-				struct count : mirror::cts::string<
-					' ', 'C', 'O', 'U', 'N', 'T', '(', '*', ')', ' '
-				> { };
-
-				struct update : mirror::cts::string<
-					'U', 'P', 'D', 'A', 'T', 'E', ' '
-				> { };
-
-				struct set : mirror::cts::string<
-					' ', 'S', 'E', 'T', ' '
-				> { };
-			}
-
-		}
-
-	static __thread soci::session sql;
-	static __thread boost::shared_ptr<soci::statement> statement;
-	static __thread unsigned int counter;
 	static __thread std::vector<boost::shared_ptr<soci::indicator>> indicators;
-
-	class Storage {
-		public:
-		static boost::shared_ptr<soci::statement> getStatement() {
-			if (!statement)
-				statement = boost::shared_ptr<soci::statement>(new soci::statement(sql));
-				
-			return statement;
-		};
-
-		static inline void connect(std::string const & connection_string) {
-			sql.open(connection_string);
-		};
-
-		static inline void resetStatement() {
-			statement.reset();
-			counter = 0;
-		};
-	};
-
-	struct PartialQuery {
-		std::string content;
-		PartialQuery(std::string const & content) : content(content) { };
-
-		operator std::string () {
-			return this->content;
-		};
-
-		friend std::ostream & operator<<(std::ostream & os, PartialQuery const & pq) {
-			os << pq.content;
-			return os;
-		};
-
-		PartialQuery operator&&(PartialQuery const & right) {
-			std::stringstream ss;
-			ss << "(" << this->content << " AND " << right.content << ")";
-			this->content = ss.str();
-			return PartialQuery(this->content);
-		};
-
-		PartialQuery operator||(PartialQuery const & right) {
-			std::stringstream ss;
-			ss << "(" << this->content << " OR " << right.content << ")";
-			this->content = ss.str();
-			return PartialQuery(this->content);
-		};
-
-	};
-
-	template <typename MetaMemberVariable>
-	struct QueryLexer {	
-		typedef typename MetaMemberVariable::type::original_type OriginalType;
-		std::string content;
-		std::string column_name;
-		boost::shared_ptr<soci::statement> statement;
-
-		QueryLexer() {
-			this->column_name = // Create a c-style string ...
-					mirror::cts::c_str<
-						// ... of MetaMemberVariable
-						mirror::static_name<
-							MetaMemberVariable
-						>
-					>();
-
-			this->content = mirror::cts::c_str<
-						// ... of the name ...
-						mirror::static_name<
-							// ... of MetaMemberVariable's class
-							mirror::scope<MetaMemberVariable>
-						>
-					>() + std::string(".") + this->column_name;
-
-			this->statement = Storage::getStatement();
-		};
-
-		inline PartialQuery handle(OriginalType const & right, std::string const & op) {
-			this->statement.get()->exchange(
-				soci::use(right, this->column_name + boost::lexical_cast<std::string>(counter))
-			);
-			this->content += op + " :" + this->column_name + boost::lexical_cast<std::string>(counter++);
-			return PartialQuery(this->content);
-		};
-
-		inline PartialQuery operator==(OriginalType const & right) {
-			return handle(right, " =");
-		};
-
-		inline PartialQuery operator!=(OriginalType const & right) {
-			return handle(right, " <>");
-		};
-
-		inline PartialQuery operator<(OriginalType const & right) {
-			return handle(right, " <");
-		};
-
-		inline PartialQuery operator>(OriginalType const & right) {
-			return handle(right, " >");
-		};
-
-		inline PartialQuery operator<=(OriginalType const & right) {
-			return handle(right, " <=");
-		};
-
-		inline PartialQuery operator>=(OriginalType const & right) {
-			return handle(right, " >=");
-		};
-
-		inline PartialQuery operator%=(OriginalType const & right) {
-			return handle(right, " LIKE");
-		};
-
-	};
 
 	template <typename MetaClass>
 	struct ClassTransf {
@@ -744,6 +539,7 @@ namespace firestarter {
 	};
 
 /* Close namespaces */
+		}
 	}
 }
 

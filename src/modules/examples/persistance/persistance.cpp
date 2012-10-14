@@ -5,7 +5,7 @@ DECLARE_MODULE_LOG(Persistance);
 using namespace firestarter::module::examples::Persistance;
 
 Persistance::Persistance(zmq::context_t & context) : RunnableModule(context) {
-	using namespace firestarter::common;
+	using namespace firestarter::common::Persistent;
 	LOG_INFO(logger, "Persistance object being created.");
 
 

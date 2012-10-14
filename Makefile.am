@@ -105,6 +105,10 @@ MODULES_DEFAULT_SRC = src/common/module.hpp src/common/module.cpp \
                       src/common/zmq/zmqsocket.hpp src/common/zmq/zmqsocket.cpp \
                       src/common/clients/instancemanager.hpp
 
+PERSISTENT_DEFAULT_SRC = src/common/persistent.hpp src/common/persistent/keywords.hpp \
+                         src/common/persistent/lexer.hpp \
+                         src/common/persistent/storage.hpp
+
 webinterface_la_SOURCES = $(MODULES_DEFAULT_SRC) \
                           src/modules/core/webInterface/webinterface.cpp \
                           src/modules/core/webInterface/webinterface.hpp \
@@ -121,7 +125,7 @@ webinterface_la_LDFLAGS = -module -avoid-version -export-dynamic
 webinterface_la_CPPFLAGS = $(MODULES_CPPFLAGS) $(WEBDEPS_CFLAGS)
 webinterface_la_LIBADD = $(WEBDEPS_LIBS)
 
-persistance_la_SOURCES = $(MODULES_DEFAULT_SRC) src/common/persistent.hpp \
+persistance_la_SOURCES = $(MODULES_DEFAULT_SRC) $(PERSISTENT_DEFAULT_SRC) \
                          src/modules/examples/persistance/persistance.hpp \
                          src/modules/examples/persistance/persistance.cpp \
                          src/modules/examples/persistance/person.meta.hpp \
