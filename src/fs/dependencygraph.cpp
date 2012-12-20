@@ -8,28 +8,14 @@ namespace firestarter { namespace ModuleManager { namespace DependencyGraph {
 
 using namespace firestarter::ModuleManager::DependencyGraph;
 
-/** \brief Initialises a DependencyGraph
-  *
-  * This constructor initialises the object so that it can be used immediately.
-  */
 DependencyGraph::DependencyGraph() : SimpleCache<std::list<std::string> >() {
 	this->vertices["root"] = boost::add_vertex(std::string("root"), this->graph);
 }
 
-/** \brief Destroys the object
-  *
-  * The destructor deletes the cache if it exists.
-  */
 DependencyGraph::~DependencyGraph() {
 	this->invalidateCache();
 }
 
-/** \brief Add a module to the graph
-  *
-  * Add a dependency to the graph. An exception is thrown if the second argument can not be found in the graph.
-  *
-  * \warning If it exists, the getModules() cache is invalidated.
-  */
 void DependencyGraph::addDependency(/** [in] */ const std::string & child_name, 
                                     /** [in] */ const std::string & parent_name) {
 
@@ -52,13 +38,6 @@ void DependencyGraph::addDependency(/** [in] */ const std::string & child_name,
 	this->invalidateCache();
 }
 
-/** \brief Remove a dependency from the graph
-  *
-  * As the method's name indicates, it removes a dependency from the graph. If the first or second parameter can't be
-  * found in the graph, an exception is thrown (or will be, in the future).
-  * 
-  * \warning If it exists, the getModules() cache is invalidated.
-  */
 void DependencyGraph::removeDependency(/** [in] */ const std::string & child_name, 
                                        /** [in] */ const std::string & parent_name) {
 
@@ -81,15 +60,6 @@ void DependencyGraph::removeDependency(/** [in] */ const std::string & child_nam
 	this->invalidateCache();
 }
 
-
-/** \brief Sort the graph topologically
-  *
-  * This method applies boost::topological_sort to the stored graph. The graph is only sorted when the cache is
-  * invalid.
-  *
-  * \return The cache computed by getModules()
-  * \see getModules
-  */
 std::list<std::string> * DependencyGraph::resolve() {
 	LOG_INFO(logger, "Attempting to resolve the dependency graph.");
 
@@ -102,30 +72,6 @@ std::list<std::string> * DependencyGraph::resolve() {
 	return this->getModules();
 }
 
-/** \brief Obtain the order in which the modules should be loaded to avoid dependency issues.
-  *
-  * The getModules method extracts from the (previously resolve()'d) Graph the list of modules in the order in which
-  * they should be loaded. The order is important, as it enables specific modules to provide symbols that other modules
-  * require.
-  *
-  * A small level of caching is implemented: Once returned, the pointer to the list will remain the same as long as
-  * addDependency() or removeDependency() is not called (and hence, the cache invalidated). For example:
-  * \code
-  * DependencyGraph graph;
-  * graph.addDependency("bar");
-  * graph.addDependency("foo", "bar");
-  * std::list<std::string> * module_order = graph.resolve(); // getModules() is called by resolve(), cache is init'd
-  * graph.addDependency("taz", "bar"); // cache is invalidated, module_order should not be used anymore
-  * std::list<std::string> * first = graph.resolve(); // cache is initialised
-  * std::list<std::string> * second = graph.getModules(); // first == second
-  * \endcode 
-  *
-  * \return Pointer to a list of strings.
-  * This pointer is managed, which means it should not be deleted by the receiver.
-  * If the graph has not been resolve()'d before calling getModules(), the value returned will point to an empty list.
-  *
-  * \see resolve
-  */
 std::list<std::string> * DependencyGraph::getModules() {
 
 	if (this->cacheIsValid()) {
