@@ -47,7 +47,8 @@ pkglib_LTLIBRARIES = webinterface.la persistance.la sqlite_backend.la mysql_back
 fsconf_DATA = configuration/fs.cfg configuration/logging.cfg configuration/lighttpd.conf
 
 ## Modules configuration files
-modconf_DATA = configuration/modules/webinterface.cfg
+modconf_DATA = configuration/modules/webinterface.cfg configuration/modules/persistance.cfg \
+			   configuration/modules/sqlite_backend.cfg
 
 ## WebInterface data directory
 webinterfacedir = ${localstatedir}/firestarter/www
