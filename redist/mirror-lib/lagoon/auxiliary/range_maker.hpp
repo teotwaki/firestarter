@@ -64,12 +64,10 @@ struct range_maker
 	{
 		// call the appropriate overload of append item based
 		// on the category of the meta-object
-		append_item(
-			meta_object,
-			decltype(lagoon::aux::has_wrapper(
-				mirror::categorize_meta_object(meta_object)
-			))()
-		);
+		decltype(lagoon::aux::has_wrapper(
+			mirror::categorize_meta_object(meta_object)
+		)) do_append;
+		append_item(meta_object, do_append);
 	}
 };
 

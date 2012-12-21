@@ -22,6 +22,9 @@ AC_SEARCH_LIBS([lt_dlinit], [ltdl])
 AC_ARG_ENABLE([debugging], AS_HELP_STRING([--enable-debugging],
 	[Enable debugging compilation options (e.g. CPU profiling, -ggdb3, -O0)]))
 
+AC_ARG_ENABLE([profiling], AS_HELP_STRING([--with-profiling],
+	[Enable linking against gperftools libprofiler]))
+
 # Check whether debugging mode is enabled or not
 AS_IF([test "x$enable_debugging" = "xyes"], [
 	CXXFLAGS="-g -ggdb3 -O0"
@@ -52,6 +55,34 @@ AS_IF([test "x$maureen_present" != "xyes"], [
 	])
 ])
 
+# If debugging is enabled, add libprofiler to the list of libraries
+AS_IF([test "x$with_profiling" = "xyes"], [
+	PKG_CHECK_MODULES([DEPS],
+		[liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0 libprofiler >= 2.0])
+	], [
+	PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
+	]
+)
+# Check whether the fastcgi connector and libctemplate are availble
+PKG_CHECK_MODULES([WEBDEPS], [fastcgi++ >= 2.0 libctemplate >= 2.2])
+
+# Check whether mysql_config is available
+AC_CHECK_PROG(mysql_config_present, mysql_config, yes)
+AS_IF([test "x$mysql_config_present" = "xyes"], [
+	MYSQL_LIBS="`mysql_config --libs`"
+	MYSQL_CFLAGS="`mysql_config --cflags`"
+	AC_SUBST(MYSQL_LIBS)
+	AC_SUBST(MYSQL_CFLAGS)
+])
+
+PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7],,
+	[AC_MSG_WARN([Could not find the SQLite 3 library. Building without SQLite support.])])
+
+PKG_CHECK_MODULES([PGSQL], [libpqxx >= 3.1],,
+	[AC_MSG_WARN([Could not find the PostgreSQL 3.1 library. Building without PostgreSQL support.])])
+
+AX_SOCI([3.1])
+
 # Check if the boost libraries are available
 # Boost 1.48 is required as we're trying to compile with -std=gnu++11
 BOOST_REQUIRE([1.48])
@@ -63,17 +94,6 @@ BOOST_GRAPH
 BOOST_STRING_ALGO
 BOOST_THREADS
 BOOST_DATE_TIME
-
-# If debugging is enabled, add libprofiler to the list of libraries
-AS_IF([test "x$enable_debugging" = "xyes"], [
-	PKG_CHECK_MODULES([DEPS],
-		[liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0 libprofiler >= 2.0])
-	], [
-	PKG_CHECK_MODULES([DEPS], [liblog4cxx >= 0.10 libconfig++ >= 1.3.2 libzmq >= 3.0 protobuf >= 2.3.0])
-	]
-)
-# Check whether the fastcgi connector and libctemplate are availble
-PKG_CHECK_MODULES([WEBDEPS], [fastcgi++ >= 2.0 libctemplate >= 2.2])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_MACRO_DIR([m4])

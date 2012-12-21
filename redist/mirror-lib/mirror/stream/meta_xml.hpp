@@ -48,7 +48,7 @@ private:
 
 		void wr_val(bool x)
 		{
-			out << x ? "true" : "false";
+			out << (x ? "true" : "false");
 		}
 
 		void wr_val(const std::string& x)

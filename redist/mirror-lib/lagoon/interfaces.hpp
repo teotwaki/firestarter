@@ -21,10 +21,6 @@
 #include <string>
 #include <memory>
 
-#if LAGOON_MT_WITH_MAKE_FACTORY
-#include <lagoon/polymorph_factory.hpp>
-#endif
-
 LAGOON_NAMESPACE_BEGIN
 
 /** @defgroup lagoon_interfaces Lagoon - Interfaces
@@ -142,6 +138,13 @@ MIRROR_FOR_EACH_META_OBJECT(LAGOON_HELPER_MAKE_MMO_IS_META_OBJECT, _)
 	//@}
 };
 
+LAGOON_NAMESPACE_END
+
+#if LAGOON_MT_WITH_MAKE_FACTORY
+#include <lagoon/polymorph_factory.hpp>
+#endif
+
+LAGOON_NAMESPACE_BEGIN
 
 /// The base interface for all Lagoon's meta-objects
 /** This interface serves as a common ancestor for all

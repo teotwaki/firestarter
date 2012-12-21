@@ -5,42 +5,41 @@ Compiler:
 	We use clang for development.
 
 Libraries:
-	Boost 1.48 or above.
-	ZMQ 3.2 or above.
-	Log4CXX 0.10 or above.
-	libconfig++ 1.3.2 or above.
-	Google's Protobufs 2.3.0 or above.
-	FastCGI++ 2.0 or above
-	Google's CTemplate (2.2 or above).
+	Boost (1.48 or above),
+	ZMQ (3.2 or above),
+	Log4CXX (0.10 or above),
+	libconfig++ (1.3.2 or above),
+	Google's Protobufs (2.3.0 or above),
+	FastCGI++ (2.1 or above),
+	Google's CTemplate (2.2 or above),
+	SOCI (3.1.0 or above).
 
 Tools:
-	MAuReEn 0.1.0 or above.
+	MAuReEn (0.1.0 or above).
 
-Optional:
+Optional: 
 	When compiling in debug mode (./configure --enable-debugging):
 	libprofiler (part of ex-Google's perftools)
+
+	For the persistence part. None of these are required, but at least
+	one is highly recommended. Some applications may not function
+	properly if you do not have the correct database backend available
+	SQLite 3 (3.7 or above)
+	PostgreSQL client library (3.1 or above)
+	MySQL client library (5.5 or above)
 
 Some of these are too recent for Debian Stable (squeeze), but can be
 obtained from Debian Testing (wheezy):
 	# Pull from Testing (wheezy)
-	aptitude install -t testing clang libboost1.49-all-dev
+	aptitude install -t testing clang libboost1.49-all-dev \
+	libctemplate-dev
 	# Pull from Stable (squeeze)
-	aptitude install liblog4cxx10-dev libprotobuf-dev libconfig++8-dev
+	aptitude install liblog4cxx10-dev libprotobuf-dev libconfig++8-dev \
+	libsqlite3-dev libpqxx3-dev libmysqlclient-dev
 
-The list, however, is not complete: ctemplate does not have a -dev 
-package available in wheezy at the time of writing (only runtime).
-As for ZMQ, MAuReEn and fastcgi++, they simply don't exist. No problem,
-we'll get them from source:
-
-	# CTemplate
-	wget http://ctemplate.googlecode.com/files/ctemplate-2.2.tar.gz
-	tar xvf ctemplate-2.2.tar.gz
-	cd ctemplate-2.2/
-	# If you wish to install to /usr/lib instead of /usr/local/lib
-	# use: ./configure --prefix=/usr
-	./configure && make -j4
-	# Install with root
-	make install
+The list, however, is not complete: Regarding ZMQ, MAuReEn, SOCI and
+fastcgi++, they simply don't exist. No problem, we'll get them from
+source:
 
 	# ZMQ
 	wget http://download.zeromq.org/zeromq-3.2.0-rc1.tar.gz
@@ -56,9 +55,9 @@ we'll get them from source:
 	make install
 		
 	# FastCGI++
-	wget http://download.savannah.nongnu.org/releases/fastcgipp/fastcgi++-2.0.tar.bz2
-	tar xvf fastcgi++-2.0.tar.bz2
-	cd fastcgi++-2.0/
+	wget http://download.savannah.nongnu.org/releases/fastcgipp/fastcgi++-2.1.tar.bz2
+	tar xvf fastcgi++-2.1.tar.bz2
+	cd fastcgi++-2.1/
 	# If you wish to install to /usr/lib instead of /usr/local/lib
 	# use: ./configure --prefix=/usr
 	./configure && make -j4
@@ -66,9 +65,21 @@ we'll get them from source:
 	make install
 
 	# MAuReEn
-	wget http://kifri.fri.uniza.sk/~chochlik/maureen/release/maureen-0.1.0.tar.gz
-	tar xvf maureen-0.1.0.tar.gz
-	cd maureen-0.1.0/
-	./bootstrap.sh
+	# The latest release of MAuReEn doesn't include some fixes we need. So we have
+	# to pull from git:
+	git clone git://gitorious.org/maureen/maureen.git
+	cd maureen
+	./configure.sh && cd _build && make
 	# Install with root
 	make install
+
+	# SOCI
+	wget http://downloads.sourceforge.net/project/soci/soci/soci-3.1.0/soci-3.1.0.zip
+	unzip soci-3.1.0.zip
+	cd soci-3.1.0/
+	cmake -G "Unix Makefiles" && make -j4
+	# Install with root
+	make install
+	# Please note that in some cases you may have to get SOCI from the git repository
+	# as the 3.1 release is too old, and uses features incompatible with the latest
+	# releases of clang++.

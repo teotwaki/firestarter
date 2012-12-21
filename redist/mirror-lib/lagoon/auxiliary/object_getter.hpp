@@ -11,6 +11,8 @@
 #ifndef LAGOON_AUX_OBJECT_GETTER_1011291729_HPP
 #define LAGOON_AUX_OBJECT_GETTER_1011291729_HPP
 
+#include <lagoon/interfaces.hpp>
+
 LAGOON_NAMESPACE_BEGIN
 namespace aux {
 

@@ -50,12 +50,12 @@ using namespace firestarter::module;
 /** \brief Encapsulates module information
   *
   * The ModuleInfo class encapsulates all the different aspects of a module (as seen from the ModuleManager class' perspective)
-  * in order to provide a unified way to access the data (for example, by abstracting ugly things like function pointers in instantiate(), etc.). 
+  * in order to provide a unified way to access the data (for example, by abstracting ugly things like function pointers in instantiate(), etc.).
   * It also provides a very basic inspection ability implemented by isValid().
   *
   * This class is mainly used by ModuleManager, which is why it shares the header file.
   *
-  * \see ModuleManager 
+  * \see ModuleManager
   */
 class ModuleInfo {
 
@@ -108,27 +108,46 @@ class ModuleInfo {
 	inline void setFactory(/** [in] */ create_module * factory) { this->factory = factory; };
 	inline void setRecyclingFacility(/** [in] */ destroy_module * recycling_facility) { this->recycling_facility = recycling_facility; };
 	inline void setContext(/** [in] */ zmq::context_t & context) { this->context = &context; };
+
 	/** \brief Check if the module seems valid
 	  *
 	  * The isValid() method provides a very basic check to see if all the components are correctly initialised. It does not do any complex
 	  * analysis, and can for example, return true even though some of the data structures point to discarded or invalid memory.
 	  */
-	inline bool isValid() { if (this->configuration != NULL && this->handle != NULL && this->factory != NULL && this->recycling_facility != NULL) return true; return false; };
+	inline bool isValid() {
+		if (this->configuration != NULL && this->handle != NULL &&
+				this->factory != NULL && this->recycling_facility != NULL)
+			return true;
+
+		return false;
+	};
+
 	/** \brief Check if the module needs to be auto-started
 	  *
 	  * \return The value of the module.autostart configuration key or true if it can't be found
 	  */
-	inline bool shouldAutostart() { return this->getConfiguration()->exists("module.autostart") ? this->getConfiguration()->lookup("module.autostart") : true; };
+	inline bool shouldAutostart() {
+		return this->getConfiguration()->exists("module.autostart") ?
+			this->getConfiguration()->lookup("module.autostart") : true;
+	};
+
 	/** \brief Check if the module wants to run in its own thread
 	  *
 	  * \return The value of the module.threaded configuration key or false if it can't be found
 	  */
-	inline bool shouldRunThreaded() { return this->getConfiguration()->exists("module.threaded") ? static_cast<bool>(this->getConfiguration()->lookup("module.threaded")) : false; };
+	inline bool shouldRunThreaded() {
+		return this->getConfiguration()->exists("module.threaded") ?
+			static_cast<bool>(this->getConfiguration()->lookup("module.threaded")) : false;
+	};
+
 	/** \brief Check if the module wants to run in its own process
 	  *
 	  * \return The value of the module.standalone configuration key or false if it can't be found
 	  */
-	inline bool shouldRunStandAlone() { return this->getConfiguration()->exists("module.standalone") ? static_cast<bool>(this->getConfiguration()->lookup("module.standalone")) : false; };
+	inline bool shouldRunStandAlone() {
+		return this->getConfiguration()->exists("module.standalone") ?
+			static_cast<bool>(this->getConfiguration()->lookup("module.standalone")) : false;
+	};
 	
 };
 
@@ -143,7 +162,7 @@ typedef boost::unordered_map<std::string, ModuleInfo *> ModuleMap;
   *
   * The ModuleManager class abstracts the complexities of having to manually open the shared libraries, configuration files
   * and manually track the modules' respective dependencies. The only thing it needs is a reference to the application's configuration
-  * file. Its constructor will do most of the heavy lifting (read the config, resolve the dependencies, load the modules, etc), 
+  * file. Its constructor will do most of the heavy lifting (read the config, resolve the dependencies, load the modules, etc),
   * even though convenience methods are available should modules be loaded after the initial constructor run.
   *
   * This class relies on DependencyGraph and ModuleInfo.
