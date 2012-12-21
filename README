@@ -10,7 +10,7 @@ Libraries:
 	Log4CXX (0.10 or above),
 	libconfig++ (1.3.2 or above),
 	Google's Protobufs (2.3.0 or above),
-	FastCGI++ (2.0 or above),
+	FastCGI++ (2.1 or above),
 	Google's CTemplate (2.2 or above),
 	SOCI (3.1.0 or above).
 
@@ -55,9 +55,9 @@ source:
 	make install
 		
 	# FastCGI++
-	wget http://download.savannah.nongnu.org/releases/fastcgipp/fastcgi++-2.0.tar.bz2
-	tar xvf fastcgi++-2.0.tar.bz2
-	cd fastcgi++-2.0/
+	wget http://download.savannah.nongnu.org/releases/fastcgipp/fastcgi++-2.1.tar.bz2
+	tar xvf fastcgi++-2.1.tar.bz2
+	cd fastcgi++-2.1/
 	# If you wish to install to /usr/lib instead of /usr/local/lib
 	# use: ./configure --prefix=/usr
 	./configure && make -j4
